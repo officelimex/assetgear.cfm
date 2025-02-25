@@ -34,6 +34,11 @@ component {
 		application.companyAddress = "";
 		application.site.url = variables.site.url;
 		application.s3.bucket = variables.aws.s3.bucket;
+
+		application.LIVE = 0
+		application.DEV = 1
+
+		application.mode = variables.mode;
 	
 		// Save the most used components(CFC) into an application variable
 		application.com.Module = createObject('component', 'assetgear.com.awaf.Module').init();
@@ -54,9 +59,7 @@ component {
 		System.setProperty("mail.smtp.ssl.protocols", "TLSv1.2");
 	}
 
-	function onApplicationEnd(required applicationScope) {
-		// ...existing code...
-	}
+	function onApplicationEnd(required applicationScope) {}
 
 	function onRequestStart(required string requestname) {
 		lock type="exclusive" scope="session" timeout="10" {
@@ -80,37 +83,45 @@ component {
 		param name="request.IsHSE" default="false" type="boolean";
 		param name="request.IsPS" default="false" type="boolean";
 		param name="request.IsSV" default="false" type="boolean";
+		param name="request.IsSup" default="false" type="boolean";
 		param name="request.IsFS" default="false" type="boolean";
 
 		if (isDefined("request.userinfo.role")) {
 			switch (request.userinfo.role) {
 				case "HT":
-						request.IsHost = true;
-						break;
-				case "WH":
-						request.IsWarehouseMan = true;
-						break;
-				case "MS":
-						request.IsMS = true;
-						break;
-				case "AD":
-						request.IsAdmin = true;
-						break;
-				case "HSE":
-						request.IsHSE = true;
-						break;
-				case "PS":
-						request.IsPS = true;
-						break;
-				case "FS":
-						request.IsFS = true;
-						break;
+					request.IsHost = true;
+					break;
+				case "SUP":
+					request.IsSup = true;
+					break;
+				case "IT":
+					request.IsIT = true;
+					break;
 				case "SV":
-						request.IsSV = true;
-						break;
+					request.IsSV = true;
+					break;
+			}
+
+			switch (request.userinfo.role) {
+				case "SUP":
+				case "SV":
+					switch (request.userinfo.department) {
+						case "Admin":
+							request.IsAdmin = true;
+							break;
+						case "HSE":
+							request.IsHSE = true;
+							break;
+						case "Warehouse":
+							request.IsWarehouseMan = true;
+							break;
+						case "Maintenance":
+							request.IsMtnc = true;
+							break;
+					}
+					break;
 			}
 		}
-
 		// Delegated role
 		param name="request.IsPSDelegated" default="false" type="boolean";
 		param name="request.IsFSDelegated" default="false" type="boolean";
@@ -119,11 +130,11 @@ component {
 			// TODO: check date too
 			switch (request.delegate.role) {
 				case "PS":
-						request.IsPSDelegated = true;
-						break;
+					request.IsPSDelegated = true;
+					break;
 				case "FS":
-						request.IsFSDelegated = true;
-						break;
+					request.IsFSDelegated = true;
+					break;
 			}
 		}
 
