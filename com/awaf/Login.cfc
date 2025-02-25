@@ -140,18 +140,16 @@
     <cffunction name="SendLoginDetail" access="public" returntype="void" hint="send login detail via email to owner">
     	<cfargument name="em" hint="email address" type="string" required="yes"/>
         <cfargument name="pwd" hint="password of the receipiant" required="yes" type="string"/>
-        
         <cfmail from="AssetGear <do-not-reply@assetgear.net>" to="#arguments.em#" subject="Login Access" type="html">
-        	Hello,
+            Hello,
             <p>
-            	Below is your login details @ #this.url#<br/>
+                Below is your login details @ #this.url#<br/>
                 Username: #arguments.em#<br/>
                 Password: #arguments.pwd#
             </p>
             You can change your password immediatly you login.
             <p>Thank you<br/> 
         </cfmail>
-        
     </cffunction>
     
     <cffunction name="GenerateNewPassword" access="public" returntype="void" hint="generate new login info for an employee" output="yes"> 

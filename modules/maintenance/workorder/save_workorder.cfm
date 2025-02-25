@@ -28,17 +28,17 @@
 <cfset qAL = application.com.Asset.GetAssetLocationByAsset(qWO.AssetId)/>
 <!---<cfset qA = application.com.Asset.GroupAssetByLocation()/>--->
 
-<cfquery name="qCU">
+<cfquery name="qCU" cachedwithin="#CreateTime(5,0,0)#">
 	SELECT UserId,concat(Surname, " ", OtherNames) as Names, Email
     FROM core_user
 	WHERE Approved = "Yes" AND UserStatus = "Active"
     ORDER BY Names
 </cfquery>
-<cfquery name="qCun">
+<cfquery name="qCun" cachedwithin="#CreateTime(5,0,0)#">
 	SELECT * FROM core_unit
     ORDER BY Name
 </cfquery>
-<cfquery name="qCD">
+<cfquery name="qCD" cachedwithin="#CreateTime(5,0,0)#">
 	SELECT * FROM core_department
     ORDER BY Name
 </cfquery>
@@ -67,7 +67,7 @@
           <tr>
             <td colspan="2" valign="top">
 <!---<cfif url.id eq 0>--->
-<cfquery name="qA">
+<!--- <cfquery name="qA" cachedwithin="#CreateTime(5,0,0)#">
 	SELECT
     	CONCAT(a.Description,' @ ',l.Name,' ',IFNULL(al.LocDescription,'')) Asset, CONCAT(a.AssetId,',',al.AssetLocationId) AssetId 
     FROM asset a
@@ -75,14 +75,12 @@
     INNER JOIN location l ON (l.LocationId = al.LocationId)
     WHERE a.Status = "Online"
     ORDER BY a.Description,l.Name
-</cfquery>
+</cfquery> --->
 
 <!---<f:Select name="AssetId" label="Asset" required ListValue="#valuelist(qA.AssetId,'`')#" autoselect delimiters="`" ListDisplay="#valuelist(qA.Asset,'`')#" Selected="#qWO.AssetId#,#qWO.AssetLocationIds#" class="span10"/>
 --->
-<cfquery name="qA">
-	SELECT
-    	CONCAT(a.Description) Asset, a.AssetId
-    FROM asset a
+<cfquery name="qA" cachedwithin="#CreateTime(5,0,0)#">
+	SELECT CONCAT(a.Description) Asset, a.AssetId FROM asset a
 </cfquery>
 <f:Select name="AssetId" label="Asset" required ListValue="#valuelist(qA.AssetId,'`')#" autoselect delimiters="`" ListDisplay="#valuelist(qA.Asset,'`')#" Selected="#qWO.AssetId#" class="span10"/>
 
@@ -118,15 +116,15 @@
                     	<td valign="top">
 
 <script>
-<cfset dd= "_#CreateUUID()#"/>
-CKEDITOR.replaceAll('#dd#');
-var editor = CKEDITOR.instances['WorkDetails'], _txteditor = $$('.#dd#')[0];
-editor.on( 'key', function( e ) {
-	_txteditor.set('text',e.editor.getData());
-});
-editor.on( 'blur', function( e ) {
-	_txteditor.set('text',e.editor.getData());
-});
+	<cfset dd= "_#CreateUUID()#"/>
+	CKEDITOR.replaceAll('#dd#');
+	var editor = CKEDITOR.instances['WorkDetails'], _txteditor = $$('.#dd#')[0];
+	editor.on( 'key', function( e ) {
+		_txteditor.set('text',e.editor.getData());
+	});
+	editor.on( 'blur', function( e ) {
+		_txteditor.set('text',e.editor.getData());
+	});
 </script>
                         <textarea id="WorkDetails" name="WorkDetails" style="width:85%; height:110px;" class="#dd#">#qWO.WorkDetails#</textarea></td>
                     </tr>
@@ -138,7 +136,7 @@ editor.on( 'blur', function( e ) {
     </div>
     <div id="#Id2#">
     	<div class="alert alert-info">Use this area to add spare parts from the warehouse</div>
-    	<cfquery name="qOI_" dbtype="query">
+    	<cfquery name="qOI_" dbtype="query" >
         	SELECT * FROM qOI
           WHERE ItemId <> '' AND ItemStatus = 'Online' AND Obsolete = 'No'
       </cfquery>
@@ -177,7 +175,7 @@ editor.on( 'blur', function( e ) {
     	<et:Table allowInput height="210px" id="Labour">
             <et:Headers>
                 <et:Header title="Employee" size="4" type="int">
-                    <et:Select ListValue="#Valuelist(qCU.UserId,'`')#" ListDisplay="#Valuelist(qCU.Names,'`')#" delimiters="`"/>
+                  <et:Select ListValue="#Valuelist(qCU.UserId,'`')#" ListDisplay="#Valuelist(qCU.Names,'`')#" delimiters="`"/>
                 </et:Header>
                 <et:Header title="Role played in this job" size="6" type="text"/>
                 <et:Header title="Hours" size="1" type="int"/>
@@ -256,19 +254,19 @@ editor.on( 'blur', function( e ) {
         <div class="alert alert-info">Use this area to add/view documents for easy access such as invoice, receipt, or any other type of document.</div>
         <ul >
 			<cfif rt1.RecordCount gt 0>
-                <li style=" display:inline; margin-right:12px">
-                    <cfloop query="qMr">
-                        MATERIAL REQUISITION ##: <a target="_blank" href="modules/warehouse/transaction/mr/#printtype#.cfm?id=#qMr.MRId#">#qMr.MRId#</a>
-                    </cfloop>
-                </li>
-             </cfif>
+				<li style=" display:inline; margin-right:12px">
+					<cfloop query="qMr">
+						MATERIAL REQUISITION ##: <a target="_blank" href="modules/warehouse/transaction/mr/#printtype#.cfm?id=#qMr.MRId#">#qMr.MRId#</a>
+					</cfloop>
+				</li>
+			</cfif>
 			<cfif rt2.RecordCount gt 0>
-                <li style=" display:inline; margin-right:12px">
-                    <cfloop query="qMIs">
-                        MATERIAL ISSUE ##: <a target="_blank" href="modules/warehouse/transaction/issue/print_material_issue.cfm?id=#qMIs.IssueId#">#qMIs.IssueId#</a>
-                    </cfloop>
-                </li>
-             </cfif>
+				<li style=" display:inline; margin-right:12px">
+					<cfloop query="qMIs">
+						MATERIAL ISSUE ##: <a target="_blank" href="modules/warehouse/transaction/issue/print_material_issue.cfm?id=#qMIs.IssueId#">#qMIs.IssueId#</a>
+					</cfloop>
+				</li>
+				</cfif>
         </ul>
         <hr>
         <u:UploadFile id="Attachments" table="work_order" pk="#url.id#" />

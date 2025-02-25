@@ -18,29 +18,29 @@
 <cfimport taglib="../../../assets/awaf/tags/xUtil/" prefix="util" />
 
 <!--- Getting Data From Whs_item--->
-<cfquery name="qWI">
+<cfquery name="qWI" cachedwithin="#CreateTime(5,0,0)#">
 	SELECT * FROM whs_item 
     WHERE ItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.id#"/>
 </cfquery>
   	
-<cfquery name="qSL">
+<cfquery name="qSL" cachedwithin="#CreateTime(5,0,0)#">
 	SELECT * FROM shelf_location
     WHERE ShelfLocationId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qWI.ShelfLocationId#">
 </cfquery>
 
-<cfquery name="qD">
+<cfquery name="qD" cachedwithin="#CreateTime(5,0,0)#">
 	SELECT * FROM core_department 
     WHERE DepartmentId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qWI.DepartmentIds#">
 </cfquery>
 
 <!--- Get for Asset Category --->
-<cfquery name="qAC">
+<cfquery name="qAC" cachedwithin="#CreateTime(5,0,0)#">
 	SELECT * FROM asset_category 
     WHERE AssetCategoryId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qWI.AssetCategoryId#">
 </cfquery>
 
 <!--- Get for UM --->
-<cfquery name="qUM">
+<cfquery name="qUM" cachedwithin="#CreateTime(5,0,0)#">
 	SELECT * FROM um
     WHERE UMId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qWI.UMId#">
 </cfquery>

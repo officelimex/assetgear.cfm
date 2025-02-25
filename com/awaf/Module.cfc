@@ -7,7 +7,7 @@
 
     <cffunction name="getModules" access="public" returntype="query">
 
-        <cfquery name="qMs">
+        <cfquery name="qMs" cachedwithin="#CreateTime(5,0,0)#">
         	SELECT * FROM core_module m
             ORDER BY Position ASC
         </cfquery>
@@ -35,7 +35,7 @@
     <cffunction name="getModule" access="public" returntype="query">
     	<cfargument name="id" required="yes" hint="module id" type="numeric"/>
 
-        <cfquery name="qM">
+        <cfquery name="qM" cachedwithin="#CreateTime(5,0,0)#">
         	SELECT * FROM core_module
             WHERE ModuleId = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.id#"/>
         </cfquery>
@@ -45,7 +45,7 @@
 
     <cffunction name="getPages" access="public" returntype="query">
 
-        <cfquery name="qPs">
+        <cfquery name="qPs" cachedwithin="#CreateTime(5,0,0)#">
         	SELECT
             	p.PageId, p.Title,p.Code, p.Url,
                 m.Title Module, m.ModuleId
@@ -60,7 +60,7 @@
     <cffunction name="getPagesByModule" access="public" returntype="query">
     	<cfargument name="id" required="yes" hint="module id" type="numeric"/>
 
-        <cfquery name="qPs">
+        <cfquery name="qPs" cachedwithin="#CreateTime(5,0,0)#">
         	SELECT * FROM core_page
             WHERE ModuleId = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.id#"/>
             	AND IsTab = "y"
@@ -73,7 +73,7 @@
     <cffunction name="getPage" access="public" returntype="query">
     	<cfargument name="id" required="yes" hint="page id" type="numeric"/>
 
-        <cfquery name="qP">
+        <cfquery name="qP" cachedwithin="#CreateTime(5,0,0)#">
         	SELECT * FROM core_page
             WHERE PageId = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.id#"/>
         </cfquery>
@@ -84,7 +84,7 @@
     <cffunction name="getRole" access="public" returntype="query" hint="get role">
     	<cfargument name="id" required="yes" hint="role id" type="numeric"/>
 
-        <cfquery name="qP">
+        <cfquery name="qP" cachedwithin="#CreateTime(5,0,0)#">
         	SELECT * FROM core_role
             WHERE RoleId = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.id#"/>
         </cfquery>
@@ -94,7 +94,7 @@
 
     <cffunction name="getRoles" access="public" returntype="query" hint="get all roles">
 
-        <cfquery name="qP">
+        <cfquery name="qP" cachedwithin="#CreateTime(5,0,0)#">
         	SELECT * FROM core_role
             WHERE RoleId <> 1
         </cfquery>

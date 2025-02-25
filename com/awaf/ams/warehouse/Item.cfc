@@ -34,13 +34,13 @@
 
     <cffunction name="GetItems" access="public" returntype="query" hint="get al item in the warehouse">
 
-        <cfquery name="qI" cachedwithin="#createTime(1,0,0)#">
-            #this.WAREHOUSE_ITEM_SQL#
-            WHERE Obsolete = "No" AND Status <> "Deleted"
-						ORDER BY ItemDescription ASC
-        </cfquery>
+			<cfquery name="qI" cachedwithin="#createTime(1,0,0)#">
+				#this.WAREHOUSE_ITEM_SQL#
+				WHERE Obsolete = "No" AND Status <> "Deleted"
+				ORDER BY ItemDescription ASC
+			</cfquery>
 
-        <cfreturn qI/>
+			<cfreturn qI/>
     </cffunction>
 
     <cffunction name="GetAllUM" access="public" returntype="query" hint="get unit of measurment">
