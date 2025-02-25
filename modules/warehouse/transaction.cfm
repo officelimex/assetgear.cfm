@@ -22,6 +22,9 @@
 			<n:NavItem title="Issue Out Material" url="modules/warehouse/transaction/issue/save_material_issue.cfm?newpage=true" id="save_material_issue"/>
 			<n:NavItem title="Return Material back" url="modules/warehouse/transaction/save_material_returned.cfm?newpage=true" id="save_material_returned"/>
 			<n:navItem type="divider">
+			<n:NavItem title="New MR (Stocked)" url="modules/warehouse/transaction/save_mr.cfm?newpage=true" id="save_mr"/>
+			<n:NavItem title="New MR (Non-Stocked)" url="modules/warehouse/transaction/save_mrni.cfm?newpage=true" id="save_mrni"/>
+			<n:navItem type="divider">
 			<n:NavItem title="Material Issue" isactive url="modules/warehouse/transaction/issue/material_issue.cfm" id="material_issue"/>
 			<n:NavItem title="Material Returns" url="modules/warehouse/transaction/return/material_returned.cfm" id="material_returned"/>
 			<n:navItem type="divider">
