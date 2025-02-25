@@ -52,9 +52,13 @@
 
 	<g:Event command="editA">
     <g:Window title="'Work order ##' +d[0]" width="990px" height="500px" url="'modules/maintenance/workorder/get_page.cfm?cid=#url.cid#&filter=#url.filter#'" id="">
-      <g:Button value="Send to Supervisor" executeURL="'modules/ajax/maintenance.cfm?cmd=sendToSupervisor'" class="btn-warning"/>
       
-      <cfif request.isMS || request.IsWarehouseMan || request.IsAdmin || request.IsHSE || request.IsPS || request.IsSV >
+      <cfif request.isSv>
+        <!--- <g:Button value="Send to Supritendent" executeURL="'modules/ajax/maintenance.cfm?cmd=sendToSupervisor'" class="btn-warning"/> --->
+        <g:Button value="Send to Supritendent" executeURL="'modules/ajax/maintenance.cfm?cmd=sendToSupritendent'" class="btn-warning"/>
+      </cfif>
+
+      <cfif request.isSup>
         <g:Button value="Approve & Send to FS" icon="icon-thumbs-up icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=SupervisorApproveWO&to=FS'" class="btn-success"/>
         <g:Button value="Approve & Send to Materials" icon="icon-thumbs-up icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=SupervisorApproveWO&to=WH'" class="btn-success"/>
         <g:Button value="Reject" prompt="Reason" icon="icon-thumbs-down icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=RejectWO'" class="btn-danger"/>

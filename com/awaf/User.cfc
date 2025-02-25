@@ -271,17 +271,20 @@
             	WHERE UserId = <cfqueryparam cfsqltype="cf_sql_integer" value="#d.UserId#"/>
             </cfif>
         </cfquery>
+        <cfif application.mode EQ application.LIVE>
+					<cfmail from="AssetGear <do-not-reply@assetgear.net>" to="#d.email#" subject="Login Access" type="html">
+						Hello,
+						<p>
+								Below is your login details @ #application.site.url#<br/>
+								Username: #d.email#<br/>
+								Password: #pwd#
+						</p>
+						You can change your password immediatly you login.
+						<p>Thank you<br/> 
+					</cfmail>
+        </cfif>
+        <cfset systemOutput("email:#d.email#, pwd: #pwd#", true)/>
 
-        <cfmail from="AssetGear <do-not-reply@assetgear.net>" to="#d.email#" subject="Login Access" type="html">
-        	Hello,
-            <p>
-            	Below is your login details @ #application.site.url#<br/>
-                Username: #d.email#<br/>
-                Password: #pwd#
-            </p>
-            You can change your password immediatly you login.
-            <p>Thank you<br/> 
-        </cfmail>
         <cfreturn pwd/>
     </cffunction>
 
@@ -498,11 +501,13 @@
     </cffunction>
 
     <cffunction name="getRole" access="public" returntype="struct" hint="get all roles">
-
-        
-			<cfreturn {
+<!--- 			<cfreturn {
 				Code : "UR,FS,SV,MS,HSE,PS,AD,WH",
 				Title : "User,F.S,Supervisor,Main. Supervisor,HSE,Production Supv.,IT,Warehouse"
+			}/> --->
+			<cfreturn {
+				Code : "UR,SUP,SV,IT",
+				Title : "User,Supritendent,Supervisor,IT"
 			}/>
 
 		</cffunction>
