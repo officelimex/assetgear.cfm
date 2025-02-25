@@ -25,10 +25,7 @@
 			<cfset em_ = valueList(qD.Email)/>
 			<cfdump var="#qD#"/>
 		</cfif>
-		<!--- send alert 
-		<cfmail from="do-not-reply@assetgear.net" username="do-not-reply@assetgear.net" password="CexF!ssHl%74" server="mail.assetgear.net" to="" subject="" type="text/html">
-			
-		</cfmail>--->
+
 		<cfset i = application.com.Notice.SendEmail("#em_#","Reminder: #qE.Asset# Expiration","
 			Hello,
 			<p>
