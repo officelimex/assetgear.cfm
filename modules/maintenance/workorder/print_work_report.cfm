@@ -55,17 +55,20 @@ border-bottom:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
   <cfinclude template="../../../include/letter_head.cfm"/>
   </cfdocumentitem>
   <cfquery name="qD" cachedwithin="#CreateTime(1,0,0)#">
-        SELECT
-            d.*, CONCAT(d.Name,"/",u.Name) as DU, d.Name Department, u.UnitId, u.Name Unit
-        FROM core_department d
-        LEFT JOIN core_unit u ON u.DepartmentId = d.DepartmentId
-        <cfif isdefined("form.DepartmentIds")>
-			<cfif form.DepartmentIds neq "">
-                WHERE d.DepartmentId IN (#form.DepartmentIds#)
-            </cfif>
-        </cfif>
-        GROUP BY DU
+    SELECT
+      d.*, 
+      CONCAT(d.Name, '/', u.Name) AS DU, 
+      d.Name AS Department, 
+      u.UnitId, 
+      u.Name AS Unit
+    FROM core_department d
+    LEFT JOIN core_unit u ON u.DepartmentId = d.DepartmentId
+    <cfif isdefined("form.DepartmentIds") AND form.DepartmentIds NEQ "">
+      WHERE d.DepartmentId IN (<cfqueryparam value="#form.DepartmentIds#" cfsqltype="cf_sql_integer" list="true"/>)
+    </cfif>
+    GROUP BY d.DepartmentId, d.Name, u.UnitId, u.Name
   </cfquery>
+
 
   <cfloop query="qD">
     <cfquery name="qW">

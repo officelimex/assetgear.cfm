@@ -13,9 +13,15 @@ AssetGear is a web application designed for managing assets and maintenance task
 - Incident Reporting
 
 ## Todo 
-- [ ] Print JHA should also show attached documents and workorder in the export pdf
-- [ ] Print Work Order should also show attached documents in the export pdf
-- [ ] Print PTW should include JHA (if no jha, include the attachment)
+- [ ] Print JHA should also show attached documents and work order in the exported PDF  
+- [ ] Print Work Order should also show attached documents in the exported PDF  
+- [ ] Print PTW should include JHA (if no JHA, include the attachment)  
+- [ ] Each department has a superintendent that needs to approve a WO  
+- [ ] Add and Impement the following roles:  
+  - [ ] Supervisor  
+  - [ ] Superintendent  
+  - [ ] Field Manager  
+- 
  
 ## Installation
 

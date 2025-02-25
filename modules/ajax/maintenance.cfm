@@ -2,19 +2,40 @@
 
 <cfoutput>
 
+<cffunction name="getUser">
+  <cfargument name="dept_id" required="yes" type="numeric">
+  <cfargument name="unit_id" required="no" type="string">
+  <cfargument name="role" required="yes" type="string">
+
+	<cfset uid = val(arguments.unit_id)/>
+	<cfquery name="q" cachedwithin="#createTime(5,0,0)#">
+		SELECT 
+			u.Email
+		FROM core_user  u
+		INNER JOIN core_login l 
+		WHERE l.Role IN (<cfqueryparam value = "#arguments.role#" CFSQLType = "cf_sql_varchar" list="true"/>)
+			AND u.DepartmentId = #val(arguments.dept_id)#
+				<cfif uid>
+					AND u.UnitId = #uid#
+				</cfif>
+	</cfquery>
+
+	<cfreturn q/>
+</cffunction>
+
 <cfscript>
 
 	public query function getWO(required numeric id) {
 		
 		var qW = queryExecute("
 			SELECT 
-				wo.SupervisedByUserId, wo.WorkOrderId, wo.DepartmentId,
+				wo.SupervisedByUserId, wo.WorkOrderId, wo.DepartmentId, wo.UnitId,
 					wo.Description, wo.Status2,
 					wo.SupervisedApprovedDate,
-				u.Email,
+				-- u.Email,
 				cb.Email cb_Email
 			FROM work_order wo
-			INNER JOIN core_user u ON u.UserId = wo.SupervisedByUserId
+			-- INNER JOIN core_user u ON u.UserId = wo.SupervisedByUserId
 			LEFT  JOIN core_user cb ON cb.UserId = wo.CreatedByUserId
 			WHERE WorkOrderId = ? 
 		", [arguments.id])
@@ -151,6 +172,44 @@
 				})
 			
 		</cfscript>
+	</cfcase>
+
+	
+	<cfcase value="sendToSupritendent">
+			<cfset qW = getWO(url.id)/>
+			<cfset qU = getUser(val(qW.DepartmentId), qW.UnitId, "HT")/>
+	
+			<cfif qU.Recordcount>
+
+				<cfif application.mode EQ application.LIVE>
+					<cfset application.com.Notice.SendEmail(
+						to			: qU.columnData("Email").toList(),
+						cc  		: qW.cb_Email,
+						subject	: "Work Order ###qW.WorkOrderId#",
+						msg 		: "
+							Hello, 
+							<p>
+								Work Order ###qW.WorkOrderId# has been sent to you for approval <br/>
+								==================<br/>
+								#qW.Description#<br/>
+								==================<br/>
+							</p> 
+							Thank you
+						"
+					)/>
+				</cfif>
+
+				<cfquery>
+					UPDATE work_order SET 
+						<cfif request.IsSV AND qW.SupervisedApprovedDate EQ "">
+							SupervisedByUserId = #request.userInfo.UserId#,
+							SupervisedApprovedDate = <cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#"/>,
+						</cfif>
+						Status2 = 'Sent to Supritendent'
+					WHERE WorkOrderId = #url.id#
+				</cfquery>
+
+			</cfif>	
 	</cfcase>
 
 	<!--- sendToSupervisor --->

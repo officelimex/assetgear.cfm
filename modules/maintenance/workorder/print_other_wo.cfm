@@ -63,15 +63,20 @@ border-bottom:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
 </cfdocumentitem>
 <cfquery name="qD" cachedwithin="#CreateTime(1,0,0)#">
 	SELECT
-    	CONCAT(d.Name, '/', u.Name) DU, d.Name Department, d.DepartmentId, u.UnitId, u.Name Unit
+    	CONCAT(d.Name, '/', u.Name) AS DU, 
+    	d.Name AS Department, 
+    	d.DepartmentId, 
+    	u.UnitId, 
+    	u.Name AS Unit
     FROM pm_task pm
     INNER JOIN core_department d ON d.DepartmentId = pm.DepartmentId
     LEFT JOIN core_unit u ON u.UnitId = pm.UnitId
     <cfif !(request.IsHost or request.IsAdmin)>
-    	WHERE pm.DepartmentId = #request.userinfo.departmentid#
+    	WHERE pm.DepartmentId = <cfqueryparam value="#request.userinfo.departmentid#" cfsqltype="cf_sql_integer"/>
     </cfif>
-    GROUP BY DU
+    GROUP BY d.Name, u.Name, d.DepartmentId, u.UnitId
 </cfquery>
+
 <cfloop query="qD">
     <cfquery name="qW">
         #application.com.WorkOrder.WORK_ORDER_SQL#

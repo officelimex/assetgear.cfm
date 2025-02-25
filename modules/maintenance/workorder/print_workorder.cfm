@@ -277,7 +277,15 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
         </tr>
       <tr>
         <td align="left" colspan="2">
-			<sup style="font-size:7px;">&nbsp;&nbsp;Supervised By:  #qWO.SupervisedBy# (#qWO.Department#)</sup>
+			<sup style="font-size:7px;">
+        &nbsp;&nbsp;Supervisor: #qWO.SupervisedBy# (
+          <cfif qWO.Unit EQ "">
+            #qWO.Department#
+          <cfelse>
+            #qWO.Unit#
+          </cfif>
+        )
+      </sup>
 		</td>
       </tr>
     </table></td>
@@ -339,7 +347,7 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
       </tr>
       <tr>
         <td align="center" colspan="2">
-          <sup style="font-size:7px;">Field Superintendent: 
+          <sup style="font-size:7px;">Superintendent: 
             <cfif qWO.FSApprovedDate != "">
               <cfquery name="qFS">
                 SELECT CONCAT(u.Surname, ' ', u.OtherNames) Name FROM work_order wo 
