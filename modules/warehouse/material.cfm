@@ -21,11 +21,11 @@
             <n:NavItem title="Obsolate Warehouse Items" url="modules/warehouse/material/warehouse_item.cfm?ob=yes" id="warehouse_itemyes"/>
             <n:navItem type="divider">
             <n:NavItem title="Shelf Location" url="modules/warehouse/material/shelf_location.cfm" id="shelf_location"/>
+            <n:NavItem title="Count Due list" url="modules/warehouse/material/count_due.cfm" id="count_due"/>
             <n:navItem type="divider">
             <n:NavItem type="header" title="Reports"/>
             <n:NavItem type="new window" title="Month End Report" url="modules/warehouse/material/print_month_end.cfm"/>
-            <n:NavItem title="Bin Location" url="modules/settings/warehouse/shelf_location.cfm" id="shelf_location"/>
-            <n:NavItem title="Count due list" url="modules/settings/warehouse/shelf_location.cfm" id="shelf_location"/>
+            <!--- <n:NavItem title="Bin Location" url="modules/settings/warehouse/shelf_location.cfm" id="shelf_location"/> --->
             <n:NavItem type="new window" title="Inventory List Report" url="modules/warehouse/transaction/report/print_all_item.cfm"/>
         </n:Nav>
     </div>
