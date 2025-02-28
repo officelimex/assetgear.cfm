@@ -140,16 +140,20 @@
 		<cfargument name="msg" required="yes" type="string" hint="Subject of message"/>
 		<cfargument name="cc" required="no" type="string"/>
 		<cfargument name="bcc" required="no" type="string"/>
-	
-		<cfmail from="AssetGear <do-not-reply@assetgear.net>" to="#arguments.to#" cc="#arguments.cc#" bcc="#arguments.bcc#" subject="#arguments.subject#" type="html">
-			<html>
-				<head></head>
-				<body>
-					<strong>AssetGear Notification</strong><br><br>
-					<div>#arguments.msg#<br></div>
-				</body>
-			</html>
-		</cfmail>
+
+		<cfif application.mode EQ application.LIVE>
+			<cfmail from="AssetGear <do-not-reply@assetgear.net>" to="#arguments.to#" cc="#arguments.cc#" bcc="#arguments.bcc#" subject="#arguments.subject#" type="html">
+				<html>
+					<head></head>
+					<body>
+						<strong>AssetGear Notification</strong><br><br>
+						<div>#arguments.msg#<br></div>
+					</body>
+				</html>
+			</cfmail>
+		<cfelse>
+			<cfset systemOutput(arguments.msg, true)/>
+		</cfif>
 
 
 		<cfreturn 0/>
