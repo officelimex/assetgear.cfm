@@ -41,17 +41,7 @@ component {
 		application.mode = variables.mode;
 	
 		// Save the most used components(CFC) into an application variable
-		application.com.Module = createObject('component', 'assetgear.com.awaf.Module').init();
-		application.com.Asset = createObject('component', 'assetgear.com.awaf.ams.maintenance.Asset').init();
-		application.com.PMTask = createObject('component', 'assetgear.com.awaf.ams.maintenance.PMTask').init();
-		application.com.Item = createObject('component', 'assetgear.com.awaf.ams.warehouse.Item').init();
-		application.com.Transaction = createObject('component', 'assetgear.com.awaf.ams.warehouse.Transaction').init();
-		application.com.WorkOrder = createObject('component', 'assetgear.com.awaf.ams.maintenance.WorkOrder').init();
-		application.com.Permit = createObject('component', 'assetgear.com.awaf.ams.ptw.Permit').init();
-		application.com.User = createObject('component', 'assetgear.com.awaf.User').init();
-		application.com.Notice = createObject('component', 'assetgear.com.awaf.ams.Notice').init();
-		application.com.Incident = createObject('component', 'assetgear.com.awaf.ams.maintenance.Incident').init();
-
+		setApplication()
 		application.Module = application.com.Module.SetupModuleIds();
 		application.AppModuleId = 'app_module';
 
@@ -62,6 +52,10 @@ component {
 	function onApplicationEnd(required applicationScope) {}
 
 	function onRequestStart(required string requestname) {
+
+		if (application.mode EQ application.DEV) {
+			setApplication()
+		}
 		lock type="exclusive" scope="session" timeout="10" {
 			param name="session.IsLogin" default="false" type="boolean";
 			param name="session.Userinfo" default="";
@@ -120,6 +114,11 @@ component {
 							break;
 					}
 					break;
+				case "WH":
+				case "WH_SV":
+				case "WH_SUP":
+					request.IsWarehouseMan = true;
+				break
 			}
 		}
 		// Delegated role
@@ -141,11 +140,26 @@ component {
 		if (
 				!request.IsLogin &&
 				listContainsNoCase(
-						'update_spare_parts.cfm,register.cfm,login.cfm,forget.cfm,error.cfm,clear.cfm,shedule_wo.cfm,pwd.cfm,backup.cfm,backup2.cfm,update_spare_parts.cfm,due_for_order.cfm,sync.cfc,expire_alert.cfm,reminder.cfm',
-						listLast(cgi.SCRIPT_NAME, '/')
+					'update_spare_parts.cfm,register.cfm,login.cfm,forget.cfm,error.cfm,clear.cfm,shedule_wo.cfm,pwd.cfm,backup.cfm,backup2.cfm,update_spare_parts.cfm,due_for_order.cfm,sync.cfc,expire_alert.cfm,reminder.cfm',
+					listLast(cgi.SCRIPT_NAME, '/')
 				) eq 0
 		) {
 			location(url="login.cfm", addtoken="no");
 		}
 	}
+
+	function setApplication()	{
+		application.com.Module = createObject('component', 'assetgear.com.awaf.Module').init();
+		application.com.Asset = createObject('component', 'assetgear.com.awaf.ams.maintenance.Asset').init();
+		application.com.PMTask = createObject('component', 'assetgear.com.awaf.ams.maintenance.PMTask').init();
+		application.com.Item = createObject('component', 'assetgear.com.awaf.ams.warehouse.Item').init();
+		application.com.Transaction = createObject('component', 'assetgear.com.awaf.ams.warehouse.Transaction').init();
+		application.com.WorkOrder = createObject('component', 'assetgear.com.awaf.ams.maintenance.WorkOrder').init();
+		application.com.Permit = createObject('component', 'assetgear.com.awaf.ams.ptw.Permit').init();
+		application.com.User = createObject('component', 'assetgear.com.awaf.User').init();
+		application.com.Notice = createObject('component', 'assetgear.com.awaf.ams.Notice').init();
+		application.com.Incident = createObject('component', 'assetgear.com.awaf.ams.maintenance.Incident').init();
+		application.com.File = createObject('component', 'assetgear.com.awaf.util.file').init();
+	}
+
 }
