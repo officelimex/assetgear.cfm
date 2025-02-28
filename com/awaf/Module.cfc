@@ -18,18 +18,19 @@
     <cffunction name="getModulesInRole" access="public" returntype="query">
 		<cfargument required="yes" type="string" name="rl"/>
 
-        <cfquery name="qMs" cachedwithin="#CreateTime(5,0,0)#">
-        	SELECT * FROM core_module m
-			<cfif arguments.rl neq "HT">
-            	WHERE ModuleId IN (
-                	SELECT ModuleId FROM core_privilege
-                    WHERE `Role` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.rl#"/>
-                )
-            </cfif>
-            ORDER BY Position ASC
-        </cfquery>
+			<cfquery name="qMs" cachedwithin="#CreateTime(5,0,0)#">
+				SELECT * FROM core_module m
+				<cfif arguments.rl neq "HT">
+					WHERE ModuleId IN (
+						SELECT ModuleId 
+						FROM core_privilege
+						WHERE `Role` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.rl#"/>
+					)
+				</cfif>
+				ORDER BY Position ASC
+			</cfquery>
 
-        <cfreturn qMs/>
+			<cfreturn qMs/>
     </cffunction>
 
     <cffunction name="getModule" access="public" returntype="query">

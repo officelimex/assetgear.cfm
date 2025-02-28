@@ -43,19 +43,20 @@
 
 <t:TabRequest id="#application.AppModuleId#" IsApplicationTab>
 	<cfset qM = application.com.Module.getModulesInRole(request.userinfo.role)/>
-    <cfloop query="qM">
-    	<cfif qM.Code eq "__message">
-        	<t:Tab id="#qM.Code#" title='#qM.Title# <sup id="__inbox_count">5</sup>' url="#qM.URL#"/>
-        <cfelse>
-    		<t:Tab id="#qM.Code#" title="#qM.Title#" url="#qM.URL#"/>
-        </cfif>
-    </cfloop>
-    <cfswitch expression="#request.userinfo.role#">
-    	<cfcase value="WH"><t:DefaultTab renderTo="__bdy" tabid="__warehouse"/></cfcase>
-        <cfcase value="HSE"><t:DefaultTab renderTo="__bdy" tabid="__ptw"/></cfcase>
-        <cfdefaultcase><t:DefaultTab renderTo="__bdy" tabid="__maintenance"/></cfdefaultcase>        
-    </cfswitch>
-    
+	<cfloop query="qM">
+		<cfif qM.Code eq "__message">
+			<t:Tab id="#qM.Code#" title='#qM.Title# <sup id="__inbox_count">5</sup>' url="#qM.URL#"/>
+		<cfelse>
+			<t:Tab id="#qM.Code#" title="#qM.Title#" url="#qM.URL#"/>
+		</cfif>
+	</cfloop>
+
+	<cfswitch expression="#request.userinfo.role#">
+		<cfcase value="WH,WH_SV,WH_SUP"><t:DefaultTab renderTo="__bdy" tabid="__warehouse"/></cfcase>
+		<cfcase value="HSE"><t:DefaultTab renderTo="__bdy" tabid="__ptw"/></cfcase>
+		<cfdefaultcase><t:DefaultTab renderTo="__bdy" tabid="__maintenance"/></cfdefaultcase>        
+	</cfswitch>
+
 </t:TabRequest>
  
 <script language="Javascript" type="text/javascript"> 

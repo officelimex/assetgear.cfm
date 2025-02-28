@@ -36,13 +36,15 @@
   </g:Columns>
 
   <g:Commands>
-    <cfif request.userinfo.role == "FS">
-      <!--- <g:Command id="editA" icon="pencil" help="Edit/View Work Order" /> --->
-      <g:Command id="viewFS" icon="file" help="View Work Order" />
-    <cfelseif request.userinfo.role != "WH">
+    <!--- <cfif request.userinfo.role == "FS"> --->
+    <cfif !request.isWarehouseMan>
       <g:Command id="editA" icon="pencil" help="Edit/View Work Order" condition="row[8]=='#request.userinfo.departmentid#'||row[9]=='#request.userinfo.unitid#'"/>
     </cfif>
-    <cfif request.userinfo.role == "WH">
+    <cfif request.isSup>
+      <!--- <g:Command id="editA" icon="pencil" help="Edit/View Work Order" /> --->
+      <g:Command id="viewSup" icon="file" help="View Work Order" />
+    </cfif>
+    <cfif request.isWarehouseMan>
       <g:Command id="editA" icon="pencil" help="Edit/View Work Order" />
       <g:Command id="viewWH" icon="file" help="View Work Order" />
     </cfif>
@@ -57,10 +59,12 @@
         <!--- <g:Button value="Send to Supritendent" executeURL="'modules/ajax/maintenance.cfm?cmd=sendToSupervisor'" class="btn-warning"/> --->
         <g:Button value="Send to Supritendent" executeURL="'modules/ajax/maintenance.cfm?cmd=sendToSupritendent'" class="btn-warning"/>
       </cfif>
-
       <cfif request.isSup>
-        <g:Button value="Approve & Send to FS" icon="icon-thumbs-up icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=SupervisorApproveWO&to=FS'" class="btn-success"/>
-        <g:Button value="Approve & Send to Materials" icon="icon-thumbs-up icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=SupervisorApproveWO&to=WH'" class="btn-success"/>
+        <!--- <g:Button value="Approve & Send to FS" icon="icon-thumbs-up icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=SupervisorApproveWO&to=FS'" class="btn-success"/> --->
+        <!--- <g:Button value="Approve & Send to Materials" icon="icon-thumbs-up icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=SupervisorApproveWO&to=WH'" class="btn-success"/> --->
+        
+        <g:Button value="Approve & Send to Manager" icon="icon-thumbs-up icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=SupervisorApproveWO&to=FS'" class="btn-success"/>
+        <g:Button value="Approve & Send to Materials" icon="icon-thumbs-up icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=SupritendentApproveWO&to=WH'" class="btn-success"/>
         <g:Button value="Reject" prompt="Reason" icon="icon-thumbs-down icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=RejectWO'" class="btn-danger"/>
       </cfif>
       
@@ -69,13 +73,15 @@
   </g:Event>
 	<g:Event command="viewWH">
     <g:Window title="'Work order ##' +d[0]" width="990px" height="500px" url="'modules/maintenance/workorder/get_page.cfm?cid=#url.cid#&filter=#url.filter#&other=true'" id="">
-      <g:Button value="Approve & Send to FS" executeURL="'modules/ajax/maintenance.cfm?cmd=WHApprove'" class="btn-success"/>
+      <!--- <g:Button value="Approve & Send to FS" executeURL="'modules/ajax/maintenance.cfm?cmd=WHApprove'" class="btn-success"/> --->
+      <g:Button value="Approve & Send to Manager" executeURL="'modules/ajax/maintenance.cfm?cmd=WHApprove'" class="btn-success"/>
       <g:Button value="Reject" prompt="Reason" icon="icon-thumbs-down icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=RejectWO'" class="btn-danger"/>
     </g:Window>
   </g:Event>
-	<g:Event command="viewFS">
+	<g:Event command="viewSup">
     <g:Window title="'Work order ##' +d[0]" width="990px" height="500px" url="'modules/maintenance/workorder/get_page.cfm?cid=#url.cid#&filter=#url.filter#&other=true'" id="">
-      <g:Button value="Approve" executeURL="'modules/ajax/maintenance.cfm?cmd=FSApprove'" class="btn-success"/>
+      <!--- <g:Button value="Approve" executeURL="'modules/ajax/maintenance.cfm?cmd=FSApprove'" class="btn-success"/> --->
+      <g:Button value="Approve" executeURL="'modules/ajax/maintenance.cfm?cmd=SupritentedApprove'" class="btn-success"/>
       <g:Button value="Reject" prompt="Reason" icon="icon-thumbs-down icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=RejectWO'" class="btn-danger"/>
     </g:Window>
   </g:Event>

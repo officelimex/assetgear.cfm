@@ -256,7 +256,9 @@
         	SELECT * FROM core_login
             WHERE UserId = <cfqueryparam cfsqltype="cf_sql_integer" value="#d.UserId#"/>
         </cfquery>
-
+				<cfset systemOutput(d.Role, true)/>
+				<cfoutput>
+				</cfoutput>
         <cfquery>
         	<cfif qL.Recordcount>
             	UPDATE
@@ -501,13 +503,15 @@
     </cffunction>
 
     <cffunction name="getRole" access="public" returntype="struct" hint="get all roles">
-<!--- 			<cfreturn {
-				Code : "UR,FS,SV,MS,HSE,PS,AD,WH",
-				Title : "User,F.S,Supervisor,Main. Supervisor,HSE,Production Supv.,IT,Warehouse"
-			}/> --->
+			<!--- 			
+				<cfreturn {
+					Code : "UR,FS,SV,MS,HSE,PS,AD,WH",
+					Title : "User,F.S,Supervisor,Main. Supervisor,HSE,Production Supv.,IT,Warehouse"
+				}/> 
+			--->
 			<cfreturn {
-				Code : "UR,SUP,SV,IT",
-				Title : "User,Supritendent,Supervisor,IT"
+				Code  : "UR,SUP,SV,MS,IT,WH,WH_SV,WH_SUP",
+				Title : "User,Supritendent,Supervisor,Maintenance Mgr,IT,Warehouse Uesr,Warehouse Supervisor,Warehouse Supritendent"
 			}/>
 
 		</cffunction>
