@@ -1,5 +1,4 @@
 <cfparam default="0" name="url.id"/>
-
 <cfset astId = "__asset_c_all_asset_view" & url.id/>
 
 <cfset Id1 = "#astId#_1"/>
@@ -239,11 +238,22 @@
 </div>
 
 <div id="#Id10#" align="center">
-<table width="250" border="1">
+<table width="250" cellpadding="8" border="1">
   <tr>
-    <td style="padding:5px;">#qA.Description#. &mdash;#url.id#</td>
-    <td width="80" align="right"><img src="http://chart.apis.google.com/chart?chs=110x110&cht=qr&chl=http://#application.appName#.assetgear.net/services/view_asset.cfm?id=#url.id#&choe=UTF-8&chld=M|1" /></td>
+    <td width="100%">
+			<div id="qrcode_#url.id#"></div>
+			<script type="text/javascript">
+				var qrcode = new QRCode("qrcode_#url.id#", {
+					text: "http://#lcase(application.appName)#.assetgear.net/services/v.cfm?id=#url.id#",
+					width: 250, height: 250,  correctLevel : QRCode.CorrectLevel.M
+				});
+			</script>
+			
+		</td>
   </tr>
+	<tr>
+		<td style="padding:5px;">#qA.Description#. &mdash;#url.id#</td>
+	</tr>
   </table>
 
 </div>

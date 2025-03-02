@@ -21,6 +21,7 @@
 <script type="text/javascript" src="assets/awaf/UI/awaf-0.0.4.0.js?v=1.3"></script>
 
 <script type="text/javascript" src="assets/awaf/UI/canvasjs.min.js"></script> 
+<script type="text/javascript" src="assets/awaf/UI/qrcode.min.js"></script>
 
 <!--- import datepicker ---->
 <script type="text/javascript" src="assets/awaf/UI/datepicker/dp.js"></script> 
