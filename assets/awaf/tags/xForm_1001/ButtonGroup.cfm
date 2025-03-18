@@ -8,7 +8,7 @@
 <cfif ThisTag.ExecutionMode EQ "Start">  
 
 	<cfparam name="Attributes.renderTo" type="string" default="#request.form.formid#"/>   
- 	 <div id="#Attributes.renderTo#_bg" style="position:absolute;bottom:0px;right:30px;padding:5px 0px 5px 5px;"></div>    
+ 	 <div id="#Attributes.renderTo#_bg" style="position:absolute;bottom:0px;right:15px;padding:5px 0px 10px 5px;"></div>    
 <script type="text/javascript" charset="utf-8">
 	document.addEvent('domready', function() { 
 	

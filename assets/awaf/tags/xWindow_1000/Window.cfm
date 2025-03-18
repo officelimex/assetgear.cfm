@@ -11,6 +11,7 @@
     <cfparam name="Attributes.title" type="string" default="#Attributes.Caption#"/>
     <cfparam name="Attributes.renderTo" type="string" default=""/> 
     <cfparam name="Attributes.URL" type="string"/>
+    <cfparam name="Attributes.id" type="string" default="_#replace(createuniqueid(),'-','_','all')#"/>
     <cfparam name="Attributes.modal" type="string" default="true"/>
     <cfparam name="Attributes.Height" type="string" default="300px"/>
     <cfparam name="Attributes.Width" type="string" default="600px"/>
@@ -19,9 +20,10 @@
 <cfset id1 = gR.RandValue(8,'alphabets')/>
 <cfset request.window.id = gR.RandValue(7,'alphabets')/> 
 <script language="Javascript" type="text/javascript"> 
+	var win_#Attributes.id#;
 	window.addEvent('domready', function(){
 		$('#id1#').addEvent('click', function(){
-			_w = new aWindow('#request.window.id#',{
+			win_#Attributes.id# = new aWindow('#request.window.id#',{
 				<cfif Attributes.renderTo neq "">
 					renderTo:#Attributes.renderTo#,
 				</cfif>

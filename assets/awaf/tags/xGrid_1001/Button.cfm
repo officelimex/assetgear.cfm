@@ -13,19 +13,26 @@
 	<!--- for saving data --->
 	<cfparam name="Attributes.IsSave" type="boolean" default="false"/> 
 	<cfparam name="Attributes.prompt" type="string" default=""/> 
+	<cfparam name="Attributes.condition" default="1"/> 
 	<!--- end ----> 
 	<cfparam name="Attributes.executeURL" type="string" default=""/> <!--- execuite command on a url --->
-	 
-	<cfassociate basetag="cf_Window" />   
+	<cfassociate basetag="cf_Window" />  
+	<cfset windowTagData = getBaseTagData("cf_Window") /> 
+	<!--- <cfdump  var="#windowTagData.Attributes#"/> --->
 			var pmt = "";
-			_w.addButton(new Element('a',{
+			<!--- _w.addButton(new Element('a',{ --->
+			win_#windowTagData.Attributes.id#.addButton(new Element('a',{
 					html: 
 		<cfif Attributes.icon eq "">
 			'#Attributes.Value#',
 		<cfelse>
 			'<i class="#Attributes.icon#"></i> #Attributes.Value#',
 		</cfif>
-		'class' : 'btn #Attributes.class#',
+		<cfif Attributes.condition == 1>
+			'class' : "btn #attributes.class#",
+		<cfelse>
+			'class' : ["btn #attributes.class#", !(#Attributes.condition#) && "hide"].filter(Boolean).join(" "),
+		</cfif>
 		styles : {
 			'margin-left':'10px'
 		},
@@ -52,8 +59,9 @@
 															onSuccess: function(r){
 																	if(r.trim()==''){r='Your data was saved sucessfuly. Please refresh to see change.'}
 																	var an = new aNotify();
-																	an.alert('Success!',r);  
-																	_w.close();
+																	an.alert('Successful!',r);  
+																	// _w.close();
+																	win_#windowTagData.Attributes.id#.close()
 																	tr.highlight('##FF0'); 
 															},
 															onComplete: function(){e.target.disabled=false;}
@@ -65,12 +73,12 @@
 							#Attributes.onClick#                        
 					</cfif>
 					<cfif len(Attributes.NewWindowURL)>
-							<cfset nid = "_" & left(createUUID(),6)/>
-							<cfif find('?',Attributes.NewWindowURL)>
-									window.open(#Attributes.NewWindowURL#+'&id='+d[0],'#nid#'+d[0],'',false);
-							<cfelse>
-									window.open(#Attributes.NewWindowURL#+'?id='+d[0],'#nid#'+d[0],'',false);
-							</cfif> 
+						<cfset nid = "_" & left(createUUID(),6)/>
+						<cfif find('?',Attributes.NewWindowURL)>
+							window.open(#Attributes.NewWindowURL#+'&id='+d[0],'#nid#'+d[0],'',false);
+						<cfelse>
+							window.open(#Attributes.NewWindowURL#+'?id='+d[0],'#nid#'+d[0],'',false);
+						</cfif> 
 					</cfif>
 					
 					<cfif Attributes.executeURL neq ""> 
@@ -87,7 +95,7 @@
 								onRequest: function()	{e.target.disabled=true;},
 								onSuccess: function(r)	{
 										var an = new aNotify();
-										an.alert('Success!',r);	
+										an.alert('Successful!',r);	
 										_w.close();
 										tr.highlight('##FF0'); 					
 								},

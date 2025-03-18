@@ -20,9 +20,12 @@
 <cfset rf = ListLast(nparam,'&')/>
 <cfset nparam = replacenocase(nparam,rf,"")/>
 <cfset rf = ListLast(rf,'=')/>
+<cfset rf = listChangeDelims(rf, "`")/>
 <!--- loop throught required field and throw error is data is not provided --->
-<cfloop list="#rf#" item="req_f" index="ii">
-	<cfif trim(url[req_f]) eq "">
+<cfloop list="#rf#" item="req_f" index="ii" delimiters="`">
+	<cfset itsReq_f = listLast(req_f,'-')/>
+	<cfset f_value = listFirst(req_f,'-')/>
+	<cfif trim(url[f_value]) eq "" && itsReq_f>
 		<cfthrow message="Error: #listgetAt(fn,ii,'`')# Field is required"/>
 	</cfif>
 </cfloop>

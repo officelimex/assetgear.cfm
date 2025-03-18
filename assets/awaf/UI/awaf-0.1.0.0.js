@@ -1,5 +1,5 @@
 /*
- * AWAF JS Library 0.0.2.1
+ * AWAF JS Library 0.1.0.0
  * Copyright(c) 2011 Adexfe Systems Ltd.
  * http://awaf.adexfe.com/license
  */
@@ -1340,12 +1340,6 @@ var aWindow = new Class({
 	},
 
 	addCloseButton: function () {
-		/*		this.buttonFrame.adopt(new aButton(String.uniqicID, {
-			'value':'Close',
-			click : function()	{
-			this.close();
-			}.bind(this)
-			}));*/
 		this.buttonFrame.adopt(
 			new Element("a", {
 				html: '<i class="icon-remove icon-white"></i> Close',

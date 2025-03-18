@@ -1,30 +1,31 @@
 <cfoutput>
 <cfif ThisTag.ExecutionMode EQ "Start">
 
-    <cfparam name="Attributes.TagName" type="string" default="TextBox"/> 
-    <cfparam name="Attributes.name" type="string"/>
-    <cfparam name="Attributes.Label" type="string" default="#Attributes.name#"/>
-    <cfparam name="Attributes.value" type="string" default=""/>
-    <cfparam name="Attributes.class" type="string" default="input-large"/>
-    <cfparam name="Attributes.required" type="boolean" default="false"/>
-    <cfparam name="Attributes.help" type="string" default=""/>
-    <cfparam name="Attributes.inlinehelp" type="string" default=""/>
-    <cfparam name="Attributes.Validate" type="string" default=""/><!---integer, numeric, digits, alpha, alphanum, date, email, url---->
-    <cfparam name="Attributes.hint" type="string" default=""/>
-    <cfparam name="Attributes.Disabled" type="boolean" default="false"/>
-    <cfparam name="Attributes.Type" type="string" default="text"/>
-    
-    <cfassociate basetag="cf_form" /> 
-    <cfset req = ""/>
+	<cfparam name="Attributes.TagName" type="string" default="TextBox"/> 
+	<cfparam name="Attributes.name" type="string"/>
+	<cfparam name="Attributes.Label" type="string" default="#Attributes.name#"/>
+	<cfparam name="Attributes.value" type="string" default=""/>
+	<cfparam name="Attributes.class" type="string" default="input-large"/>
+	<cfparam name="Attributes.required" type="boolean" default="false"/>
+	<cfparam name="Attributes.help" type="string" default=""/>
+	<cfparam name="Attributes.inlinehelp" type="string" default=""/>
+	<cfparam name="Attributes.Validate" type="string" default=""/><!---integer, numeric, digits, alpha, alphanum, date, email, url---->
+	<cfparam name="Attributes.hint" type="string" default=""/>
+	<cfparam name="Attributes.Disabled" type="boolean" default="false"/>
+	<cfparam name="Attributes.Type" type="string" default="text"/>
+	<cfparam name="Attributes.bind" type="string" default=""/>
+			
+	<cfassociate basetag="cf_form" /> 
+	<cfset req = ""/>
 	<cfset vali = ""/>
-    
+        
  <div class="control-group">
-    <cfif Attributes.Type neq "Hidden">
-        <label for="#request.form.formid##Attributes.name#" class="control-label">#Attributes.Label#
-        <cfif Attributes.required><i class="red">*</i>
-            <cfset req = "required"/> 
-        </cfif></label>
-    </cfif>
+	<cfif Attributes.Type neq "Hidden">
+		<label for="#request.form.formid##Attributes.name#" class="control-label">#Attributes.Label#
+		<cfif Attributes.required><i class="red">*</i>
+			<cfset req = "required"/> 
+		</cfif></label>
+	</cfif>
 
 	<div class="controls"> 
     <cfswitch expression="#Attributes.Validate#">
@@ -44,4 +45,31 @@
 <cfelse>
  </div></div>  
 </cfif> 
+<!--- 
+<script type="text/javascript">
+  
+	<cfif Attributes.bind neq "">
+		window.addEvent('domready', function()  {       
+		<cfset i=0/>
+		<cfloop list="#Attributes.bind#" index="elbind" delimiters=",">
+			<cfset i++/>
+			$('#request.form.formid##elbind#').addEvent('change', function(e){
+				new Request.JSON({
+					url: '#listgetat(Attributes.data,i)#&s=#sid#&id='+e.target.value,
+					onFailure: function()	{
+						alert('error');
+					}, 
+					onSuccess: function(x){
+						ae.clear();
+						ae.addRows(x.data);
+					}
+				}).send();	
+			})
+		</cfloop>
+		});
+
+	</cfif>
+
+</script>
+ --->
 </cfoutput>

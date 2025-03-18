@@ -47,7 +47,8 @@ window.addEvent('domready', function()  {
 		}).send();	
 	})
 	</cfloop>
-    </cfif>
+
+</cfif>
 	 
 });
 
