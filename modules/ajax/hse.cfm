@@ -245,7 +245,7 @@
         </cfif>
 
         <cfif id_ eq 0>
-            Service Request was successfuly create [###jrid#]
+            Service Request was successfully create [###jrid#]
         <cfelse>
             Service Request ###jrid# was updated
         </cfif>

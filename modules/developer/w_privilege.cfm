@@ -68,7 +68,7 @@
 				onRequest: function(){e.target.disabled=true },
 				onFailure: function(r){showError(r);e.target.disabled=false},
 				onSuccess: function(){										
-					new aNotify().alert('Success!','The Privilege was added'); 
+					new aNotify().alert('Successful!','The Privilege was added'); 
 					e.target.disabled=false  
 				}.bind(this)
 			}).send();

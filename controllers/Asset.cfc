@@ -51,7 +51,7 @@ component  {
             }else{
                 i = application.com.Notice.SendEmail("fieldsuperintendent@#application.domain#","AssetGear Equipment Availibility","Hello, <p>This is to notify you that #form.Asset# is back online <br/></p> Thank you")
 			}
-        return "Report #arguments.id# was saved successfuly";
+        return "Report #arguments.id# was saved successfully";
     }
     remote string function SaveAssetFailureReport(required numeric id) {
 
@@ -158,7 +158,7 @@ component  {
 				"text0,int0",
                 "IntegratIonId","AssetFailureReportId",_id)
                 
-        return "Report #_id# was saved successfuly";
+        return "Report #_id# was saved successfully";
 
     }
 }

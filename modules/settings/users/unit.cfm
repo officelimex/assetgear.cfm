@@ -7,7 +7,6 @@
 <cfoutput> 
 <cfset ursId = '__users_c'/>
 <cfimport taglib="../../../assets/awaf/tags/xGrid_1001/" prefix="g" /> 
- <cfdump var="#ursId#">
 <g:Grid renderTo="#ursId#_unit" url="modules/ajax/settings.cfm?cmd=getUnits" commandWidth="70px" class="table-hover table-condensed">
 	<g:Columns>
 		<g:Column id="UnitId" caption="##" field="cu.UnitId" sortable searchable/>

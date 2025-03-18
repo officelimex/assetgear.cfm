@@ -141,11 +141,11 @@
     </nt:Content>
 </nt:NavTab>
 
-	 <cfif url.id eq 0>
-        <f:ButtonGroup>
-            <f:Button value="Create new Item" class="btn-primary" IsSave/>
-        </f:ButtonGroup>
-     </cfif>
+	<cfif url.id eq 0>
+		<f:ButtonGroup>
+			<f:Button value="Create new Item" class="btn-primary" IsSave/>
+		</f:ButtonGroup>
+  </cfif>
 
 </f:Form>
 

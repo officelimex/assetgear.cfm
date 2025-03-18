@@ -31,7 +31,11 @@
     <table border="0" width="100%">
       <tr>
         <td width="50%" valign="top">
-          <f:TextBox name="Code" label="Code" required value="#qWI.Code#"/>
+					<cfset help=""/>
+          <cfif val(url.id) == 0>
+						<cfset help="Ignore this section if you want an auto generated code"/>
+					</cfif>
+          <f:TextBox name="Code" label="Code" value="#qWI.Code#" help="#help#" />
           <f:TextArea name="Description" label="Description" required value="#qWI.Description#"/>
           <f:RadioBox name="Obsolete" inline showlabel label="Is Obsolete" required selected="#qWI.Obsolete#" ListValue="Yes,No"/>
           <f:RadioBox name="Currency" inline showlabel label="Currency" required selected="#qWI.Currency#" ListValue="NGN,USD" ListDisplay="Naira,US Dollar" />

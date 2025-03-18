@@ -148,7 +148,7 @@
                         </cfif>
                     	<div class="h1 alert pad35" <cfif val(qPM.PAApprovedByUserId) neq 0>style="display:none;"</cfif>><a id="#Id4#_sign">Click here</a> to confirm that the safety percautions specified will be observed.</div>
                         <div class="h2 alert pad35 alert-info" <cfif val(qPM.PAApprovedByUserId) eq 0>style="display:none;"</cfif>><cfif request.userinfo.userid eq qPM.PAApprovedByUserId>You have<cfelse>#qPM.PA# has</cfif> signed this document on #dateformat(qPM.PAApprovedDate,'dd mmm yyyy')# #lcase(timeformat(qPM.PAApprovedDate,'hh:mm tt'))#</div> 
-                        <div class="h3 alert pad35 alert-danger" style="display:none;">Document signed successfuly</div> 
+                        <div class="h3 alert pad35 alert-danger" style="display:none;">Document signed successfully</div> 
                     </td>
                 </tr>
             </table>

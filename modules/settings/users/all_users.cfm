@@ -40,12 +40,12 @@ Modified: 2011/11/19
             </g:Event>
 
             <g:Event command="rpin">
-                <g:Window title="'Reset PIN for ' + d[1]" width="490px" height="70px" url="'modules/settings/users/reset_pin.cfm?cid=#url.cid#'" id="">
-                    <g:Button IsSave value="Reset" />
-                </g:Window>
+							<g:Window title="'Reset PIN for ' + d[1]" width="490px" height="70px" url="'modules/settings/users/reset_pin.cfm?cid=#url.cid#'" >
+								<g:Button IsSave value="Reset" />
+							</g:Window>
             </g:Event>
             <g:Event command="gkey">
-                <g:Window title="'Update login access for ' + d[1]" width="490px" height="170px" url="'modules/settings/users/edit_user_role.cfm?cid=#url.cid#'" id="">
+                <g:Window title="'Update login access for ' + d[1]" width="490px" height="170px" url="'modules/settings/users/edit_user_role.cfm?cid=#url.cid#'" >
                     <g:Button IsSave />
                 </g:Window>
             </g:Event>

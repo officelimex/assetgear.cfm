@@ -428,7 +428,7 @@
             <cfset form.PreparedByUserId = request.userinfo.userId/>
         	<cfset id_ = application.com.Permit.saveJHA(form)/>
             <cfif form.id eq 0>
-            	JHA ###id_# was successfuly created
+            	JHA ###id_# was successfully created
             </cfif>
         </cfcase>  
         
@@ -514,7 +514,7 @@
                         
 			<cfif form.id eq 0>
                 <cfset form.id = rt.GENERATED_KEY/>
-                Permit #form.id# was successfuly created 
+                Permit #form.id# was successfully created 
             </cfif>
             
             <cfset h = createobject('component','assetgear.com.awaf.util.helper').Init()/>

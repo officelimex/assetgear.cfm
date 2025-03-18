@@ -19,12 +19,12 @@
         <!--- change password ---> 
         <cfif form.NewPassword neq "">
         	<cfset qU = application.com.User.UpdatePassword(form,request.userinfo.userid)/>
-        	Your password was change successfuly.
+        	Your password was change successfully.
         </cfif>	
 		<!--- change pin --->
         <cfif form.NewPIN neq "">
         	<cfset qU = application.com.User.UpdatePIN(form,request.userinfo.userid)/>
-        	Your PIN was change successfuly.
+        	Your PIN was change successfully.
         </cfif>
         <!--- delegate role to user --->
         <cfparam name="form.DelegateUser" default=""/>

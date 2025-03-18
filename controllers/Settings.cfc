@@ -94,7 +94,7 @@ component  {
         }
         
                 
-        return "Report #_id# was saved successfuly";
+        return "Report #_id# was saved successfully";
 
     }
     
@@ -113,6 +113,6 @@ component  {
             _id = rt.GENERATED_KEY;
         }
 
-        return "Report #arguments.id# was saved successfuly";
+        return "Report #arguments.id# was saved successfully";
     }
 }

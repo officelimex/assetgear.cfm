@@ -16,7 +16,7 @@
 				onRequest: function(){},
 				onFailure: function(r){showError(r);},
 				onSuccess: function(r){
-					alert("Your Permit was successfuly send the Field Supervisor");
+					alert("Your Permit was successfully send the Field Supervisor");
 					$('__permit_c_permit_for_pa_#url.id#').dispose();
 				},
 				onComplete: function(){}
@@ -53,7 +53,7 @@
 						},
 						onSuccess: function(r){
 							aW.close();
-							alert("Your Permit was successfuly closed");
+							alert("Your Permit was successfully closed");
 							$('__permit_c_permit_for_pa_#url.id#').dispose();
 						},
 						onComplete: function(){e.target.disabled=false;}

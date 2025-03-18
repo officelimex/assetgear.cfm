@@ -54,8 +54,7 @@
   </tr> 
   <tr>
   	<td colspan="2"> 
-     
-        <et:Table allowInput height="130px" id="MRNIItem" bind="WorkOrderId,ServiceRequestId" Event="keyup,keyup" 
+        <et:Table allowInput height="330px" id="MRNIItem" bind="WorkOrderId,ServiceRequestId" Event="keyup,keyup" 
         	data="modules/ajax/warehouse.cfm?cmd=getWorkOrderNI&WO=#qWhs.WorkOrderId#,modules/ajax/warehouse.cfm?cmd=getServiceRequestItem&SR=#qWhs.ServiceRequestId#">
             <et:Headers>
                <et:Header title="Description" size="8" />
