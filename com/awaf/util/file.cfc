@@ -39,7 +39,7 @@
 	</cffunction>
 
 	<cffunction name="GetSignaturePath" access="public" returntype="string" hint="Get user signature path">
-		<cfargument name="uid" hint="user id" required="yes" type="string"/>
+		<cfargument name="uid" hint="user id" required="no" type="string"/>
 
 		<cfquery name="qS1" cachedwithin="#CreateTime(1,0,0)#">
 			SELECT * FROM `file`
@@ -48,7 +48,10 @@
 			LIMIT 0,1
 		</cfquery>
 
-		<cfset p = s3generatePresignedUrl("#application.s3.bucket#doc/photo/core_user/#arguments.uid#/#qS1.File#")/>
+		<cfset p = ""/>
+		<cfif qS1.recordcount>
+			<cfset p = s3generatePresignedUrl("#application.s3.bucket#doc/photo/core_user/#arguments.uid#/#qS1.File#")/>
+		</cfif>
 
 		<cfreturn p/>
 	</cffunction>
@@ -91,6 +94,30 @@
 		</cfloop>
 
 		<cfreturn ex_list/>
+	</cffunction>
+
+	<cffunction name="createQRCode" access="public" returntype="any">
+		<cfargument name="content" required="yes" type="string"/>
+		<cfargument name="size" required="yes" type="numeric"/>
+		<cfargument name="color" required="no" default="000000" type="string"/>
+		<cfargument name="logo" required="no" type="string" />
+
+		<cfif arguments.color == "">
+			<cfset arguments.color = "000000"/>
+		</cfif>
+		<cfscript>
+			zxing = new assetgear.com.google.zxing();
+			base64String = zxing.createQRBinary(
+				content         = arguments.content,
+				size            = arguments.size,
+				margin          = 0,
+				fgColorHex 			= "#arguments.color#",
+				errorCorrection = "L",
+				logoPath 				= "#arguments.logo#"
+			);
+		</cfscript>
+
+		<cfreturn base64String/>
 	</cffunction>
 
 
