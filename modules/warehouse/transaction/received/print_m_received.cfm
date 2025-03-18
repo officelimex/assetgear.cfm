@@ -1,11 +1,12 @@
 <cfoutput>
 <cfset qMR = application.com.Transaction.GetMaterialReceived(url.id)/>
+<cfset util = application.com.File/>
 <cfdocument pagetype="a4" format="pdf" margintop="0.25" marginbottom="0" marginleft="0.4" marginright="0.4" >
 <html>
 <head>
-<cfset bg = "##fce8e8"/>
-<cfset brd_c = "##f8c5c5"/>
-<cfset brd_c2 = "##ef7f7f"/>
+<cfset bg = "##f0f2f8"/>
+<cfset brd_c = "##d6daeb"/>
+<cfset brd_c2 = "##5364a9"/>
 <style type="text/css">
 	html,body{padding:0; margin:0;font: 12px Tahoma;}
 	.head_section td{font-size: 11px;padding:5px;}
