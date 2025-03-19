@@ -20,13 +20,13 @@
 <cfimport taglib="../../../assets/awaf/tags/xForm_1001/" prefix="f" />
 <cfimport taglib="../../../assets/awaf/tags/xEditTable/" prefix="et" />
 <cfimport taglib="../../../assets/awaf/tags/xUploader_1000/" prefix="u" />
+<cfimport taglib="../../../assets/awaf/tags/xForm_1001/" prefix="l" />
 
 <cfset qWO = application.com.WorkOrder.GetWorkOrder(url.id)/>
 <cfset qOI = application.com.WorkOrder.GetWorkOrderItems(url.id)/>
 <cfset qJC = application.com.WorkOrder.GetJobClass()/>
 <cfset qWI = application.com.Item.GetItems()/>
 <cfset qAL = application.com.Asset.GetAssetLocationByAsset(qWO.AssetId)/>
-<!---<cfset qA = application.com.Asset.GroupAssetByLocation()/>--->
 
 <cfquery name="qCU" cachedwithin="#CreateTime(5,0,0)#">
 	SELECT UserId,concat(Surname, " ", OtherNames) as Names, Email
@@ -43,13 +43,15 @@
     ORDER BY Name
 </cfquery>
 
+<cfset qUM = application.com.Item.GetAllUM()/>
+
 <cfquery name="qL">
-    SELECT
-        l.LabourId,l.Hours,l.Rate,l.Function,l.WorkOrderId,
-        CONVERT(Concat(cu.Surname," ",cu.OtherNames,"~",cu.UserId) USING utf8) as `Names`
-    FROM
-    	labour AS l
-    INNER JOIN core_user AS cu ON l.UserId = cu.UserId
+	SELECT
+		l.LabourId,l.Hours,l.Rate,l.Function,l.WorkOrderId,
+		CONVERT(Concat(cu.Surname," ",cu.OtherNames,"~",cu.UserId) USING utf8) as `Names`
+	FROM
+		labour AS l
+	INNER JOIN core_user AS cu ON l.UserId = cu.UserId
 	WHERE l.WorkOrderId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.id#"/> AND Approved="Yes"
 </cfquery>
 <cfquery name="qCon">
@@ -79,17 +81,19 @@
 
 <!---<f:Select name="AssetId" label="Asset" required ListValue="#valuelist(qA.AssetId,'`')#" autoselect delimiters="`" ListDisplay="#valuelist(qA.Asset,'`')#" Selected="#qWO.AssetId#,#qWO.AssetLocationIds#" class="span10"/>
 --->
-<cfquery name="qA" cachedwithin="#CreateTime(5,0,0)#">
-	SELECT CONCAT(a.Description) Asset, a.AssetId FROM asset a
-</cfquery>
-<f:Select name="AssetId" label="Asset" required ListValue="#valuelist(qA.AssetId,'`')#" autoselect delimiters="`" ListDisplay="#valuelist(qA.Asset,'`')#" Selected="#qWO.AssetId#" class="span10"/>
+	<cfquery name="qA" cachedwithin="#CreateTime(5,0,0)#">
+		SELECT CONCAT(a.Description) Asset, a.AssetId FROM asset a
+	</cfquery>
 
-
-</td>
-          </tr>
-          <tr>
+	<cfif qWO.createdBy != "">
+		<l:Label name="Created by" value="#qWO.createdBy#"/>
+	</cfif>
+	<f:Select name="AssetId" label="Asset" required ListValue="#valuelist(qA.AssetId,'`')#" autoselect delimiters="`" ListDisplay="#valuelist(qA.Asset,'`')#" Selected="#qWO.AssetId#" class="span10"/>
+	</td>
+				</tr>
+				<tr>
             <td width="50%" valign="top">
-                <f:TextArea name="Description" label="Work Description" required value="#qWO.Description#" rows="4"/>
+              <f:TextArea name="Description" label="Work Description" required value="#qWO.Description#" rows="4"/>
             </td>
             <td class="horz-div" valign="top">
             <cfif qWO.WorkClassId eq 10>
@@ -141,70 +145,74 @@
           WHERE ItemId <> '' AND ItemStatus = 'Online' AND Obsolete = 'No'
       </cfquery>
         <et:Table allowInput height="200px" id="WorkOrderItem">
-            <et:Headers>
-                <et:Header title="Spare parts" size="6" type="int">
-                    <et:Select ListValue="#Valuelist(qWI.ItemId,'`')#" ListDisplay="#Valuelist(qWI.ItemDescription,'`')#" delimiters="`"/>
-                </et:Header>
-                <et:Header title="Purpose" size="4" type="text" />
-                <et:Header title="Qty" size="1" type="int" />
-                <et:Header title="" size="1"/>
-            </et:Headers>
-           <et:Content Query="#qOI_#" Columns="ItemDescription,Purpose,Quantity" type="int-select,text,int" PKField="WorkOrderItemId"/>
+					<et:Headers>
+						<et:Header title="Description" size="6" type="int">
+							<et:Select ListValue="#Valuelist(qWI.ItemId,'`')#" ListDisplay="#Valuelist(qWI.ItemDescriptionWithVPNAndQOH,'`')#" delimiters="`"/>
+						</et:Header>
+						<et:Header title="Purpose" size="4" type="text" required="false" />
+						<et:Header title="Qty" size="1" type="int" />
+						<et:Header title="" size="1"/>
+					</et:Headers>
+					<et:Content Query="#qOI_#" Columns="ItemDescription,Purpose,Quantity" type="int-select,text,int" PKField="WorkOrderItemId"/>
         </et:Table>
     </div>
 
 	<div id="#Id3#">
     	<div class="alert alert-info">Use this area to add materials not stocked in the warehouse</div>
-    	<cfquery name="qOI_2" dbtype="query">
-        	SELECT * FROM qOI
-            WHERE ItemId = ''
-        </cfquery>
-        <et:Table allowInput height="200px" id="WorkOrderItem2">
-            <et:Headers>
-                <et:Header title="Material needed" size="5" type="text"/>
-                <et:Header title="Purpose" size="3" type="text"/>
-                <et:Header title="Unit price" size="2" type="float"/>
-                <et:Header title="Qty" size="1" type="float"/>
-                <et:Header title="" size="1"/>
-            </et:Headers>
-           <et:Content Query="#qOI_2#" Columns="Description,Purpose,UnitPrice,Quantity" type="text,text,float,int" PKField="WorkOrderItemId"/>
-        </et:Table>
+			<cfquery name="qOI_2" dbtype="query">
+				SELECT * FROM qOI
+				WHERE ItemId = ''
+			</cfquery>
+			<et:Table allowInput height="200px" id="WorkOrderItem2">
+				<et:Headers>
+					<et:Header title="Material Description" size="5" type="text"/>
+					<et:Header title="Qty" size="1" type="int"/>
+					<et:Header title="UOM" size="1" type="text">
+						<et:Select listvalue="#ValueList(qUM.Title,'`')#" delimiters="`"/>
+					</et:Header>
+					<et:Header title="OEM" size="2" type="text" required="false"/>
+					<et:Header title="Part No./Model/Serial" size="2" type="text" required="false"/> 
+					<et:Header title="" size="1"/>
+				</et:Headers>
+				<et:Content Query="#qOI_2#" Columns="Description,Quantity,UOM,OEM,Others" type="text,int,text,text,text" PKField="WorkOrderItemId"/>
+			</et:Table>
     </div>
 
     <div id="#Id4#"><!--- Labour --->
     	<et:Table allowInput height="210px" id="Labour">
-            <et:Headers>
-                <et:Header title="Employee" size="4" type="int">
-                  <et:Select ListValue="#Valuelist(qCU.UserId,'`')#" ListDisplay="#Valuelist(qCU.Names,'`')#" delimiters="`"/>
-                </et:Header>
-                <et:Header title="Role played in this job" size="6" type="text"/>
-                <et:Header title="Hours" size="1" type="int"/>
-                <et:Header title="" size="1"/>
-            </et:Headers>
-            <et:Content Query="#qL#" Columns="Names,Function,Hours" type="text,text,int" PKField="LabourId"/>
-        </et:Table>
+				<et:Headers>
+					<et:Header title="Employee" size="4" type="int">
+						<et:Select ListValue="#Valuelist(qCU.UserId,'`')#" ListDisplay="#Valuelist(qCU.Names,'`')#" delimiters="`"/>
+					</et:Header>
+					<et:Header title="Role played in this job" size="6" type="text"/>
+					<et:Header title="Hours" size="1" type="int"/>
+					<et:Header title="" size="1"/>
+				</et:Headers>
+				<et:Content Query="#qL#" Columns="Names,Function,Hours" type="text,text,int" PKField="LabourId"/>
+			</et:Table>
     </div>
 
-    <div id="#Id5#"><!--- Contractor --->
-    	<et:Table allowInput height="210px" id="Contract">
-            <et:Headers>
-                <et:Header title="Contractor" size="4" type="text"/>
-                <et:Header title="Work scope" size="5" type="text"/>
-                <et:Header title="Currency" size="1" type="text">
-                    <et:Select ListValue="NGN,USD"/>
-                </et:Header>
-                <et:Header title="Cost" size="1" type="float"/>
-                <et:Header title="" size="1"/>
-            </et:Headers>
-            <et:Content Query="#qCon#" Columns="Contractor,Description,Currency,Cost" type="text,text,text,foat" PKField="ContractId"/>
-        </et:Table>
+		<!--- Contractor --->
+    <div id="#Id5#">
+			<et:Table allowInput height="210px" id="Contract">
+				<et:Headers>
+					<et:Header title="Contractor" size="4" type="text"/>
+					<et:Header title="Work scope" size="7" type="text"/>
+<!--- 					<et:Header title="Currency" size="1" type="text" required="false">
+						<et:Select ListValue="-,NGN,USD"/>
+					</et:Header> --->
+					<!--- <et:Header title="Cost" size="1" type="float" required="false"/> --->
+					<et:Header title="" size="1"/>
+				</et:Headers>
+				<et:Content Query="#qCon#" Columns="Contractor,Description" type="text,text" PKField="ContractId"/>
+			</et:Table>
     </div>
 
     <div id="#Id6#" align="center">
         <table width="100%" border="0">
           <tr>
             <td width="50%" valign="top">
-            	<f:DatePicker name="DateClosed" label="Date Closed" value="#dateformat(qWO.DateClosed,'dd/mmm/yyyy')#"/>
+            	<f:DatePicker name="DateClosed" label="Date Closed" value="#qWO.DateClosed#" type="datetime"/>
             </td>
             <td class="horz-div" valign="top">
             	<f:Select name="SupervisedByUserId" autoselect label="Supervised By" delimiters="`" ListValue="#Valuelist(qCU.UserId,'`')#" ListDisplay="#Valuelist(qCU.Names,'`')#" Selected="#qWO.SupervisedByUserId#" class="span9" required/>
@@ -220,19 +228,19 @@
           </tr>
           <tr>
           	<td>
-                <cfif (qWO.DepartmentId eq request.userinfo.departmentid)>
-                    <cfif request.IsSV || request.IsPS || request.IsMS || (request.userinfo.role eq "FS")>
-                        <f:Select name="Status" required ListValue="Open,Close,Suspended,Part on hold,Declined" Selected="#qWO.Status#" class="span6"/>
-                    <cfelse>
-                        <f:Select name="Status" ListValue="Open,Close,Suspended" Selected="#qWO.Status#" class="span6"/>
-                    </cfif>
-                <cfelse>
-                    <cfif request.userinfo.role eq "FS" || equest.IsMS>
-                        <f:Select name="Status" required ListValue="Open,Close,Suspended,Part on hold,Declined" Selected="#qWO.Status#" class="span6"/>
-                    <cfelse>
-                        <f:Select name="Status" Disabled ListValue="Open,Close,Suspended,Part on hold,Declined" Selected="#qWO.Status#" class="span6"/>
-                    </cfif>
-                </cfif>
+							<cfif (qWO.DepartmentId eq request.userinfo.departmentid)>
+								<cfif request.IsSV || request.IsPS || request.IsMGR>
+									<f:Select name="Status" required ListValue="Open,Close,Suspended,Part on hold,Declined" Selected="#qWO.Status#" class="span6"/>
+								<cfelse>
+									<f:Select name="Status" ListValue="Open,Close,Suspended" Selected="#qWO.Status#" class="span6"/>
+								</cfif>
+							<cfelse>
+								<cfif request.IsMGR>
+									<f:Select name="Status" required ListValue="Open,Close,Suspended,Part on hold,Declined" Selected="#qWO.Status#" class="span6"/>
+								<cfelse>
+									<f:Select name="Status" Disabled ListValue="Open,Close,Suspended,Part on hold,Declined" Selected="#qWO.Status#" class="span6"/>
+								</cfif>
+							</cfif>
             </td>
             <td></td>
           </tr>
@@ -266,33 +274,61 @@
 						MATERIAL ISSUE ##: <a target="_blank" href="modules/warehouse/transaction/issue/print_material_issue.cfm?id=#qMIs.IssueId#">#qMIs.IssueId#</a>
 					</cfloop>
 				</li>
-				</cfif>
-        </ul>
-        <hr>
-        <u:UploadFile id="Attachments" table="work_order" pk="#url.id#" />
+			</cfif>
+			</ul>
+			<hr>
+			<u:UploadFile id="Attachments" table="work_order" pk="#url.id#" />
     </div>
 
     <nt:NavTab renderTo="#woId#">
-        <nt:Tab>
-            <nt:Item title="Open Section" isactive/>
-            <nt:Item title="Part Section (A)"/>
-            <nt:Item title="Part Section (B)"/>
-            <nt:Item title="Labour Section"/>
-            <nt:Item title="Contractors"/>
-            <nt:Item title="Close Section"/>
-            <nt:Item title="Documents"/>
-        </nt:Tab>
-        <nt:Content>
-            <nt:Item id="#Id1#" isactive/>
-            <nt:Item id="#Id2#"/>
-            <nt:Item id="#Id3#"/>
-            <nt:Item id="#Id4#"/>
-            <nt:Item id="#Id5#"/>
-            <nt:Item id="#Id6#"/>
-            <nt:Item id="#Id7#"/>
-        </nt:Content>
+			<nt:Tab>
+				<nt:Item title="Open Section" isactive/>
+				<nt:Item title="Material In Stock"/>
+				<nt:Item title="Material Out of Stock"/>
+				<nt:Item title="Labour Section"/>
+				<nt:Item title="Contractors"/>
+				<nt:Item title="Close Section"/>
+				<nt:Item title="Documents"/>
+			</nt:Tab>
+			<nt:Content>
+				<nt:Item id="#Id1#" isactive/>
+				<nt:Item id="#Id2#"/>
+				<nt:Item id="#Id3#"/>
+				<nt:Item id="#Id4#"/>
+				<nt:Item id="#Id5#"/>
+				<nt:Item id="#Id6#"/>
+				<nt:Item id="#Id7#"/>
+			</nt:Content>
     </nt:NavTab>
-  
+
+    <f:ButtonGroup>
+			<cfif qWO.WorkClassId == 12 && request.IsSUP>
+      	<f:Button IsSave 
+					value="Save as Draft" class="btn-info" onSuccess="win_save_wo_window.close()"
+					actionURL="modules/ajax/maintenance.cfm?cmd=saveWorkOrder&draft=true" 
+				/>
+      	<f:Button value="Save & Send to Warehouse" class="btn-primary" IsSave onSuccess="win_save_wo_window.close()"/>
+			<cfelse>
+				<cfif request.IsSV>
+      		<f:Button value="Save Only" class="btn-primary" IsSave onSuccess="win_save_wo_window.close()"/>
+      		<f:Button 
+						value="Save & Send to Superintendent" 
+						actionURL="modules/ajax/maintenance.cfm?cmd=sendToSuperintendent"
+						class="btn-success" IsSave 
+						onSuccess="win_save_wo_window.close()"/>
+				<cfelseif request.IsSUP>
+      		<f:Button value="Save Only" class="btn-primary" IsSave onSuccess="win_save_wo_window.close()"/>
+      		<f:Button 
+						value="Approve" 
+						actionURL="modules/ajax/maintenance.cfm?cmd=ApproveAndSendToWarehouse"
+						class="btn-success" IsSave 
+						onSuccess="win_save_wo_window.close()"/>					
+				<cfelse>
+      		<f:Button value="Save" class="btn-primary" IsSave onSuccess="win_save_wo_window.close()"/>
+				</cfif>
+			</cfif>
+    </f:ButtonGroup>
+
 </f:Form>
 
 <script>

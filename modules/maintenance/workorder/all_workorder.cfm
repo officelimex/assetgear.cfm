@@ -36,55 +36,85 @@
   </g:Columns>
 
   <g:Commands>
+    <!--- <g:Command id="editA" icon="pencil" help="Edit/View Work Order" condition="row[8]=='#request.userinfo.departmentid#'||row[9]=='#request.userinfo.unitid#'"/> --->
+
     <!--- <cfif request.userinfo.role == "FS"> --->
-    <cfif !request.isWarehouseMan>
+<!---     <cfif !request.isWarehouseMan>
       <g:Command id="editA" icon="pencil" help="Edit/View Work Order" condition="row[8]=='#request.userinfo.departmentid#'||row[9]=='#request.userinfo.unitid#'"/>
+    </cfif> --->
+<!---     <cfif request.isUser>
+      <g:Command id="editA" icon="pencil" help="Edit/View Work Order" condition="row[8]=='#request.userinfo.departmentid#'||row[9]=='#request.userinfo.unitid#'"/> 
+    </cfif> --->
+    <g:Command id="editA" icon="file" text="View" help="Edit/View Work Order" />
+
+<!---     <cfif request.IsMGR >
+      <g:Command id="viewMs" icon="file" help="View Work Order" />
     </cfif>
-    <cfif request.isSup>
-      <!--- <g:Command id="editA" icon="pencil" help="Edit/View Work Order" /> --->
+    <cfif request.isSup || request.isSV>
+      <g:Command id="editA" icon="pencil" help="Edit/View Work Order" />
       <g:Command id="viewSup" icon="file" help="View Work Order" />
     </cfif>
     <cfif request.isWarehouseMan>
-      <g:Command id="editA" icon="pencil" help="Edit/View Work Order" />
       <g:Command id="viewWH" icon="file" help="View Work Order" />
-    </cfif>
+    </cfif> --->
     <g:Command id="Print" icon="print" help="Print Work Order"/>
 
   </g:Commands>
 
 	<g:Event command="editA">
-    <g:Window title="'Work order ##' +d[0]" width="990px" height="500px" url="'modules/maintenance/workorder/get_page.cfm?cid=#url.cid#&filter=#url.filter#'" id="">
+    <g:Window 
+      title="'Work order ##' +d[0]" width="990px" height="500px" 
+      url="'modules/maintenance/workorder/get_page.cfm?cid=#url.cid#&filter=#url.filter#'" 
+      id="save_wo_window">
       
       <cfif request.isSv>
-        <!--- <g:Button value="Send to Supritendent" executeURL="'modules/ajax/maintenance.cfm?cmd=sendToSupervisor'" class="btn-warning"/> --->
-        <g:Button value="Send to Supritendent" executeURL="'modules/ajax/maintenance.cfm?cmd=sendToSupritendent'" class="btn-warning"/>
+        <!--- <g:Button value="Send to Superintendent" executeURL="'modules/ajax/maintenance.cfm?cmd=sendToSupervisor'" class="btn-warning"/> --->
+        <!--- <g:Button value="Send to Superintendent" executeURL="'modules/ajax/maintenance.cfm?cmd=sendToSuperintendent'" class="btn-warning"/> --->
       </cfif>
       <cfif request.isSup>
         <!--- <g:Button value="Approve & Send to FS" icon="icon-thumbs-up icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=SupervisorApproveWO&to=FS'" class="btn-success"/> --->
         <!--- <g:Button value="Approve & Send to Materials" icon="icon-thumbs-up icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=SupervisorApproveWO&to=WH'" class="btn-success"/> --->
-        
-        <g:Button value="Approve & Send to Manager" icon="icon-thumbs-up icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=SupervisorApproveWO&to=FS'" class="btn-success"/>
-        <g:Button value="Approve & Send to Materials" icon="icon-thumbs-up icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=SupritendentApproveWO&to=WH'" class="btn-success"/>
-        <g:Button value="Reject" prompt="Reason" icon="icon-thumbs-down icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=RejectWO'" class="btn-danger"/>
+      <!---   
+        <g:Button value="Approve & Send to Manager" icon="icon-thumbs-up icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=SupApproveWO-MM'" class="btn-success"/>
+        <g:Button value="Approve & Send to Materials" icon="icon-thumbs-up icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=SupApproveWO-WH'" class="btn-success"/>
+        <g:Button value="Reject" prompt="Reason" icon="icon-thumbs-down icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=RejectWO'" class="btn-danger"/> --->
       </cfif>
-      
-      <g:Button IsSave />
+
+      <!--- <g:Button IsSave /> --->
     </g:Window>
   </g:Event>
 	<g:Event command="viewWH">
     <g:Window title="'Work order ##' +d[0]" width="990px" height="500px" url="'modules/maintenance/workorder/get_page.cfm?cid=#url.cid#&filter=#url.filter#&other=true'" id="">
       <!--- <g:Button value="Approve & Send to FS" executeURL="'modules/ajax/maintenance.cfm?cmd=WHApprove'" class="btn-success"/> --->
-      <g:Button value="Approve & Send to Manager" executeURL="'modules/ajax/maintenance.cfm?cmd=WHApprove'" class="btn-success"/>
-      <g:Button value="Reject" prompt="Reason" icon="icon-thumbs-down icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=RejectWO'" class="btn-danger"/>
+      
+      <!--- if its a warehouse item use this process --->
+      <cfswitch expression="#request.userinfo.role#">
+        <cfcase value="WH_SV">
+          <g:Button value="Approve & Send to Manager" condition="d[8]==#request.userinfo.departmentId#" executeURL="'modules/ajax/maintenance.cfm?cmd=WHApproveSendToWM'" class="btn-success"/>
+        </cfcase>
+        <cfcase value="MS,WH_SUP">
+          <g:Button value="Approve" condition="d[8]==#request.userinfo.departmentId#" executeURL="'modules/ajax/maintenance.cfm?cmd=WHApproveOnly'" class="btn-success"/>
+          <g:Button value="Reject" prompt="Reason" icon="icon-thumbs-down icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=RejectWO'" class="btn-danger"/>
+        </cfcase>
+      </cfswitch>
+
     </g:Window>
   </g:Event>
 	<g:Event command="viewSup">
     <g:Window title="'Work order ##' +d[0]" width="990px" height="500px" url="'modules/maintenance/workorder/get_page.cfm?cid=#url.cid#&filter=#url.filter#&other=true'" id="">
       <!--- <g:Button value="Approve" executeURL="'modules/ajax/maintenance.cfm?cmd=FSApprove'" class="btn-success"/> --->
-      <g:Button value="Approve" executeURL="'modules/ajax/maintenance.cfm?cmd=SupritentedApprove'" class="btn-success"/>
-      <g:Button value="Reject" prompt="Reason" icon="icon-thumbs-down icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=RejectWO'" class="btn-danger"/>
+      <!--- <g:Button value="Approve" executeURL="'modules/ajax/maintenance.cfm?cmd=SupritentedApprove'" class="btn-success"/>
+      <g:Button value="Reject" prompt="Reason" icon="icon-thumbs-down icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=RejectWO'" class="btn-danger"/> --->
     </g:Window>
   </g:Event>
+	<g:Event command="viewMs">
+    <g:Window title="'Work order ##' +d[0]" width="990px" height="500px" url="'modules/maintenance/workorder/get_page.cfm?cid=#url.cid#&filter=#url.filter#&material=true&'" id="save_wo_window">
+<!---       <g:Button value="Approve" executeURL="'modules/ajax/maintenance.cfm?cmd=MSApprove'" class="btn-success"/>
+      <g:Button value="Reject" prompt="Reason" icon="icon-thumbs-down icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=RejectWO'" class="btn-danger"/> 
+      <g:Button value="Reject" prompt="Reason" icon="icon-thumbs-down icon-white" executeURL="'modules/ajax/maintenance.cfm?cmd=RejectReq'" class="btn-danger"/> --->
+    </g:Window>
+  </g:Event>
+
 <!---   <g:Event command="editA">
   <g:Window title="'Permit ##'+d[0]" width="1000px" height="400px" url="'modules/ptw/permit/save_permit.cfm?cid=#url.cid#'" id="">        	
         <g:Button value="Send to Facility Supervisor" class="btn btn-success" icon="icon-share icon-white" executeURL="'modules/ajax/ptw.cfm?cmd=SendToPS&jhaid='+d[1]"/>

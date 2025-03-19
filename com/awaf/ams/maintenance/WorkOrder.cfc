@@ -25,13 +25,13 @@
  			LEFT JOIN `asset_category` ac ON ac.AssetCategoryId = a.AssetCategoryId
  			INNER JOIN `job_class` jc ON jc.JobClassId = wo.WorkClassId
  			LEFT JOIN `service_request` sr ON sr.ServiceRequestId = wo.ServiceRequestId
- 			LEFT JOIN `core_user` rb ON rb.UserId = sr.RequestByUserId
+ 			LEFT JOIN core_user rb ON rb.UserId = sr.RequestByUserId
 			INNER JOIN `pm_task` pm ON pm.PMtaskId = wo.PMTaskId
 			LEFT JOIN frequency f ON pm.FrequencyId = f.FrequencyId
 			LEFT JOIN reading_type rt ON pm.ReadingTypeId = rt.ReadingTypeId
  			
- 			LEFT JOIN `core_user` cu ON cu.UserId = wo.ClosedByUserId
- 			LEFT JOIN `core_user` su ON su.UserId = wo.SupervisedByUserId
+ 			LEFT JOIN core_user cu ON cu.UserId = wo.ClosedByUserId
+ 			LEFT JOIN core_user su ON su.UserId = wo.SupervisedByUserId
  		'/>
  		<cfset this.WORK_ORDER_SQL = '
  			SELECT
@@ -43,7 +43,11 @@
 				ut.Name Unit,
  				CONCAT(cu.Surname," ",cu.OtherNames) ClosedBy,
  				CONCAT(su.Surname," ",su.OtherNames) SupervisedBy,
- 				CONCAT(rb.Surname," ",rb.OtherNames) RequestBy
+ 				CONCAT(sup.Surname," ",sup.OtherNames) SupName,
+ 				CONCAT(rb.Surname," ",rb.OtherNames) RequestBy,
+ 				CONCAT(cr.Surname," ",cr.OtherNames) CreatedBy,
+ 				CONCAT(mgr.Surname," ",mgr.OtherNames) ManagerName,
+ 				CONCAT(wh.Surname," ",wh.OtherNames) WHPerson
  			FROM
  				work_order wo
  			INNER JOIN `core_department` d ON d.DepartmentId = wo.DepartmentId
@@ -52,10 +56,15 @@
  			LEFT JOIN `asset_category` ac ON ac.AssetCategoryId = a.AssetCategoryId
  			INNER JOIN `job_class` jc ON jc.JobClassId = wo.WorkClassId
  			LEFT JOIN `service_request` sr ON sr.ServiceRequestId = wo.ServiceRequestId
- 			LEFT JOIN `core_user` rb ON rb.UserId = sr.RequestByUserId
+ 			LEFT JOIN core_user rb ON rb.UserId = sr.RequestByUserId
  			
- 			LEFT JOIN `core_user` cu ON cu.UserId = wo.ClosedByUserId
- 			LEFT JOIN `core_user` su ON su.UserId = wo.SupervisedByUserId
+ 			LEFT JOIN core_user cu ON cu.UserId = wo.ClosedByUserId
+ 			LEFT JOIN core_user su ON su.UserId = wo.SupervisedByUserId
+
+ 			LEFT JOIN core_user cr ON cr.UserId = wo.CreatedByUserId
+			LEFT JOIN core_user mgr ON mgr.UserId = wo.FSUserId 
+      LEFT JOIN core_user wh ON wh.UserId = wo.WHUserId 
+      LEFT JOIN core_user sup ON sup.UserId = wo.SupUserId 
  		'/>
     <cfset this.WORK_ORDER_COUNT_SQL = '
  			SELECT
@@ -67,15 +76,16 @@
  			-- LEFT JOIN `asset_category` ac ON ac.AssetCategoryId = a.AssetCategoryId
  			-- INNER JOIN `job_class` jc ON jc.JobClassId = wo.WorkClassId
  			-- users
- 			-- LEFT JOIN `core_user` cu ON cu.UserId = wo.ClosedByUserId
- 			-- LEFT JOIN `core_user` su ON su.UserId = wo.SupervisedByUserId
+ 			-- LEFT JOIN core_user cu ON cu.UserId = wo.ClosedByUserId
+ 			-- LEFT JOIN core_user su ON su.UserId = wo.SupervisedByUserId
 		'/>
  		<cfset this.WORK_ORDER_ITEM_SQL = '
 		    SELECT
-		        woi.*,
-						i.Status,i.Obsolete,i.Status as ItemStatus,i.Code,
-		        CONVERT(CONCAT(i.Description,"~",i.ItemId) USING utf8) ItemDescription, i.Description Item, i.VPN,
-		        um.Code UM
+					woi.*,
+					i.Status,i.Obsolete,i.Status as ItemStatus,i.Code,
+					CONVERT(CONCAT("[",i.VPN,"] ",i.Description,"~",i.ItemId) USING utf8) ItemDescription, 
+					i.Description Item, i.VPN, i.Maker,
+					um.Code UM
 		    FROM
 		    	work_order_item woi
 		    INNER JOIN work_order wo ON woi.WorkOrderId = wo.WorkOrderId
@@ -92,7 +102,7 @@
  				CONCAT(u.Surname," ",u.OtherNames,"~",u.UserId) User,  CONCAT(u.Surname," ",u.OtherNames) Labourer
  			FROM
  				`labour` l
- 			INNER JOIN `core_user` u ON u.UserId = l.UserId
+ 			INNER JOIN core_user u ON u.UserId = l.UserId
  		'/>
  		<cfset this.SERVICE_REQUEST_SQL = '
  			SELECT
@@ -224,16 +234,26 @@
 		<cfreturn qSR/>
 	</cffunction>
 
-	<cffunction name="SaveWorkOrder" returntype="numeric" access="public" hint="creeate new work order">
+
+	<cffunction name="SaveWorkOrder" returntype="numeric" access="public" hint="create new work order">
 		<cfargument name="wod" type="struct" required="true" hint="data holding the new work order to be created." />
+		<cfargument name="draft" default="false" type="boolean" required="false" />
 
 		<cfset wo = arguments.wod/>
 
 		<cfparam name="wo.AssetLocationIds" default=""/>
+		<cfparam name="wo._AssetId" default=""/>
+		<cfparam name="AssetLocationIds" default=""/>
+		<cfif val(wo._AssetId)>
+			<cfset wo.AssetId = wo._assetId/>
+			<cfset wo.AssetLocationIds = wo._assetLocId/>
+		</cfif>
 		<cfif listLen(wo.AssetId) eq 2>
 			<cfset wo.AssetLocationIds = listLast(wo.AssetId)/>
 			<cfset wo.AssetId = listFirst(wo.AssetId)/>
 		</cfif>
+		
+
 		<cfparam name="wo.Status" default="Open"/>
     	<cfif wo.Status eq "">
 			<cfset wo.Status = "Open"/>
@@ -258,11 +278,10 @@
 		</cfif>
 		<cfif IsDate(wo.DateClosed)>
 			<cfif wo.DateClosed lt wo.DateOpened>
-					<cfthrow message="Date closed can not be less than date work was Opened (#dateformat(wo.DateOpened,'dd-mm-yyyy')#)."/>
-				</cfif>
+				<cfthrow message="Date closed can not be less than date work was Opened (#dateformat(wo.DateOpened,'dd-mm-yyyy')#)."/>
+			</cfif>
 		</cfif>
 
-        <!--- wo.AssetId is assetlocationid --->
 
 		<cftransaction action="begin">
 			<!--- update the status of the Service request --->
@@ -306,7 +325,6 @@
 				</cfif>
 				<cfif wo.id neq 0>
 					`WorkDone` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#wo.WorkDone#"/>,
-					
 				<cfelse>
 					<!--- if the user is just creating the work order, add the department --->
 					<cfif val(wo.CreatedByUserId)>
@@ -316,6 +334,9 @@
 				</cfif>
 								
 				<cfif wo.AssetLocationIds eq "">
+					<cfif !val(wo.AssetId)>
+						<cfabort showerror="Please select an Asset"/>
+					</cfif>
 					<cfset qAL = application.com.Asset.GetAssetLocationByAsset(wo.AssetId)/>
 					`AssetLocationIds` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#ValueList(qAL.AssetLocationId)#"/>,
 				<cfelse>
@@ -330,25 +351,25 @@
 			<cfif val(wo.PMTaskId)>
 				`PMTaskId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#val(wo.PMTaskId)#"/>,
 			</cfif>
-								`WorkDetails` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#wo.WorkDetails#"/>
-						<cfif wo.id neq 0>
-								WHERE `WorkOrderId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#wo.id#"/>
-						</cfif>
-				</cfquery>
+				`WorkDetails` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#wo.WorkDetails#"/>
+				<cfif wo.id neq 0>
+						WHERE `WorkOrderId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#wo.id#"/>
+				</cfif>
+			</cfquery>
 
 				<!--- save the description and details of the WO to PM if available --->
-				<cfif val(wo.PMTaskId)>
-						<cfquery>
-								UPDATE pm_task SET
-										Description = <cfqueryparam cfsqltype="cf_sql_varchar" value="#wo.Description#"/>,
-										TaskDetails = <cfqueryparam cfsqltype="cf_sql_varchar" value="#wo.WorkDetails#"/>
-								WHERE PMTaskId = <cfqueryparam cfsqltype="cf_sql_integer" value="#wo.PMTaskId#"/>
-						</cfquery>
+				<cfif val(wo.PMTaskId) AND len(wo.WorkDetails) GT 10>
+					<cfquery>
+						UPDATE pm_task SET
+							Description = <cfqueryparam cfsqltype="cf_sql_varchar" value="#wo.Description#"/>,
+							TaskDetails = <cfqueryparam cfsqltype="cf_sql_varchar" value="#wo.WorkDetails#"/>
+						WHERE PMTaskId = <cfqueryparam cfsqltype="cf_sql_integer" value="#wo.PMTaskId#"/>
+					</cfquery>
 				</cfif>
 
 				<cfset WOId = wo.Id/>
 				<cfif wo.Id eq 0>
-						<cfset WOId = rt.GENERATED_KEY/>
+					<cfset WOId = rt.GENERATED_KEY/>
 				</cfif>
 
 				<cfset f = CreateObject("component","assetgear.com.awaf.util.file").init()/>
@@ -356,9 +377,9 @@
 				<!--- upload attachments --->
 				<cfparam name="wo.Attachments" default=""/>
 				<cfif wo.Attachments neq "">
-						<cfset s_path = wo.AttachmentsSource & "/" & wo.Attachments />
-						<cfset d_path = wo.AttachmentsDestination & "/work_order/" & WOId & "/" />
-						<cfset f.Move('work_order',WOId,'a',s_path,d_path)/>
+					<cfset s_path = wo.AttachmentsSource & "/" & wo.Attachments />
+					<cfset d_path = wo.AttachmentsDestination & "/work_order/" & WOId & "/" />
+					<cfset f.Move('work_order',WOId,'a',s_path,d_path)/>
 				</cfif>
 
 				<cfset h = createobject('component','assetgear.com.awaf.util.helper').Init()/>
@@ -390,17 +411,17 @@
 						"ItemId,Purpose,Quantity",
 						"int0,text0,int1",
 						"WorkOrderItemId","WorkOrderId",WOId)/>
+
 				<cfset h.SaveFromTempTable(wo.WorkOrderItem2,
 						"work_order_item",
-						"Description,Purpose,UnitPrice,Quantity",
-						"text0,text1,float0,float1",
+						"Description,Quantity,UOM,OEM,Others",
+						"text0,int0,text1,text2,text3",
 						"WorkOrderItemId","WorkOrderId",WOId)/>
-						
+	
 				<!--- check unitprice of spares and make sure there is value --->
 				<!--- <cfif IsDate(wo.DateClosed)> --->
 					<cfquery name="qsp">
-						SELECT UnitPrice FROM work_order_item WHERE ItemId IS NULL
-							AND WorkOrderId = #WOId#
+						SELECT UnitPrice FROM work_order_item WHERE ItemId IS NULL AND WorkOrderId = #WOId#
 					</cfquery>
 					<!--- <cfloop query="qsp">
 						<cfif qsp.UnitPrice eq 0>
@@ -410,8 +431,8 @@
 				<!--- </cfif> --->
 				<cfset h.SaveFromTempTable(wo.Contract,
 						"contract",
-						"Contractor,Description,Currency,Cost",
-						"text0,text1,text2,float0",
+						"Contractor,Description",
+						"text0,text1",
 						"ContractId","WorkOrderId",WOId)/>
 				<cfset h.SaveFromTempTable(wo.Labour,
 						"labour",
@@ -419,98 +440,148 @@
 						"int0,text0,int1",
 						"LabourId","WorkOrderId",WOId)/>
 
+			<cfquery name="qpts">
+				SELECT 
+					i.Code, i.Description ItemDesc, woi.Description ItemDesc2, i.VPN
+				FROM work_order_item woi
+				LEFT JOIN whs_item i ON i.ItemId = woi.ItemId
+				WHERE WorkOrderId = #WOId#
+			</cfquery>
 
+			<cfif qpts.recordcount>
+				<cfset _emails = application.com.User.GetEmailsInRole("WH_SUP,WHS_SV")/> 
+				<cfif wo.WorkClassId == 12 && wo.Status == "Open">
+					<cfset _emails = application.com.User.GetEmailsInRole("WH_SUP")/> 
+					<cfquery name="qpts">
+						UPDATE work_order SET
+							Status = "Parts On Hold",
+							Status2 = "Sent to Warehouse"
+						WHERE WorkOrderId = #WOId#
+					</cfquery>
+					<cfif listLen(_emails) && application.mode == application.LIVE && !arguments.draft>
+
+						<cfmail from="AssetGear <do-not-reply@assetgear.net>" to="#_emails#" subject="Work Order ###WOId#" type="html">
+							Hello,
+							<p>	
+								#wo.Description# has been raised and requires the following materials:
+								<ol>
+									<cfloop query="#qpts#">
+										<li>
+											<cfif qpts.Code != "">[#qpts.Code#]</cfif> 
+											#qpts.ItemDesc# #qpts.ItemDesc2# 
+											<cfif qpts.VPN != "">[#qpts.VPN#]</cfif> 
+										</li>
+									</cfloop>
+								</ol>
+							</p>
+							<p>Thank you<br/> 
+						</cfmail>
+					</cfif>
+				</cfif>
+
+			</cfif>
  		</cftransaction>
 
 		<cfreturn WOId/>
 	</cffunction>
+
+
 
 	<cffunction name="SaveServiceRequest" access="public" returntype="numeric">
 		<cfargument name="sr_" hint="struct containing job request data" required="true" type="struct"/>
 
 		<cfset sr = arguments.sr_/>
 
-        <cfquery name="qA">
-            SELECT al.AssetId, a.Description FROM asset_location al
-            INNER JOIN asset a ON a.AssetId = al.AssetId
-            WHERE AssetLocationId = <cfqueryparam cfsqltype="cf_sql_integer" value="#sr.AssetLocationId#"/>
-        </cfquery>
+		<cfquery name="qA">
+			SELECT al.AssetId, a.Description FROM asset_location al
+			INNER JOIN asset a ON a.AssetId = al.AssetId
+			WHERE AssetLocationId = <cfqueryparam cfsqltype="cf_sql_integer" value="#sr.AssetLocationId#"/>
+		</cfquery>
 
-        <!--- check the user who created this sr --->
-        <cfset qU = application.com.User.GetUser(sr.RequestByUserId)/>
-        <cfset sr.ApprovedByUserId = 0/>
-        <cfswitch expression="#qU.Role#">
-        	<cfcase value="PS,FS,MS"><cfset sr.ApprovedByUserId = sr.RequestByUserId/></cfcase>
-            <cfcase value="SV">
-            	<cfif qU.DepartmentId eq 7 or qU.DepartmentId eq 15>
-                	<!--- TODO: send to HOD to approve --->
-                <cfelse>
-                	<cfset sr.ApprovedByUserId = sr.RequestByUserId/>
-                </cfif>
-            </cfcase>
-        </cfswitch>
+		<!--- check the user who created this sr --->
+		<cfset qU = application.com.User.GetUser(sr.RequestByUserId)/>
+		<cfset sr.ApprovedByUserId = 0/>
+		<cfswitch expression="#qU.Role#">
+			<cfcase value="WHS_SUP,WHS_SV,MS,SUP,SV"><cfset sr.ApprovedByUserId = sr.RequestByUserId/></cfcase>
+				<cfcase value="SV">
+					<cfif qU.DepartmentId eq 7 or qU.DepartmentId eq 15>
+							<!--- TODO: send to HOD to approve --->
+						<cfelse>
+							<cfset sr.ApprovedByUserId = sr.RequestByUserId/>
+						</cfif>
+				</cfcase>
+		</cfswitch>
 
-		<cfquery result="rt">
+		<cftransaction action="begin">
+			<cfquery result="rt">
 				<cfif sr.id eq 0>
 					INSERT INTO
 				<cfelse>
 					UPDATE
 				</cfif>
-            	service_request SET
-                <cfif sr.ServiceType eq "MR">
-                  `DateNeeded` = <cfqueryparam cfsqltype="cf_sql_date" value="#sr.dateneeded#">,
-                  `ReasonForRequest` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#sr.Description#">,
-									`Category` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#sr.Category#">,
-                <cfelse>
-                	`AssetId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#qA.AssetId#">,
-                    <!--- TODO: change LocationIds to AssetLocationId ---->
-                    `LocationIds` = <cfqueryparam value="#sr.AssetLocationId#" cfsqltype="cf_sql_varchar"/>, <!--- this is the asset location ---->
-                    `Description` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#sr.Description#">,
-                </cfif>
-                `Priority` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#sr.Priority#">,
-                `Date` = <cfqueryparam cfsqltype="cf_sql_date" value="#dateformat(Now(),'dd-mmm-yyyy')#">,
-                `RequestByUserId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#sr.RequestByUserId#">,
+					service_request SET
+					<cfif sr.ServiceType eq "MR">
+						`DateNeeded` = <cfqueryparam cfsqltype="cf_sql_date" value="#sr.dateneeded#">,
+						`ReasonForRequest` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#sr.Description#">,
+						`Category` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#sr.Category#">,
+					<cfelse>
+						`AssetId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#qA.AssetId#">,
+						<!--- TODO: change LocationIds to AssetLocationId ---->
+						`LocationIds` = <cfqueryparam value="#sr.AssetLocationId#" cfsqltype="cf_sql_varchar"/>, <!--- this is the asset location ---->
+						`Description` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#sr.Description#">,
+					</cfif>
+					`Priority` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#sr.Priority#">,
+					`Date` = <cfqueryparam cfsqltype="cf_sql_date" value="#dateformat(Now(),'dd-mmm-yyyy')#">,
+					`RequestByUserId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#sr.RequestByUserId#">,
 				<cfif val(sr.ApprovedByUserId)>
-                	`ApprovedByUserId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#sr.ApprovedByUserId#">,
+					`ApprovedByUserId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#sr.ApprovedByUserId#">,
 				</cfif>
-                `ServiceType` = <cfqueryparam cfsqltype="cf_sql_char" maxlength="2" value="#sr.ServiceType#"/>
+						`ServiceType` = <cfqueryparam cfsqltype="cf_sql_char" maxlength="2" value="#sr.ServiceType#"/>
 				<cfif sr.id neq 0>
 					WHERE ServiceRequestId = <cfqueryparam cfsqltype="cf_sql_integer" value="#sr.id#">
 				</cfif>
-		</cfquery>
+			</cfquery>
 
-		<cfif sr.id eq 0>
-			<cfset sr.id = rt.GENERATED_KEY/>
-			<cfif sr.ServiceType eq "JR">
-			<!--- create new workorder based on the service request --->
-				<cfset wo.WorkClassId = 3/> <!--- corrective maintenane --->
-                <cfset wo.DepartmentId = 16/> <!--- maintenance department --->
-                <cfset wo.WorkDetails = sr.Description/>
-                <cfset wo.ServiceRequestId = sr.id/>
-                <cfset wo.AssetLocationIds = sr.AssetLocationId/>
-                <cfset wo.Description = sr.Description />
-                <cfset wo.CreatedByUserId = sr.RequestByUserId />
+			<cfif sr.id eq 0>
+				<cfset sr.id = rt.GENERATED_KEY/>
+				<cfif sr.ServiceType eq "JR">
+					<!--- create new workorder based on the service request --->
+					<cfset wo.WorkClassId = 3/> <!--- corrective maintenane --->
+					<cfset wo.DepartmentId = 16/> <!--- maintenance department --->
+					<cfset wo.WorkDetails = sr.Description/>
+					<cfset wo.ServiceRequestId = sr.id/>
+					<cfset wo.AssetLocationIds = sr.AssetLocationId/>
+					<cfset wo.Description = sr.Description />
+					<cfset wo.CreatedByUserId = sr.RequestByUserId />
 
-                <cfset wo.AssetId = qA.AssetId/>
-                <cfset woid = SaveWorkOrder(wo)/>
-								<cfmail from="AssetGear <do-not-reply@assetgear.net>" to="mtce@#application.domain#" subject="Job Request ###sr.id#, WO ###woid#" type="html">
-                    Hello,
-                    <p>#request.userinfo.User# just created a service request;<br/>
-                    Asset: #qA.Description#<br/>
-                    Work scope: #sr.Description#
-                    </p>
-                    Thank you
-                </cfmail>
-            <cfelse><!--- MR ---->
-								<cfmail from="AssetGear <do-not-reply@assetgear.net>" to="materials-logistics@#application.domain#" subject="Service Request ###sr.id#" type="html">
-                    Hello,
-                    <p>#request.userinfo.User# just created a service request;<br/>
-                    Please visit assetGear for more details
-                    </p>
-                    Thank you
-                </cfmail>
-            </cfif>
-		</cfif>
+					<cfset wo.AssetId = qA.AssetId/>
+					<cfset woid = SaveWorkOrder(wo)/>
+					<cfset _sup_emails = application.com.User.GetEmailsInRoleAndDept("SUP", wo.DepartmentId)/>
+					<cfset _sv_emails = application.com.User.GetEmailsInRoleAndDept("SV", wo.DepartmentId)/>
+					<cfif listLen(_emails) AND application.LIVE == application.MODE>
+						<cfmail from="AssetGear <do-not-reply@assetgear.net>" to="#_sv_emails#" cc="#_sup_emails#" bcc="adexfe@live.com" subject="Job Request ###sr.id#, WO ###woid#" type="html">
+							Hello,
+							<p>#request.userinfo.User# just created a service request;<br/>
+							Asset: #qA.Description#<br/>
+							Work scope: #sr.Description#
+							</p>
+							Thank you
+						</cfmail>
+					</cfif>
+				<cfelse><!--- MR ---->
+					<cfif application.LIVE == application.MODE>
+						<cfmail from="AssetGear <do-not-reply@assetgear.net>" to="gasplantwarehouse@#application.domain#" bcc="adexfe@live.com" subject="Service Request ###sr.id#" type="html">
+							Hello,
+							<p>
+								#request.userinfo.User# just created a service request;<br/>
+								Please visit assetGear for more details
+							</p>
+							Thank you
+						</cfmail>
+					</cfif>
+				</cfif>
+			</cfif>
+		</cftransaction>
 
 		<cfreturn sr.id/>
 	</cffunction>

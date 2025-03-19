@@ -54,9 +54,12 @@
         <table width="100%" border="0">
           <tr>
             <td width="50%" valign="top"> 
-                <f:Label name="Work Description" value="#qWO.Description#"/>
-                <f:Label name="Asset" value="#qAS.Description#"/>
-                <f:Label name="Asset Location" value="#AssetLocation# "/> 
+              <cfif qWO.createdBy != "">
+                <f:Label name="Created by" value="#qWO.createdBy#"/>
+              </cfif>
+              <f:Label name="Work Description" value="#qWO.Description#"/>
+              <f:Label name="Asset" value="#qAS.Description#"/>
+              <f:Label name="Asset Location" value="#AssetLocation# "/> 
             </td>
             <td class="horz-div" valign="top"> 
                 <f:Label name="Service Request ##" label="Service Request ##" value="#qWO.ServiceRequestId#" />
@@ -79,20 +82,23 @@
         <table width="100%" border="0">
           <tr>
             <td valign="top" style="padding-left:10px;">
-                <table class="table"><thead><tr>
-                    <th>Spare parts</th>
-                    <th>Purpose</th>
-                    <th>Quantity</th>
-                    <th>Status</th>
-                  </tr></thead>
-                  <cfloop query="qOI">
-                  <tr><td>#qOI.Item#</td>
+              <table class="table"><thead>
+                <tr>
+                  <th>Spare parts</th>
+                  <th>Purpose</th>
+                  <th>Quantity</th>
+                  <th>Status</th>
+                </tr>
+                </thead>
+                <cfloop query="qOI">
+                  <tr>
+                    <td>#qOI.Item#</td>
                     <td>#qOI.Purpose#</td>
                     <td>#qOI.Quantity#</td>
                     <td>#qOI.Status#</td>
-                  </tr></cfloop>
-                </table>
-    
+                  </tr>
+                </cfloop>
+              </table>
             </td>
           </tr> 
         </table> 
@@ -149,9 +155,9 @@
     
     <nt:NavTab renderTo="#woId#">
         <nt:Tab>
-            <nt:Item title="Open Session" isactive/>
-            <nt:Item title="Part Session"/>
-            <nt:Item title="Labour Session"/>
+            <nt:Item title="Open Section" isactive/>
+            <nt:Item title="Part Section"/>
+            <nt:Item title="Labour Section"/>
             <nt:Item title="Documents"/>
             <nt:Item title="Close Session"/> 
         </nt:Tab>

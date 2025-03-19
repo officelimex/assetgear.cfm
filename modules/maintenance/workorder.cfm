@@ -27,9 +27,12 @@
 						<cfset stat_ = replace(stat," ","_","all")/>
 						<n:NavItem title="&nbsp;&nbsp;&nbsp;#stat#" url="modules/maintenance/workorder/all_workorder.cfm?cid=#stat_#&filter=status" id="all_workorder#stat_#status"/>
 					</cfloop>
-					<cfif request.IsFS || request.IsAdmin || request.IsWarehouseMan || request.IsHost || request.IsHSE || request.isMS> 
+					<cfif request.IsFS || request.IsAdmin || request.IsWarehouseMan || request.IsHost || request.IsHSE || request.isMS || request.userInfo.department == "Warehouse"> 
 						<n:NavItem type="divider"/>
 						<n:NavItem title="All WorkOrder" url="modules/maintenance/workorder/all_workorder.cfm?cid=&filter=" id="all_workorder"/>
+					</cfif>
+					<cfif request.IsMGR || request.isSUP || request.IsWarehouseMan>
+						<n:NavItem title="Awaiting Approval" url="modules/maintenance/workorder/awaiting_approval.cfm" id="awaiting_approval"/>
 					</cfif>
 					<n:NavItem type="divider"/>
 					<n:NavItem type="header" title="WorkOrder By Work Class"/>

@@ -3,25 +3,31 @@
 <cfoutput>
 
 <cffunction name="getUser">
-  <cfargument name="dept_id" required="yes" type="numeric">
+  <cfargument name="dept_id" required="no" type="string">
   <cfargument name="unit_id" required="no" type="string">
   <cfargument name="role" required="yes" type="string">
 
 	<cfset uid = val(arguments.unit_id)/>
-	<cfquery name="q" cachedwithin="#createTime(5,0,0)#">
+	<cfset did = val(arguments.dept_id)/>
+	<cfquery name="q" cachedwithin="#createTime(0,0,0)#">
 		SELECT 
 			u.Email
 		FROM core_user  u
-		INNER JOIN core_login l 
+		INNER JOIN core_login l ON l.UserId = u.UserId
 		WHERE l.Role IN (<cfqueryparam value = "#arguments.role#" CFSQLType = "cf_sql_varchar" list="true"/>)
-			AND u.DepartmentId = #val(arguments.dept_id)#
-				<cfif uid>
-					AND u.UnitId = #uid#
-				</cfif>
+			<cfif did>
+				AND u.DepartmentId = #val(did)#
+			</cfif>
+			<cfif uid>
+				AND u.UnitId = #uid#
+			</cfif>
 	</cfquery>
 
 	<cfreturn q/>
 </cffunction>
+
+
+<cfset userObj = createobject('component','assetgear.com.awaf.User').Init()/>
 
 <cfscript>
 
@@ -32,6 +38,7 @@
 				wo.SupervisedByUserId, wo.WorkOrderId, wo.DepartmentId, wo.UnitId,
 					wo.Description, wo.Status2,
 					wo.SupervisedApprovedDate,
+					wo.MRId,
 				-- u.Email,
 				cb.Email cb_Email
 			FROM work_order wo
@@ -47,139 +54,277 @@
 
 <cfswitch expression="#url.cmd#">
 
-	<cfcase value="RejectWO">
-		
+	<cfcase value="RejectReq">
+		<cfif trim(form.Comment) EQ "">
+			<cfthrow message="Please provide the reasons/comment"/>
+		</cfif>
+		<cftransaction>
+			<cfset qW = getWO(form.id)/>
+			<cfquery>
+				UPDATE work_order SET 
+					Status2 = 'Rejected by Manager',
+					Status 	= 'Close'
+				WHERE WorkOrderId = #form.id#
+			</cfquery>
+			<cfquery>
+				UPDATE whs_mr SET 
+					Status 	= 'Close'
+				WHERE MRId = #qW.MRId#
+			</cfquery>
+			<cfset logComment(form.id, form.Comment, "wo") />
 		<cfscript>
-			qW = getWO(url.id)
-			send = false 
-			msg = ""
-			switch (qW.Status2) {
-				case "Sent to Supervisor":
-					msg = "Your supervisor"
-					send = true 
-					qW = queryExecute("
-						UPDATE work_order SET 
-							Status2 = ''
-						WHERE WorkOrderId = :_wid
-					", {_wid : url.id})				
-				break;
-				case "Sent to FS":
-					msg = "The Field Superintendent"
-					send = true 
-					qW = queryExecute("
-						UPDATE work_order SET 
-							Status2 = ''
-						WHERE WorkOrderId = :_wid
-					", {_wid : url.id})				
-				break;
-				case "Sent to Materials":
-					msg = "Materials department"
-					send = true 
-					qW = queryExecute("
-						UPDATE work_order SET 
-							Status2 = ''
-						WHERE WorkOrderId = :_wid
-					", {_wid : url.id})				
-				break;
-			}
-
-			if(send)	{
-				cfparam(name="form.pmt", default="");
+			if(application.MODE == application.LIVE)	{
+				ws_email = userObj.GetEmailsInRole("WH_SUP")
 				application.com.Notice.SendEmail(
 					to  		: qW.cb_Email,
+					cc 			: ws_email,
 					subject	: "Work Order ###qW.WorkOrderId# Rejected",
 					msg 		: "
 						Hello, 
 						<p>
-							#msg# just rejected WO ###qW.WorkOrderId# <br/>
-							Reason : #form.pmt#
-							===================<br/>
-							#qW.Description#<br/>
-							===================<br/>
-							Kindly contact them for reasons
+							WO ###qW.WorkOrderId# of MR## #qW.MRId# was rejected due to: <br/>
+							#form.Comment#
 						</p> 
 						Thank you
 					"
 				)	
 			}
+
 		</cfscript>
+		</cftransaction>
 
 
 	</cfcase>
-	<!--- FSApprove --->
-	<cfcase value="FSApprove">
+
+	<cfcase value="RequestReview">
+		<cfif trim(form.Comment) EQ "">
+			<cfthrow message="Please provide the reasons/comment"/>
+		</cfif>
+		<cftransaction>
+			<cfset qW = getWO(form.id)/>
+			<cfquery>
+				UPDATE work_order SET 
+					Status2 = 'Sent to Warehouse'
+				WHERE WorkOrderId = #form.id#
+			</cfquery>
+			<cfset logComment(form.id, form.Comment, "wo") />
 		<cfscript>
-
-			qW = getWO(url.id)
-
+			if(application.MODE == application.LIVE)	{
+				ws_email = userObj.GetEmailsInRole("WH_SUP")
 				application.com.Notice.SendEmail(
-					cc			: qW.Email,
 					to  		: qW.cb_Email,
-					subject	: "Work Order ###qW.WorkOrderId#",
+					cc 			: ws_email,
+					subject	: "Work Order ###qW.WorkOrderId# Requires Review",
 					msg 		: "
 						Hello, 
 						<p>
-							WO ###qW.WorkOrderId# for (#qW.Description#) has been approved by Field Superintendent
+							WO ###qW.WorkOrderId# of MR## #qW.MRId# needs a review: <br/>
+							#form.Comment#
 						</p> 
 						Thank you
 					"
-				)
+				)	
+			}
 
-				qW = queryExecute("
-					UPDATE work_order SET 
-						Status2 = 'Approved',
-						FSApprovedDate = :_date, 
-						FSUserId = :_uid
-					WHERE WorkOrderId = :_wid
-				", {
-					_wid : url.id,
-					_uid : request.userinfo.userid,
-					_date   : {value: now(), cfsqltype="cf_sql_timestamp"}					
-				})
+		</cfscript>
+		</cftransaction>
+
+
+	</cfcase>
+
+
+	<cfcase value="WHApproveOnly">
+		<cfscript>
+
+			qW = getWO(url.id)
+			qU = getUser(val(qW.DepartmentId), 0, "WH_SUP")
+			application.com.Notice.SendEmail(
+				to  		: qW.cb_Email,
+				subject	: "Work Order ###qW.WorkOrderId#",
+				msg 		: "
+					Hello, 
+					<p>
+						WO ###qW.WorkOrderId# for (#qW.Description#) has been approved
+					</p> 
+					Thank you
+				"
+			)
+
+			qW = queryExecute("
+				UPDATE work_order SET 
+					Status2 = 'Sent to WM',
+					WHApprovedDate = :_date, 
+					WHUserId = :_uid
+				WHERE WorkOrderId = :_wid
+			", {
+				_wid : url.id,
+				_uid : request.userinfo.userid,
+				_date   : {value: now(), cfsqltype="cf_sql_timestamp"}					
+			})
 			
 		</cfscript>
 	</cfcase>
 
+	<cfcase value="WHApproveSendToWM">
+		<cfscript>
+
+			qW = getWO(url.id)
+			qU = getUser(val(qW.DepartmentId), 0, "WH_SUP")
+			application.com.Notice.SendEmail(
+				to			: qU.columnData("Email").toList(),
+				cc  		: qW.cb_Email,
+				subject	: "Work Order ###qW.WorkOrderId#",
+				msg 		: "
+					Hello, 
+					<p>
+						WO ###qW.WorkOrderId# for (#qW.Description#) has been send to you for approval
+					</p> 
+					Thank you
+				"
+			)
+
+			qW = queryExecute("
+				UPDATE work_order SET 
+					Status2 = 'Sent to WM',
+					SupervisedApprovedDate = :_date, 
+					SupervisedByUserId = :_uid
+				WHERE WorkOrderId = :_wid
+			", {
+				_wid : url.id,
+				_uid : request.userinfo.userid,
+				_date   : {value: now(), cfsqltype="cf_sql_timestamp"}					
+			})
+			
+		</cfscript>
+	</cfcase>
+
+	<cfcase value="MGRApprove">
+
+		<cfset qW = getWO(form.id)/>
+			<cfquery>
+				UPDATE work_order SET 
+					Status2 = 'Approved',
+					FSApprovedDate = <cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#"/>, 
+					FSUserId = #request.userinfo.userid#
+				WHERE WorkOrderId = #form.id#
+			</cfquery>
+			<cfif(application.MODE == application.LIVE)>
+				<cfset ws_email = userObj.GetEmailsInRole("WH_SUP")/>
+				<cfset sessionCookies = "CFID=#COOKIE.CFID#; CFTOKEN=#COOKIE.CFTOKEN#">
+				<cfhttp url="#application.site.url#modules/warehouse/transaction/mr/print_mr.cfm?id=#qW.MRId#" method="get" result="pdfResponse">
+					<cfhttpparam type="header" name="Cookie" value="#sessionCookies#">
+				</cfhttp>
+
+				<cfmail from="AssetGear <do-not-reply@assetgear.net>" 
+					to="adexfe@live.com" 
+					cc="#ws_email#,#qW.cb_Email#"
+					subject="MR ###qW.MRId# Approved" type="html">
+						Hello, 
+						<p>
+							MR ###qW.MRId# : #qW.Description# has been approved by the Manager.
+						</p> 
+						<p>
+							kindly find attached Material Request #qW.MRId#
+						</p>
+						Thank you
+					<cfmailparam file="MR_#qW.MRId#.pdf" type="application/pdf" disposition="attachment" content="#pdfResponse.FileContent#" />
+				</cfmail>
+
+			</cfif>
+			Approved
+	</cfcase>
 	<!--- FSApprove --->
 	<cfcase value="WHApprove">
 		<cfscript>
-
 			qW = getWO(url.id)
+			qU = getUser(val(qW.DepartmentId), qW.UnitId, "MS")
+			application.com.Notice.SendEmail(
+				to			: qU.columnData("Email").toList(),
+				cc  		: qW.cb_Email,
+				subject	: "Work Order ###qW.WorkOrderId#",
+				msg 		: "
+					Hello, 
+					<p>
+						WO ###qW.WorkOrderId# for (#qW.Description#) has been reviewed by the Warehouse and therefore request your approval
+					</p> 
+					Thank you
+				"
+			)
 
-				application.com.Notice.SendEmail(
-					cc			: qW.Email,
-					to  		: qW.cb_Email,
-					subject	: "Work Order ###qW.WorkOrderId#",
-					msg 		: "
-						Hello, 
-						<p>
-							WO ###qW.WorkOrderId# for (#qW.Description#) has been approved by Materials
-						</p> 
-						Thank you
-					"
-				)
-
-				qW = queryExecute("
-					UPDATE work_order SET 
-						Status2 = 'Sent to FS',
-						WHApprovedDate = :_date, 
-						WHUserId = :_uid
-					WHERE WorkOrderId = :_wid
-				", {
-					_wid : url.id,
-					_uid : request.userinfo.userid,
-					_date   : {value: now(), cfsqltype="cf_sql_timestamp"}					
-				})
+			qW = queryExecute("
+				UPDATE work_order SET 
+					Status2 = 'Sent to MM',
+					WHApprovedDate = :_date, 
+					WHUserId = :_uid
+				WHERE WorkOrderId = :_wid
+			", {
+				_wid : url.id,
+				_uid : request.userinfo.userid,
+				_date   : {value: now(), cfsqltype="cf_sql_timestamp"}					
+			})
 			
 		</cfscript>
 	</cfcase>
 
 	
-	<cfcase value="sendToSupritendent">
-			<cfset qW = getWO(url.id)/>
-			<cfset qU = getUser(val(qW.DepartmentId), qW.UnitId, "HT")/>
-	
+
+	<cfcase value="ApproveAndSendToWarehouse">
+		<cftransaction>
+
+			<cfset SaveWorkOrderFirst()/>
+
+			<cfset qW = getWO(form.id)/>
+			<cfset ws_email = userObj.GetEmailsInRole("WH_SV,WH_SUP")/>
+
+			<cfquery>
+				UPDATE work_order SET 
+					SupUserId 			= #request.userInfo.UserId#,
+					SupApprovedDate = <cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#"/>,
+					Status2 = 'Approved'
+				WHERE WorkOrderId = #form.id#
+			</cfquery>
+
+			<cfif application.mode EQ application.LIVE>
+				<cfset application.com.Notice.SendEmail(
+					to  		: qW.cb_Email,
+					cc  		: ws_email,
+					subject	: "Work Order ###qW.WorkOrderId# Approved",
+					msg 		: "
+						Hello, 
+						<p>
+							Your Work Order ###qW.WorkOrderId# has been approved <br/>
+							==================<br/>
+							#qW.Description#<br/>
+							==================<br/>
+						</p> 
+						Thank you
+					"
+				)/>
+			</cfif>	
+
+		</cftransaction>
+		WorkOrder ###form.id# is now Approved
+	</cfcase>
+
+	<cfcase value="sendToSuperintendent">
+
+		<cfset SaveWorkOrderFirst()/>
+
+		<cfset qW = getWO(form.id)/>
+		<cfset qU = getUser(val(qW.DepartmentId), qW.UnitId, "SUP")/>
+
+		<cftransaction>
+
 			<cfif qU.Recordcount>
+				<cfquery>
+					UPDATE work_order SET 
+						<cfif request.IsSV>
+							SupervisedByUserId = #request.userInfo.UserId#,
+							SupervisedApprovedDate = <cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#"/>,
+						</cfif>
+						Status2 = 'Sent to Superintendent'
+					WHERE WorkOrderId = #form.id#
+				</cfquery>
 
 				<cfif application.mode EQ application.LIVE>
 					<cfset application.com.Notice.SendEmail(
@@ -198,18 +343,9 @@
 						"
 					)/>
 				</cfif>
-
-				<cfquery>
-					UPDATE work_order SET 
-						<cfif request.IsSV AND qW.SupervisedApprovedDate EQ "">
-							SupervisedByUserId = #request.userInfo.UserId#,
-							SupervisedApprovedDate = <cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#"/>,
-						</cfif>
-						Status2 = 'Sent to Supritendent'
-					WHERE WorkOrderId = #url.id#
-				</cfquery>
-
 			</cfif>	
+		</cftransaction>
+		WorkOrder ###form.id# Was sent to Superintendent
 	</cfcase>
 
 	<!--- sendToSupervisor --->
@@ -247,27 +383,23 @@
 	</cfcase>
 
   <!--- SupervisorApproveWO --->
-  <cfcase value="SupervisorApproveWO">
+  <cfcase value="SupApproveWO-MM">
 
     <cfscript>
 
 			qW = getWO(url.id)
 
-      if((val(qW.SupervisedByUserId) || request.IsMS) && request.userinfo.departmentId == qW.DepartmentId)	{
+      if((val(qW.SupervisedByUserId) || request.IsMGR) && request.userinfo.departmentId == qW.DepartmentId)	{
 
-				if(url.to == "FS")	{
-					_to_email = "fieldsuperintendent@#application.domain#"
-					_status = "Sent to FS"
-				}
-				else {	
-					_to_email = "materials-logistics@#application.domain#"
-					_status = "Sent to Materials"
-				}
+				qU = getUser(request.userinfo.departmentId,0,"MS,MGR")
+				_status = "Sent to MM"
+
+				_to_email = qU.ColumnData("Email").toList()
 
 				queryExecute("
 					UPDATE work_order SET
-						SupervisedApprovedDate 	= :_date,
-						SupervisedByUserId 			= :_userid,
+						SupApprovedDate 	= :_date,
+						SupUserId 			= :_userid,
 						Status2                	= :_status,
 						SentToUserId						= NULL 
 					WHERE WorkOrderId = :_id
@@ -278,15 +410,14 @@
 					_userid : request.userinfo.UserId
 				})
 
-
 				application.com.Notice.SendEmail(
 					to 			: _to_email,
 					cc			: qW.cb_Email,
-					subject	: "Work Order ###qW.WorkOrderId# Requires Approval",
+					subject	: "Work Order ###qW.WorkOrderId# Requires Review",
 					msg 		: "
 						Hello, 
 						<p>
-							Work Order ###qW.WorkOrderId# has been sent to you for approval <br/>
+							Work Order ###qW.WorkOrderId# has been sent to you for review <br/>
 							==================<br/>
 							#qW.Description#<br/>
 							==================<br/>
@@ -297,6 +428,56 @@
 
       }
       
+    </cfscript>
+
+		<cfobjectcache action="clear"/>
+  </cfcase>
+
+	<cfcase value="test">
+		<cfdump var="#getUser(0,0,"WH_SUP,WH")#"/>
+	</cfcase>
+  <cfcase value="SupApproveWO-WH">
+    <cfscript>
+			qW = getWO(url.id)
+			qU = getUser(0,0,"WH_SUP,WH")
+
+			if(request.userinfo.departmentId != qW.DepartmentId)	{
+				abort "This WO does not falls under your Department"
+			}
+
+			_to_email = qU.columnData("Email").toList()
+			_status = "Sent to Warehouse"
+
+			queryExecute("
+				UPDATE work_order SET
+					SupApprovedDate 	= :_date,
+					SupUserId 			= :_userid,
+					Status2   			= :_status
+				WHERE WorkOrderId = :_id
+			", {
+				_status : _status,
+				_date   : {value: now(), cfsqltype="cf_sql_timestamp"},
+				_id     : url.id,
+				_userid : request.userinfo.UserId
+			})
+
+			if(application.mode EQ application.LIVE) 	{
+				application.com.Notice.SendEmail(
+					to 			: _to_email,
+					cc			: qW.cb_Email,
+					subject	: "Work Order ###qW.WorkOrderId# For Requisition/Issuance",
+					msg 		: "
+						Hello, 
+						<p>
+							Work Order ###qW.WorkOrderId# has been sent to you for Material Requisition/Issue<br/>
+							==================<br/>
+							#qW.Description#<br/>
+							==================<br/>
+						</p> 
+						Thank you
+					"
+				)
+			}
     </cfscript>
 
 		<cfobjectcache action="clear"/>
@@ -563,6 +744,7 @@
 		<cfparam name="url.perpage" default="20"/>
 		<cfparam name="url.sort" default="WorkOrderId"/>
 		<cfparam name="url.sortorder" default="DESC"/>
+		<cfparam name="url.status2" default=""/>
 		<cfset start = (url.page * url.perpage) - (url.perpage)/>
 		<!---- replace _ with " " because of "part on hold" --->
 		<cfset url.cid = replace(url.cid,"_"," ","all")/>
@@ -619,12 +801,16 @@
 						AND #url.Field# LIKE "%#url.keyword#%"
 					</cfif>
 				</cfcase>
+				<cfcase value="status2">
+					WHERE wo.Status2 = <cfqueryparam cfsqltype="cf_sql_varchar" value="#url.status2#"/>
+				</cfcase>
 				<cfcase value="unit"> 
 					WHERE wo.UnitId = #request.userinfo.unitid#
 					<cfif structkeyexists(url,'keyword')>
 						AND #url.Field# LIKE "%#url.keyword#%"
 					</cfif>
 				</cfcase>
+
 				<cfdefaultcase>
 					<cfif url.cid neq "" >
 						WHERE wo.WorkClassId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.cid#">
@@ -700,21 +886,24 @@
 						AND #url.Field# LIKE "%#url.keyword#%"
 					</cfif>
 				</cfcase>
-                <cfdefaultcase>
-                    <cfif url.cid neq "">
-						WHERE wo.WorkClassId = #url.cid#
-                        AND DateOpened <= <cfqueryparam cfsqltype="cf_sql_date" value="#now()#"/>
-                        <cfif structkeyexists(url,'keyword')>
-                            AND #url.Field# LIKE "%#url.keyword#%"
-                        </cfif>
-                    <cfelse>
-                        <cfif structkeyexists(url,'keyword')>
-                            WHERE  #url.Field# LIKE "%#url.keyword#%"
-                            AND DateOpened <= <cfqueryparam cfsqltype="cf_sql_date" value="#now()#"/>
-                        </cfif>
-                    </cfif>
-                </cfdefaultcase>
-            </cfswitch>
+				<cfcase value="status2">
+					WHERE wo.Status = <cfqueryparam cfsqltype="cf_sql_varchar" value="#url.status2#"/>
+				</cfcase>
+				<cfdefaultcase>
+						<cfif url.cid neq "">
+		WHERE wo.WorkClassId = #url.cid#
+								AND DateOpened <= <cfqueryparam cfsqltype="cf_sql_date" value="#now()#"/>
+								<cfif structkeyexists(url,'keyword')>
+										AND #url.Field# LIKE "%#url.keyword#%"
+								</cfif>
+						<cfelse>
+								<cfif structkeyexists(url,'keyword')>
+										WHERE  #url.Field# LIKE "%#url.keyword#%"
+										AND DateOpened <= <cfqueryparam cfsqltype="cf_sql_date" value="#now()#"/>
+								</cfif>
+						</cfif>
+				</cfdefaultcase>
+				</cfswitch>
         </cfquery>
 
         {"total": #qT.c#,
@@ -977,7 +1166,7 @@
         <cfparam name="form.ElementInvolved" default=""/>
 
         <cfset n_incident = application.com.Incident.SaveIncideReport(form)/>
-        Incident Report #form.Title# with ##: #n_incident# was successfuly updated...
+        Incident Report #form.Title# with ##: #n_incident# was successfully updated...
     </cfcase>
 
     <!--- Save Asset ---->
@@ -989,7 +1178,7 @@
         <cfparam name="form.WorkingForId" default=""/>
 
         <cfset n_asset = application.com.Asset.SaveAsset(form)/>
-        Asset #form.Description# with ##: #n_asset# was successfuly updated...
+        Asset #form.Description# with ##: #n_asset# was successfully updated...
     </cfcase>
 
 	<!---Get Frequency--->
@@ -1134,23 +1323,20 @@
 		<cfset id_ = form.id/>
 
 		<cfset jrid = application.com.WorkOrder.SaveServiceRequest(form)/>
+		<cfif form.ServiceType eq "MR">
+			<cfset h = createobject('component','assetgear.com.awaf.util.helper').Init()/>
+			<cfset h.SaveFromTempTable(form.ServiceRequestItem,
+				"service_request_item",
+				"Description,UnitPrice,Quantity",
+				"text0,float0,int0",
+				"ServiceRequestItemId","ServiceRequestId",jrid)/>
+		</cfif>
 
-        <cfif form.ServiceType eq "MR">
-			<!--- update service request item from temp data --->
-            <!---  text0 - Description, float0 - unitprice, int0 - Quantity ---->
-            <cfset h = createobject('component','assetgear.com.awaf.util.helper').Init()/>
-            <cfset h.SaveFromTempTable(form.ServiceRequestItem,
-                "service_request_item",
-                "Description,UnitPrice,Quantity",
-                "text0,float0,int0",
-                "ServiceRequestItemId","ServiceRequestId",jrid)/>
-        </cfif>
-
-        <cfif id_ eq 0>
-            Service Request was successfuly create [###jrid#]
-        <cfelse>
-            Service Request ###jrid# was updated
-        </cfif>
+		<cfif id_ eq 0>
+			Service Request was successfully create [###jrid#]
+		<cfelse>
+			Service Request ###jrid# was updated
+		</cfif>
 	</cfcase>
 
     <!---getAssetCategory--->
@@ -1218,68 +1404,59 @@
     <cfcase value="SavePMTask">
 
     	<cfset form.FrequencyId = val(form.FrequencyId)/>
-        <cfset form.ReadingTypeId = val(form.ReadingTypeId)/>
-        <cfparam name="form.DepartmentId" default="#request.userinfo.departmentid#"/>
-        <cfparam name="form.UnitId" default="#request.userinfo.unitid#"/>
-        <cfparam name="form.StartTime" default="#dateformat(now(),'yyyy/mm/yy')#"/>
+			<cfset form.ReadingTypeId = val(form.ReadingTypeId)/>
+			<cfparam name="form.DepartmentId" default="#request.userinfo.departmentid#"/>
+			<cfparam name="form.UnitId" default="#request.userinfo.unitid#"/>
+			<cfparam name="form.StartTime" default="#dateformat(now(),'yyyy/mm/yy')#"/>
 
-        <cfset pmid = application.com.PMTask.SavePMTask(form)/>
+			<cfset pmid = application.com.PMTask.SavePMTask(form)/>
 
-        <cfif form.id eq 0>
-        	The new PM Task #pmid# has been created
-        <cfelse>
-        	The PM Task updated.
-        </cfif>
+			<cfif form.id eq 0>
+				The new PM Task #pmid# has been created
+			<cfelse>
+				The PM Task updated.
+			</cfif>
+			
 	</cfcase>
 
 
     <!---Save Work Order--->
     <cfcase value="SaveWorkOrder">
 
-        <cfparam name="form.PMTaskId" default="0"/>
-        <cfparam name="form.Id" default="0"/>
-        <cfparam name="form.dateclosed" default=""/>
-        <!--- if the user is supervisor --->
-        <!---<cfif (form.WorkClassId eq "3")&&(form.AssetFailureReportId eq "")>
-        	<cfthrow message="Create and attach failure report number before creating a CM WorkOrder."/>
-        </cfif>--->
-        <cfif val(form.AssetFailureReportId)>
-        	<cfquery name="q" result="rt">
-            	SELECT * FROM asset_failure_report WHERE AssetFailureReportId = #val(form.AssetFailureReportId)#
-            </cfquery>
-            <cfif rt.RecordCount lt 1>
-            	<cfthrow message="Invalid Failure Report Number. Please Check Again."/>
-            </cfif>
-            <!---<cfthrow message="#listLen(form.AssetId)#"/>
-			<cfif listLen(wo.AssetId) eq 1>
-                <cfset wo.AssetLocationIds = listLast(wo.AssetId)/>
-                <cfset wo.AssetId = listFirst(wo.AssetId)/>
-            </cfif>--->
-            
-        </cfif>
+			<!--- <cfparam name="form.PMTaskId" default="0"/>
+			<cfparam name="form.Id" default="0"/>
+			<cfparam name="form.dateclosed" default=""/>
 
-        <cfif val(form.PMTaskId) == 0 && form.WorkClassId == 10>
-            <cfthrow message="You can't change this work order to a PM Task, kindly use the PM task module, or cantact the Administrator"/>
-        </cfif>
-        
-        
-        <cfif request.IsSV OR request.IsPS>
-            <cfparam name="form.ClosedByUserId" default="#request.userinfo.userid#"/>
-            <cfparam name="form.SupervisedByUserId" default="#request.userinfo.userid#"/>
-        </cfif>
-        <cfif form.Id eq 0>
-            <cfparam name="form.CreatedByUserId" default="#request.userinfo.userid#"/>
-            <cfparam name="form.DepartmentId" default="#request.UserInfo.DepartmentId#"/>
-            <cfparam name="form.UnitId" default="#request.UserInfo.UnitId#"/>
-        </cfif>
+			<cfif val(form.AssetFailureReportId)>
+				<cfquery name="q" result="rt">
+					SELECT * FROM asset_failure_report WHERE AssetFailureReportId = #val(form.AssetFailureReportId)#
+				</cfquery>
+				<cfif rt.RecordCount lt 1>
+					<cfthrow message="Invalid Failure Report Number. Please Check Again."/>
+				</cfif>
+			</cfif>
 
-        <cfset newId = application.com.WorkOrder.SaveWorkOrder(form)/>
+			<cfif val(form.PMTaskId) == 0 && form.WorkClassId == 10>
+				<cfthrow message="You can't change this work order to a PM Task, kindly use the PM task module, or cantact the Administrator"/>
+			</cfif>
+			
+			<cfif request.IsSV OR request.IsPS>
+				<cfparam name="form.ClosedByUserId" default="#request.userinfo.userid#"/>
+				<cfparam name="form.SupervisedByUserId" default="#request.userinfo.userid#"/>
+			</cfif>
+			<cfif form.Id eq 0>
+				<cfparam name="form.CreatedByUserId" default="#request.userinfo.userid#"/>
+				<cfparam name="form.DepartmentId" default="#request.UserInfo.DepartmentId#"/>
+				<cfparam name="form.UnitId" default="#request.UserInfo.UnitId#"/>
+			</cfif>
+ --->
+			<cfset SaveWorkOrderFirst()/>
 
-        <cfif form.id eq 0>
-        	Work Order #newId# has been created
-        <cfelse>
-        	Work Order was <cfif form.status eq "close">closed<cfelse>updated</cfif>
-        </cfif>
+			<cfif form.id eq 0>
+				Work Order #newId# has been created
+			<cfelse>
+				Work Order was <cfif form.status eq "close">closed<cfelse>updated</cfif>
+			</cfif>
 	</cfcase>
 
 
@@ -1381,5 +1558,55 @@
 
 </cfswitch>
 </cfoutput>
+
+<cffunction name="SaveWorkOrderFirst">
+	<cfparam name="form.PMTaskId" default="0"/>
+	<cfparam name="form.Id" default="0"/>
+	<cfparam name="form.dateclosed" default=""/>
+
+	<cfif val(form.AssetFailureReportId)>
+		<cfquery name="q" result="rt">
+			SELECT * FROM asset_failure_report WHERE AssetFailureReportId = #val(form.AssetFailureReportId)#
+		</cfquery>
+		<cfif rt.RecordCount lt 1>
+			<cfthrow message="Invalid Failure Report Number. Please Check Again."/>
+		</cfif>
+	</cfif>
+
+	<cfif val(form.PMTaskId) == 0 && form.WorkClassId == 10>
+		<cfthrow message="You can't change this work order to a PM Task, kindly use the PM task module, or cantact the Administrator"/>
+	</cfif>
+	
+	<cfif request.IsSV OR request.IsPS>
+		<cfparam name="form.ClosedByUserId" default="#request.userinfo.userid#"/>
+		<cfparam name="form.SupervisedByUserId" default="#request.userinfo.userid#"/>
+	</cfif>
+	<cfif form.Id eq 0>
+		<cfparam name="form.CreatedByUserId" default="#request.userinfo.userid#"/>
+		<cfparam name="form.DepartmentId" default="#request.UserInfo.DepartmentId#"/>
+		<cfparam name="form.UnitId" default="#request.UserInfo.UnitId#"/>
+	</cfif>
+
+	<cfparam name="url.draft" default="false"/>
+	<cfset newId = application.com.WorkOrder.SaveWorkOrder(form, url.draft)/>
+
+	<cfreturn newId/>
+</cffunction>
+
+<cffunction name="logComment">
+  <cfargument name="key" required="yes" type="numeric">
+  <cfargument name="comment" required="yes" type="string">
+  <cfargument name="model" required="yes" type="string" default="wo">
+  
+  <cfquery>
+  	INSERT INTO core_comment SET 
+      `PK` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.key#"/>,
+      CommentByUserId = <cfqueryparam cfsqltype="cf_sql_integer" value="#request.userInfo.userId#"/>,
+      Comments = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.comment#"/>,
+      `Table` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.model#"/>
+  </cfquery>
+  
+  <cfreturn true />
+</cffunction>
 
 <cfobjectcache action="clear"/>
