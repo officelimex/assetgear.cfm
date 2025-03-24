@@ -17,20 +17,20 @@
 <div class="container-fluid">
   <div class="row-fluid">
     <div class="span2" style="position:fixed;">  
-        <n:Nav renderTo="#JSId#"> 
-            <n:NavItem title="New JHA" url="modules/ptw/jha/save_jha.cfm"  id="save_jha"/>
-            <n:NavItem type="divider"/> 
-			<cfif request.IsHSE>
-            	<n:NavItem title="All JHA" isactive url="modules/ptw/jha/all_jha.cfm" id="all_jha"/>
-            <cfelse> 
-            	<n:NavItem title="All JHA" isactive url="modules/ptw/jha/all_jha.cfm" id="all_jha"/>
-            </cfif>         
-        </n:Nav>  
+    	<n:Nav renderTo="#JSId#"> 
+        <n:NavItem title="Risk Matrix" url="modules/ptw/jha/risk_matrix.cfm" id="risk_matrix"/>
+        <n:NavItem type="divider"/> 
+      	<n:NavItem title="New JHA" url="modules/ptw/jha/save_jha.cfm"  id="save_jha"/>
+        <n:NavItem type="divider"/> 
+        <n:NavItem title="All JHA" isActive url="modules/ptw/jha/all_jha.cfm" id="all_jha"/>
+        <n:NavItem type="divider"/> 
+        <n:NavItem title="Awaiting Approval" url="modules/ptw/jha/awaiting_approval.cfm" id="awaiting_approval"/>
+      </n:Nav>  
     </div>
     <div class="span10" style="float:right">
     	<div id="#JSId#_grid">
-        	<div class="sub_page all_jha" id="#JSId#_all_jha"></div>
-        </div>
+        <div class="sub_page all_jha" id="#JSId#_all_jha"></div>
+      </div>
     </div>
   </div>
 </div>  

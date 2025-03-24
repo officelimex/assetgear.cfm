@@ -3,6 +3,8 @@
 <cfset PmtId = "__permit_c_#url.wid#_" & url.id/>
 
 <cfinclude template="../inc/inc_permit.cfm"/>
+
+
 <cfoutput>
 <script>
 	/**

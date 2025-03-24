@@ -1,9 +1,3 @@
-<!--- 
-	Author: Arowolo Abiodun
-	Created: 2011/09/30
-	Modified: 2011/09/30
-	-> edit a JHA, create JHA
---->
 <cfparam default="0" name="url.id"/> 
 
 <cfimport taglib="../../../assets/awaf/tags/xForm_1001/" prefix="f"/>
@@ -12,7 +6,7 @@
 
 <cfset locId = '__jha_c_all_jha' & url.id/>
 
-<cfset qJS = application.com.Permit.GetJHA(url.id)/>
+<cfset qJS = application.com.Permit.GetJHA(val(url.id))/>
 <cfset qJ = application.com.Permit.GetJHAList(url.id)/>
 
 <cfoutput>
@@ -32,25 +26,28 @@
         </tr>
         <tr>
         	<td colspan="2">
-                <et:Table allowInput height="240px" id="JHAList">
-                    <et:Headers>
-                        <et:Header title="Job Sequence" size="3" type="text"/>
-                        <et:Header title="Hazard" size="2" type="text" />
-                        <et:Header title="Target" size="1" type="text" hint="P,E,A,R"/>
-                        <et:Header title="Risk" size="1" type="text" hint="L,M,H"/>
-                        <et:Header title="Consequences" size="2" type="text"/>
-                        <et:Header title="Control Measure" size="2" type="text"/>
-                        <!---<et:Header title="Responsible Party" size="1" type="text"/>--->                   
-                        <et:Header title="" size="1"/>
-                    </et:Headers>
-                    <et:Content Query="#qJ#" Columns="JobSequence,Hazard,Target,Risk,Consequences,ControlMeasure" type="text,text,text,text,text,text" PKField="JHAListId"/> 
-                </et:Table>            	
-            </td>
+						<hr/>
+						<et:Table allowInput height="240px" id="JHAList">
+							<et:Headers>
+								<et:Header title="Job Sequence" size="2" type="text"/>
+								<et:Header title="Hazard" size="1" type="text"/>
+								<et:Header title="Who may be Harmed" size="1" type="text" />
+								<et:Header title="Severity" size="1" type="text"/>
+								<et:Header title="Likelihood" size="1" type="text"/>
+								<et:Header title="Risk Rating" size="1" type="text"/>
+								<et:Header title="Control Measures" size="2" type="text"/>
+								<et:Header title="Recovery Plan" size="1" type="text"/>
+								<et:Header title="Action Parties" size="1" type="text"/>                   
+								<et:Header title="" size="1"/>
+							</et:Headers>
+							<et:Content Query="#qJ#" Columns="JobSequence,Hazard,Whom,Severity,Likelihood,Risk,ControlMeasure,RecoveryPlan,ActionParties" type="text,text,text,text,text,text,text,text,text" PKField="JHAListId"/> 
+						</et:Table>            	
+					</td>
         </tr>
         <tr>
           <td colspan="2">
-        <div class="alert alert-info">Attach third party JHA.</div>
-        <u:UploadFile id="Attachments" table="ptw_jha" pk="#url.id#" />
+            <div class="alert alert-info">Attach third party JHA.</div>
+            <u:UploadFile id="Attachments" table="ptw_jha" pk="#url.id#" />
           </td>
         </tr>
     	<tr>
@@ -60,18 +57,11 @@
     </table>
    
     <cfif url.id eq 0>
-        <f:ButtonGroup>
-            <f:Button value="Create new JHA" class="btn-primary" IsSave subpageId="save_jha" ReloadURL="modules/ptw/jha/save_jha.cfm"/>
-        </f:ButtonGroup>
+			<f:ButtonGroup>
+				<f:Button value="Create new JHA" class="btn-primary" IsSave subpageId="save_jha" ReloadURL="modules/ptw/jha/save_jha.cfm"/>
+			</f:ButtonGroup>
     </cfif>
 </f:Form>
-<div style="display: block; position: absolute; bottom:70px; width:80%; right:20px;">
-<div style="float:left">
-	<span class="label label-info">Target:</span> P = Personnel, E = Environment, A = Asset, R = Reputation               	
-</div>    
-<div style="float:right;">
-<span class="label label-important">Risk:</span> L = Low, M = Medium, H = High
-</div> 
-</div>
+
 
 </cfoutput>

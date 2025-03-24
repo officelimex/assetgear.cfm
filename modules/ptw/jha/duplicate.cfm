@@ -34,16 +34,17 @@
         	<td colspan="2">
                 <et:Table allowInput height="240px" id="JHAList">
                     <et:Headers>
-                        <et:Header title="Job Sequence" size="3" type="text"/>
+                        <et:Header title="Job Sequence" size="2" type="text"/>
                         <et:Header title="Hazard" size="2" type="text" />
                         <et:Header title="Target" size="1" type="text" hint="P,E,A,R"/>
                         <et:Header title="Risk" size="1" type="text" hint="L,M,H"/>
-                        <et:Header title="Consequences" size="2" type="text"/>
+                        <et:Header title="Consequences" size="1" type="text"/>
                         <et:Header title="Control Measure" size="2" type="text"/>
+                        <et:Header title="RecoveryPlan" size="2" type="text"/>
                         <!---<et:Header title="Responsible Party" size="1" type="text"/>--->                   
                         <et:Header title="" size="1"/>
                     </et:Headers>
-                    <et:Content Query="#qJ#" Columns="JobSequence,Hazard,Target,Risk,Consequences,ControlMeasure" type="text,text,text,text,text,text" /> 
+                    <et:Content Query="#qJ#" Columns="JobSequence,Hazard,Target,Risk,Consequences,ControlMeasure,RecoveryPlan" type="text,text,text,text,text,text,text" /> 
                 </et:Table>            	
             </td>
         </tr>
@@ -60,13 +61,6 @@
     </table>
     
 </f:Form>
-<div style="display: block; position: absolute; bottom:70px; width:80%; right:20px;">
-<div style="float:left">
-	<span class="label label-info">Target:</span> P = Personnel, E = Environment, A = Asset, R = Reputation               	
-</div>    
-<div style="float:right;">
-<span class="label label-important">Risk:</span> L = Low, M = Medium, H = High
-</div> 
-</div>
+
 
 </cfoutput>

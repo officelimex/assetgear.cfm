@@ -1,6 +1,6 @@
 <cfoutput> 
 <cfset qJ = application.com.Permit.GetJHA(url.id)/>
-<cfdocument pagetype="a4" format="pdf" margintop="0" marginbottom="0" marginleft="0" marginright="0" orientation="landscape">
+<cfdocument pagetype="a4" format="pdf" margintop="0" marginbottom="0" marginleft="0.1" marginright="0.1" orientation="landscape">
 <html>
 <head>
 <cfset bg = "##d7f6d4"/>
@@ -11,7 +11,7 @@
 	.ths{font-size:7px;}
 	.ths th, .ths td{padding:3px; font-weight:normal;}
 	.ths th{text-align:left; background-color:#bg#;}
-	.ths td{font-size:7px; padding:5px; border-bottom:1px solid #bg#; vertical-align:top;}
+	.ths td{font-size:7px; padding:2px; border-bottom:1px solid #bg#; vertical-align:top;}
 	.head_section td{font-size: 11px;padding:5px;}
 	.head_section td.left{background-color:#bg#;border-left:#brd_c# 1px solid;}
 	.head_section td.left,.head_section td.right{border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
@@ -74,82 +74,126 @@
       <th>&nbsp;</th>
       <th nowrap="nowrap">Job Sequence</th>
       <th>Hazard</th>
-      <th align="center">Target</th>
-      <th align="center">Risk</th>
-      <th>Consequences</th> 
-      <th>Control Measure</th>
-      <!---th>Responsible Party</th--->      
+      <th align="center">Who may be Harmed</th>
+      <th align="center">Severity</th>
+      <th>Likelihood</th> 
+      <th>Risk Rating</th>
+      <th>Control Measures</th>
+      <th>Recovery Plan</th>
+      <th>Action Parties</th>
     </tr>
     <cfset qJL = application.com.Permit.GetJHAList(url.id)/>
     <cfloop query="qJL">
-    <tr>
-      <td valign="top">#qJL.Currentrow#.</td>
-      <td valign="top">#qJL.JobSequence#</td>
-      <td valign="top">#qJL.Hazard#</td>
-      <td align="left" valign="top" nowrap="nowrap">#ucase(qJL.Target)#</td>
-      <td align="left" valign="top" nowrap="nowrap">#ucase(qJL.Risk)#</td>
-      <td valign="top">#qJL.Consequences#</td>
-      <td valign="top">#qJL.ControlMeasure#</td>
-      <!---td valign="top">#qJL.ResponsibleParty#&nbsp;</td--->      
-    </tr>
+      <tr>
+        <td valign="top" width="1px">#qJL.CurrentRow#.</td>
+        <td valign="top">#qJL.JobSequence#</td>
+        <td valign="top">#qJL.Hazard#</td>
+        <td align="left" valign="top" >#qJL.Whom#</td>
+        <td align="left" valign="top" >#qJL.Severity#</td>
+        <td valign="top">#qJL.Likelihood#</td>
+        <td valign="top">#qJL.Risk#</td>
+        <td valign="top">#qJL.ControlMeasure#</td>
+        <td valign="top">#qJL.RecoveryPlan#</td>
+        <td valign="top">#qJL.ActionParties#</td>
+      </tr>
     </cfloop>
   </table></td>
 </tr>
 <cfdocumentitem type="footer">
-<cfquery name="qS">
-	SELECT * FROM signature
-    WHERE UserId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qJ.PreparedByUserId#"/> 
-</cfquery>
-<cfquery name="qP">
-	SELECT * FROM `file`
-    WHERE `Table` = "core_user"
-    	AND `Type` = "P"
-    	AND `PK` = <cfqueryparam cfsqltype="cf_sql_integer" value="#qJ.PreparedByUserId#"/> 
-</cfquery>
-<tr><td >
-<!---<table width="100%" border="0" style="font:9px Tahoma;">
-  <tr>
-    <td width="50%" align="center"><table width="100%" border="0" cellpadding="0" cellspacing="0">
-      <tr class="nopadding">
-        <td align="right">&nbsp;</td>
-        <td rowspan="2" valign="top">&nbsp;<img src="../../../doc/photo/core_user/1/#qP.File#" width="#qS.width#" height="#qS.height#" style="position:relative; right:0px;"></td> 
-      </tr>
-      <tr>
-        <td align="right">Sign / Date: </td>
-        </tr>
-      <tr>
-        <td align="right">&nbsp;</td>
-        <td><sup style="font-size:7px;">Analysis By:  #qJ.PreparedBy#</sup></td>
-      </tr>
-    </table></td>
-    <td width="50%" align="center"><table width="100%" border="0" cellpadding="0" cellspacing="0">
-      <tr class="nopadding">
-        <td align="right"><br/>
-          <br/>
-          <br/></td>
-        <td valign="top">&nbsp;</td>
-      </tr>
-      <tr>
-        <td align="right">Sign / Date: </td>
-        <td>........................................................</td>
-      </tr>
-      <tr>
-        <td align="right">&nbsp;</td>
-        <td><sup style="font-size:7px;">HSE Supervisor: </sup></td>
-      </tr>
-    </table></td>
-  </tr>
-</table>--->    
+ <tr>
+  <td>
 
+    <table>
+      <tr>
+        <td weight="33%">
+          <table style="font:7px Tahoma; border-top:1px solid ##ECF4CF; padding-left:15px;">
+            <tr>
+              <td align="right">
+                Signature:
+              </td>
+              <td  nowrap="nowrap" width="100px">
+                <cfset fl = application.com.File.GetSignaturePath(qJ.PreparedByUserId)/>
+                <cfif len(fl)>
+                  <cfhttp url="#fl#" method="get" result="imageData" />
+                  <cfset base64Image = ToBase64(imageData.FileContent) />
+                  &nbsp;&nbsp;&nbsp;&nbsp;<img src="data:image/png;base64,#base64Image#" height="20px"/>#DateTimeFormat(qJ.Date,'dd-mmm-yyyy')#
+                </cfif>
+              </td>
+            </tr>
+            <tr>
+              <td align="right" nowrap="nowrap">
+                Prepared By:
+              </td>
+              <td nowrap="nowrap">
+                #qJ.PreparedBy# 
+              </td>
+            </tr>
+          </table>           
+        </td>
+
+        <td weight="33%" align="center">
+          <table style="font:7px Tahoma; border-top:1px solid ##ECF4CF; padding-left:15px;">
+            <tr>
+              <td align="right">
+                Signature:
+              </td>
+              <td  nowrap="nowrap" width="100px">
+                <cfset fl = application.com.File.GetSignaturePath(qJ.ReviewedByUserId)/>
+                <cfif len(fl)>
+                  <cfhttp url="#fl#" method="get" result="imageData" />
+                  <cfset base64Image = ToBase64(imageData.FileContent) />
+                  &nbsp;&nbsp;&nbsp;&nbsp;<img src="data:image/png;base64,#base64Image#" height="20px"/>#DateTimeFormat(qJ.ReviewedDate,'dd-mmm-yyyy')#
+                </cfif>
+              </td>
+            </tr>
+            <tr>
+              <td align="right" nowrap="nowrap">
+                Reviewed By:
+              </td>
+              <td nowrap="nowrap">
+                #qJ.ReviewedBy# 
+              </td>
+            </tr>
+          </table>           
+        </td>
+
+        <td weight="33%">
+          <table style="font:7px Tahoma; border-top:1px solid ##ECF4CF; padding-left:15px;">
+            <tr>
+              <td align="right">
+                Signature:
+              </td>
+              <td  nowrap="nowrap" width="100px">
+                <cfset fl = application.com.File.GetSignaturePath(qJ.HSEUserId)/>
+                <cfif len(fl)>
+                  <cfhttp url="#fl#" method="get" result="imageData" />
+                  <cfset base64Image = ToBase64(imageData.FileContent) />
+                  &nbsp;&nbsp;&nbsp;&nbsp;<img src="data:image/png;base64,#base64Image#" height="20px"/>#DateTimeFormat(qJ.HSEDate,'dd-mmm-yyyy')#
+                </cfif>
+              </td>
+            </tr>
+            <tr>
+              <td align="right" nowrap="nowrap">
+                HSE:
+              </td>
+              <td nowrap="nowrap">
+                #qJ.HSEBy# 
+              </td>
+            </tr>
+          </table>           
+        </td>
+      </tr>
+    </table>
+
+
+  </td>
+ </tr> 
+<tr><td >
+ 
   <table width="100%" border="0" style="font:7px Tahoma; border-top:1px solid ##ECF4CF; padding-left:15px;">
 <tr>
   <td width="75%" nowrap="nowrap">
-<div style="float:left">
-	Target: P = Personnel, E = Environment, A = Asset, R = Reputation               	
-</div>    
-<div style="float:right;">
-Risk: L = Low, M = Medium, H = High
-</div> 
+ 
   </td>
     <td width="25%" align="right" nowrap="nowrap">Page #cfdocument.currentpagenumber# of #cfdocument.totalpagecount#</td>
 </tr></table></td></tr>

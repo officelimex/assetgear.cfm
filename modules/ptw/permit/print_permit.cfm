@@ -1,14 +1,15 @@
 <cfoutput>
+<cfinclude template="inc_var.cfm"/>
 <cfset qP = application.com.Permit.GetPermit(url.id)/>
 <cfset qGT = application.com.Permit.GetGasTest(url.id)/>
 <cfset qAL = application.com.Asset.GetAssetLocationInWorkOrder(qP.AssetLocationIds)/>
 <cfset qL = application.com.WorkOrder.GetLabourers(qP.WorkOrderId)/>
 
-<cfdocument pagetype="a4" format="pdf" margintop="0" marginbottom="0" marginleft="0" marginright="0" backgroundvisible="yes">
+<cfdocument pagetype="a4" format="pdf" margintop="0" marginbottom="0" marginleft="0.1" marginright="0.1" backgroundvisible="yes">
 <html>
 <head>
-<cfset bg = "##f3f3f3"/>
-<cfset brd_c = "##e0e0e0"/>
+<cfset bg = "##f0f2f8"/>
+<cfset brd_c = "##d6daeb"/>
 <cfset brd_c2 = "##a5a5a5"/>
 <cfset wt = ""/>
 <cfswitch expression="#qP.WorkType#"> 
@@ -22,7 +23,7 @@
 }
 	html,body{padding:0; margin:0;font: 11px Tahoma;}
 	.tbl-pad-4 td{
-	padding: 4px 4px 0px 0px
+	padding: 8px 4px 0px 0px
 }
 	.tbl{font-size: 8px;} 
 	sub{font-size: 4px;}
@@ -33,7 +34,7 @@
 	.tbl td.cbg{background-color:#bg#;}
 	.tbl td.no-bottom{border-bottom:none !important;}
 	.a-right{text-align:right !important;}
-	.underline{border-bottom:##666 1px dotted; font-style:italic;}
+	.underline{border-bottom:##9d9fc2 1px dashed; font-style:italic;}
 	.sign > tr > td{padding: 5px 0 0px;}
 	.pad-left-5	{padding-left:5px !important;}
 	.pad-bottom-2	{padding-left:2px !important;}
@@ -41,6 +42,7 @@
 	 .v-middle, .v-middle img	{vertical-align:middle;}
 	 img{margin-top:1px;}
 	 .cbg img{margin:0px;}
+	 .bg-white  {background-color:white;}
 </style>
 <title></title>
 </head>
@@ -58,32 +60,36 @@
   <tr>
     <td><table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbl">
       <tr>
-        <td width="25" align="center" valign="middle" class="left cbg"><img src="#application.site.url#assets/img/sec1.png"/></td>
-        <td colspan="4" valign="top"><table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <td width="25" align="center" valign="middle" class="left cbg">
+          <img src="#application.site.url#assets/img/5x/section-1.png" width="25px"/>
+        </td>
+        <td colspan="4" valign="top">
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
           <tr>
-            <td><table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbl-pad-4">
+            <td>
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbl-pad-4">
               <tr>
                 <td width="16%">FACILITY/INSTALLATION: </td>
                 <td width="67%" class="underline">
                 #replace(valuelist(qAL.Location),',',', ','all')# &mdash; #qP.Asset#
                 </td>
-                <!---<td width="7%" align="right" class="pad-left-5">LOCATION:</td>
-                <td width="10%" nowrap="nowrap" class="underline">#replace(valuelist(qAL.Location),',',', ','all')#</td>--->
+              </tr>
+            </table>
+          </td>
+          </tr>
+          <tr>
+            <td>
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbl-pad-4">
+              <tr>
+                <td width="15%" align="left" >WORK DESCRIPTION:</td>
+                <td width="85%" class="underline">#qP.Work#</td>
               </tr>
             </table></td>
           </tr>
           <tr>
             <td><table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbl-pad-4">
               <tr>
-                  <td width="15%" align="left" >WORK DESCRIPTION:</td>
-                  <td width="85%" class="underline">#qP.Work#</td>
-                </tr>
-            </table></td>
-          </tr>
-          <tr>
-            <td><table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbl-pad-4">
-              <tr>
-                <td width="15%" align="left" nowrap="nowrap" >EQUIPMENT/TOOL/MATERIAL TO BE USED:</td>
+                <td width="15%" align="left" nowrap="nowrap">EQUIPMENT/TOOL/MATERIAL TO BE USED:</td>
                 <td width="85%" class="underline">#qP.EquipmentToUse#&nbsp;</td>
               </tr>
             </table></td>
@@ -92,7 +98,7 @@
             <td><table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbl-pad-4">
               <tr>
                 <td width="149" align="left" nowrap="nowrap" >START DATE/TIME:</td>
-                <td width="242" align="left" nowrap="nowrap" class="underline" >#Dateformat(qP.StartTime,'dd-mmm-yyyy')# #timeformat(qP.StartTime,'hh:mm tt')#</td>
+                <td width="242" align="left" nowrap="nowrap" class="underline" >#DateTimeFormat(qP.StartTime,'dd-mmm-yyyy hh:mm tt')#</td>
                 <td width="139" align="right" nowrap="nowrap" class="pad-left-5" >END DATE/TIME:</td>
                 <td width="162" align="left" nowrap="nowrap" class="underline" >#Dateformat(qP.EndTime,'dd-mmm-yyyy')# #timeformat(qP.EndTime,'hh:mm tt')#</td>
                 <td width="109" align="left" >&nbsp;</td>
@@ -102,58 +108,63 @@
             </table></td>
           </tr>
           <tr>
-            <td><table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbl-pad-4">
-              <tr>
-                <td width="10%" nowrap="nowrap">DEPARTMENT: </td>
-                <td width="36%" class="underline">#ucase(qP.Department)#</td>
-                <td width="15%" align="right" class="pad-left-5">CONTRACTOR:</td>
-                <td width="39%" nowrap="nowrap" class="underline">#qP.Contractor#&nbsp;</td>
-              </tr>
-            </table></td>
+            <td>
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbl-pad-4">
+                <tr>
+                  <td width="10%" nowrap="nowrap">DEPARTMENT: </td>
+                  <td width="36%" class="underline">#ucase(qP.Department)#</td>
+                  <td width="15%" align="right" class="pad-left-5">CONTRACTOR:</td>
+                  <td width="39%" nowrap="nowrap" class="underline">#qP.Contractor#&nbsp;</td>
+                </tr>
+              </table>
+            </td>
           </tr>
         </table></td>
         </tr>
       <tr>
-        <td rowspan="4" align="center" valign="middle" class="left cbg"><img src="#application.site.url#assets/img/sec2.png"/></td>
-        <td colspan="2" rowspan="4" valign="top"><table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <td rowspan="5" align="center" valign="middle" class="left cbg"><img src="#application.site.url#assets/img/5x/section-2.png" width="25px"/></td>
+        <td colspan="2" rowspan="5" valign="top">
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
           <tr>
-            <td height="18" colspan="2">SAFETY PRECAUTIONS TO BE TAKEN AT WORK PLACE</td>
-            </tr>
-          <tr>
-            <td width="15" align="center" valign="top">
-            <cfset chk = getCheck(qP.SafetyRequirement1,'Job hazard analysis sheet attached')/>
-<img src="#application.site.url#assets/img/ptw_checkbox_#chk#.png" width="9" height="9"></td>
-            <td >Job Hazard analysis sheet attached </td>
+            <td height="18" colspan="2">REQUIRED DOCUMENTS TO BE ATTACHED</td>
           </tr>
+          <cfloop list="#request.required_docs#" index="it">
+            <tr>
+              <td width="15" align="center" valign="top">
+              <cfset chk = getCheck(qP.SafetyRequirement5,it)/>
+              <img src="#application.site.url#assets/img/ptw_checkbox_#chk#.png" width="9" height="9"></td>
+              <td><div style="padding-top:1px;">#it#</div></td>
+            </tr>
+          </cfloop>
         </table><br/>
         <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr>
-    <td valign="top"><table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <td valign="top">
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
       <tr>
-        <td height="18" colspan="2" nowrap="nowrap">FACILITIES TO BE ISOLATED BY:</td>
+        <td height="18" colspan="2" nowrap="nowrap">SAFETY PRECAUTIONS TO BE TAKEN:</td>
       </tr>
-      <cfset ftbib = "Spades or Blinds,Physical seperation,Closed valves,De-energising prim mover"/>
-      <cfloop list="#ftbib#" index="it">
+      <cfloop list="#request.safety_req#" index="it">
       <tr>
-        <td width="15" align="center" valign="middle">
-        <cfset chk = getCheck(qP.SafetyRequirement2,it)/>
-        <img src="#application.site.url#assets/img/ptw_checkbox_#chk#.png" width="9" height="9"></td>
-        <td height="13" valign="middle">#it#</td>
+        <td width="15" align="center" valign="top">
+        <cfset chk = getCheck(qP.SafetyRequirement1,it)/>
+        <img src="#application.site.url#assets/img/ptw_checkbox_#chk#.png" width="9px" height="9px"></td>
+        <td><div style="padding-top:2px;">#it#</div></td>
       </tr>
       </cfloop> 
-    </table><br/>
+    </table>
+    <br/>
     <table width="100%" border="0" cellspacing="0" cellpadding="0">
       <tr>
-        <td height="18" colspan="2" nowrap="nowrap">FACILITIES TO BE PREPARED BY:</td>
+        <td height="18" colspan="2" nowrap="nowrap">FACILITIES TO BE PREPARED:</td>
       </tr>
-      <cfset ftbpb = "Depressurising,Draining / Venting,Steaming,Gas Test"/>
-      <cfloop list="#ftbpb#" index="it">
-      <tr>
-        <td width="15" align="center" valign="middle">
-        <cfset chk = getCheck(qP.SafetyRequirement3,it)/>
-        <img src="#application.site.url#assets/img/ptw_checkbox_#chk#.png" width="9" height="9"></td>
-        <td height="13" valign="middle">#it#</td>
-      </tr>
+      <cfloop list="#request.facility_prepared#" index="it">
+        <tr>
+          <td width="15" align="center" valign="middle">
+          <cfset chk = getCheck(qP.SafetyRequirement3,it)/>
+          <img src="#application.site.url#assets/img/ptw_checkbox_#chk#.png" width="9" height="9"></td>
+          <td height="13" valign="middle">#it#</td>
+        </tr>
       </cfloop> 
   </table>
     <br>
@@ -161,8 +172,7 @@
       <tr>
         <td height="18" colspan="2" nowrap="nowrap">WORK ARE TO BE PREPARED BY:</td>
       </tr>
-      <cfset watbpb = "Temporary demarcation,Temporary road closure,Additional lighting,Scaffolding/Work platform"/>
-      <cfloop list="#watbpb#" index="it">
+      <cfloop list="#request.work_prepared#" index="it">
       <tr>
         <td width="15" align="center" valign="middle">
         <cfset chk = getCheck(qP.SafetyRequirement4,it)/>
@@ -172,12 +182,12 @@
       </cfloop> 
     </table>   
     </td>
-    <td valign="top"><table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <td valign="top">
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
       <tr>
-        <td height="18" colspan="2">PPE:</td>
+        <td height="18" colspan="2">PERSONAL REQUIREMENTS:</td>
       </tr>
-      <cfset ppe = "Coverall,Safety helmet,Safety shoes,Safety goggles,Safety spectacles,Light fumes mask,Breathing apparatus,Plastic gloves,Dotted gloves,Hearing protection,Protective Apron,Rubber boots,Dust mask,Safety hamess,Work vest/life jacket,Self contained BA,Compressor air line"/>
-      <cfloop list="#ppe#" index="it">
+      <cfloop list="#request.ppe#" index="it">
         <tr>
           <td width="15" align="center" valign="middle">
           <cfset chk = getCheck(qP.PPE,it)/>
@@ -185,37 +195,49 @@
           <td height="13" valign="middle" nowrap="nowrap">#it#</td>
         </tr>
       </cfloop>
-    </table></td>
+    </table>
+  </td>
   </tr>
-</table><br/>
+</table>
+      <br/>
+      <br/>
         Additional Precautions: <div class="underline">#qP.AdditionalPrecaution#</div>
+        &nbsp;<div class="underline">&nbsp;</div>
         </td>
-        <td colspan="2" align="center" valign="middle" height="20" class="cbg"><span class="cbg"><img src="#application.site.url#assets/img/ptw_sec4.png"/></span></td>
         </tr>
       <tr>
-        <td width="40" align="center" valign="middle"><img src="#application.site.url#assets/img/ptw_pa.png"></td>
-        <td valign="top">I confirm that the safety precautions specified will be observed
+        <td width="40" align="center" valign="middle" class="bg-white"><img src="#application.site.url#assets/img/5x/section-cbs.png" width="25px"/></td>
+        <td valign="top" style="padding-top:8px;">I am satisfied that all the requires safety precautions have been taken:
+           all the applicable certificates are issued work can commence safety 
           <table class="sign" width="100%" border="0" cellspacing="0" cellpadding="0">
             <tr>
             <td width="10%" >NAME:</td>
-            <td colspan="3" class="underline">&nbsp;#qP.PA#</td>
+            <td colspan="3" class="underline">&nbsp;#qP.SV#</td>
             </tr>
-          <tr>
-            <td class="pad-right-3">DATE:</td>
-            <td width="35%" nowrap="nowrap" class="underline">&nbsp;#dateformat(qP.PAApprovedDate,'dd/mm/yy')# #timeformat(qP.PAApprovedDate,'hh:mm tt')#</td>
-            <td width="16%" class="pad-left-5">COMPANY:</td>
-            <td width="39%" class="underline">&nbsp;#ucase(left(qP.PACompany,10))#</td>
-          </tr>
-          <tr>
-            <td colspan="4" valign="middle"> 
-            <cfset fl = getSignature(qP.PAApprovedByUserId)/>
-            SIGNATURE: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="#application.site.url#doc/photo/core_user/#qP.PAApprovedByUserId#/#fl#" height="25"></td>
+            <tr>
+              <td class="pad-right-3">DATE:</td>
+              <td width="35%" nowrap="nowrap" class="underline">&nbsp;#dateformat(qP.SVApprovedDate,'dd/mm/yy')# #timeformat(qP.SVApprovedDate,'hh:mm tt')#</td>
+              <td width="16%" class="pad-left-5">DEPT:</td>
+              <td width="39%" class="underline">&nbsp;#ucase(qP.SVDepartment)#</td>
             </tr>
-          </table></td>
+            <tr>
+              <td colspan="4" valign="middle"> 
+                SIGNATURE:
+                <cfset fl = application.com.File.GetSignaturePath(qP.SVApprovedByUserId)/>
+                <cfif len(fl)>
+                  <cfhttp url="#fl#" method="get" result="imageData" />
+                  <cfset base64Image = ToBase64(imageData.FileContent) />
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="data:image/png;base64,#base64Image#" height="25px"/>
+                </cfif>
+              </td>
+            </tr>
+          </table>
+        </td>
       </tr>
       <tr>
-        <td align="center" valign="middle"><img src="#application.site.url#assets/img/ptw_fs.png"></td>
-        <td valign="top">I confirm that the safety precautions specified will be observed
+        <td align="center" valign="middle" width="12px" class="bg-white"><img src="#application.site.url#assets/img/5x/section-cbra.png" width="25px"/></td>
+        <td valign="top" style="padding-top:8px;">
+          I authorize that work may be carried out provided the stated precautions have been taken: all applicable certificates issued. Work can therefore commence.
           <table class="sign" width="100%" border="0" cellspacing="0" cellpadding="0">
             <tr>
             <td width="10%" >NAME:</td>
@@ -224,215 +246,235 @@
           <tr>
             <td class="pad-right-3">DATE:</td>
             <td width="35%" nowrap="nowrap" class="underline">&nbsp;#dateformat(qP.FSApprovedDate,'dd/mm/yy')# #timeformat(qP.FSApprovedDate,'hh:mm tt')#</td>
-            <td width="16%" class="pad-left-5">COMPANY:</td>
-            <td width="39%" class="underline">#ucase(application.appName)#</td>
+            <td width="16%" class="pad-left-5">&nbsp;DEPT:</td>
+            <td width="39%" class="underline">&nbsp;#ucase(qP.FSDepartment)#</td>
           </tr>
           <tr>
-            <td colspan="4" height="28" valign="middle"> 
-            <cfset fl = getSignature(qP.FSApprovedByUserId)/>
-            SIGNATURE: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="#application.site.url#doc/photo/core_user/#qP.FSApprovedByUserId#/#fl#" height="25">
-            </td>
+            <td colspan="4" height="25px" valign="middle"> 
+                SIGNATURE:
+                <cfset fl = application.com.File.GetSignaturePath(qP.FSApprovedByUserId)/>
+                <cfif len(fl)>
+                  <cfhttp url="#fl#" method="get" result="imageData" />
+                  <cfset base64Image = ToBase64(imageData.FileContent) />
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="data:image/png;base64,#base64Image#" height="25px"/>
+                </cfif>
+              </td>
             </tr>
           </table></td>
       </tr>
+
       <tr>
-        <td align="center" valign="middle"><img src="#application.site.url#assets/img/ptw_hs.png"></td>
-        <td valign="top">I confirm that the safety precautions specified will be observed 
+        <td align="center" valign="middle" class="bg-white"><img src="#application.site.url#assets/img/5x/section-cbph.png" width="25px"/></td>
+        <td valign="top" style="padding-top:8px;">I confirm that the safety precautions specified will be observed 
           <table class="sign" width="100%" border="0" cellspacing="0" cellpadding="0">
             <tr>
             <td width="10%" >NAME:</td>
-            <td colspan="3" class="underline">&nbsp;#qP.HS#</td>
-            </tr>
-          <tr>
-            <td class="pad-right-3">DATE:</td>
-            <td width="35%" nowrap="nowrap" class="underline">&nbsp;#dateformat(qP.HSApprovedDate,'dd/mm/yy')# #timeformat(qP.HSApprovedDate,'hh:mm tt')#</td>
-            <td width="16%" class="pad-left-5">COMPANY:</td>
-            <td width="39%" class="underline">#ucase(application.appName)#</td>
-          </tr>
-          <tr>
-          <cfset fl = getSignature(qP.HSApprovedByUserId)/>
-            <td colspan="4" height="28" valign="middle">SIGNATURE:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="#application.site.url#doc/photo/core_user/#qP.HSApprovedByUserId#/#fl#" height="25"></td>
-            </tr>
-          </table></td>
-      </tr>
-      <tr>
-        <td rowspan="8" align="center" valign="middle" class="left cbg bottom"><img src="#application.site.url#assets/img/sec3.png"/></td>
-        <td colspan="2" align="center">CERTIFICATES (INDICATE AS REQUIRED)</td>
-        <td rowspan="2" align="center" valign="middle"><img src="#application.site.url#assets/img/ptw_ls.png"></td>
-        <td rowspan="2" valign="top"> confirm that the safety precautions specified will be observed 
-          <table class="sign" width="100%" border="0" cellspacing="0" cellpadding="0">
-            <tr>
-              <td width="10%" >NAME:</td>
-              <td colspan="3" class="underline">&nbsp;#qP.LS#</td>
+            <td colspan="3" class="underline">&nbsp;#qP.PA#</td>
             </tr>
             <tr>
               <td class="pad-right-3">DATE:</td>
-              <td width="35%" nowrap="nowrap" class="underline">&nbsp;#dateformat(qP.LSApprovedDate,'dd/mm/yy')# #timeformat(qP.LSApprovedDate,'hh:mm tt')#</td>
-              <td width="16%" class="pad-left-5">COMPANY:</td>
-              <td width="39%" class="underline">#ucase(application.appName)#</td>
+              <td width="35%" nowrap="nowrap" class="underline">&nbsp;#dateformat(qP.PAApprovedDate,'dd/mm/yy')# #timeformat(qP.PAApprovedDate,'hh:mm tt')#</td>
+              <td width="16%" class="pad-left-5">DEPT:</td>
+              <td width="39%" class="underline">&nbsp;#ucase(qP.PADepartment)#</td>
             </tr>
             <tr>
-              <cfset fl = getSignature(qP.LSApprovedByUserId)/>
-              <td colspan="4" height="28" valign="middle">SIGNATURE:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img style="max-width:100px;" src="#application.site.url#doc/photo/core_user/#qP.LSApprovedByUserId#/#fl#" height="25"></td>
-            </tr>
-          </table></td>
-      </tr>
-      <tr>
-        <td width="27%" rowspan="7" valign="top" class="bottom"><table width="100%" border="0" cellspacing="0" cellpadding="0">
-          <cfset hwp = "HOT WORK PRECAUTION,Wash down area with water,Cover area with sand,Cover area with foam blanket,Shield adjacent areas,Provide trained fire watch,Provide portable fire extinguishers,FIRE to provide additional fire cover,Test area for flammable atmosphere,Gas test prior to commencement of work,Gas test at intervals of..........,Continious gas monitoring,Suspend potentially dangerous activites"/>
-          <cfloop list="#hwp#" index="it">
-            <tr>
-              <td width="15" align="center" valign="top"><cfset chk = getCheck(qP.hotwork,it)/>
-        <img src="#application.site.url#assets/img/ptw_checkbox_#chk#.png" width="9" height="9"></td>
-              <td valign="top" height="13">#it#</td>
-            </tr>
-          </cfloop>
-<tr>
-              <td colspan="2" align="left">Special Precautions: <em class="underline">#qP.Custom2#</em></td>
-              </tr>
-        </table><br/><br/>
-          <strong>GAS TEST</strong><br/><br/>
-          FLAMMABLE GAS TEST RECORDED (By an approved gas tester)<br/><br>The area was tested by me with the following results:
-          
-          <table width="100%" border="0" cellspacing="0" cellpadding="0">
-  <tr>
-    <td>DATE</td> 
-    <td>GAS%</td>
-    <td>O<SUB>2</SUB>%</td>
-    <td>H<sub>2</sub>S%</td>
-  </tr><cfloop query="qGT">
-  <tr>
-    <td class="underline">#dateformat(qGT.Date,'dd/mm/yy')# #timeformat(qGT.Date,'hh:mm tt')#</td>
-    <td class="underline">#qGT.Gas#</td>
-    <td class="underline">#qGT.O2#</td>
-    <td class="underline">#qGT.H2O#</td>
-  </tr> </cfloop>
-          </table>
-          <p>GAS FREE? #qP.GasFree#</p>
-          SIGNATURE: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="#application.site.url#doc/photo/core_user/#qP.PAApprovedByUserId#/#qS1.File#" height="25">
-        </td>
-        <td width="28%" rowspan="7" valign="top" class="bottom"><table width="100%" border="0" cellspacing="0" cellpadding="0">
-          <cfset cshibfs = "CONFINED SPACE ENTRY HAZARDS IDENTIFIED BY DACILITY SUPERVISOR,Oxygen deficiency,Oxygen enrichment,Chemical / Toxic substances,Flammable gases,Physical Harzard"/>
-          <cfloop list="#cshibfs#" index="it">
-            <tr>
-              <td width="15" align="center" valign="top"><cfset chk = getCheck(qP.ConfinedSpace,it)/><img src="#application.site.url#assets/img/ptw_checkbox_#chk#.png" width="9" height="9"></td>
-              <td valign="top" height="13">#it#</td>
-            </tr>
-          </cfloop>
-          <tr>
-            <td colspan="2" align="left"><br/>Specify: <em class="underline">#qP.Custom3#</em></td>
-          </tr>
-        </table><br/> 
-          <table width="100%" border="0" cellspacing="0" cellpadding="0">
-            <cfset p_ = "PRECAUTIONS,Gas tests for flammable gas O<sub>2</sub> & H<sub>2</sub>O carried out,Hazadousor non-hazardous entry(form gas test),Continious gas test every ....... hours for flammable gas O<sub>2</sub> & H<sub>2</sub>O carried out,Positive breathing apparatus worn,Standby man with lifeline and positive breathing apparatus,Fumes present. Light fume respirator worn,Potentially dangerous activity adjacent the work area has been suspended,Max. number of persons in confined space,All flammable/toxic residues removed,Additional lightings flame proof,Special tools required,Improved natural ventilation,External Mechanical Ventilation Flame proof,Emergency exits/equipments available"/>
-            <cfloop list="#p_#" index="it">
-              <tr>
-                <td width="15" align="center" valign="top"><cfset chk = getCheck(qP.Precaution,it)/><img src="#application.site.url#assets/img/ptw_checkbox_#chk#.png" width="9" height="9"></td>
-                <td valign="top" height="13">#it#</td>
-                </tr>
-            </cfloop>
-            </table>
-          <p>&nbsp;</p></td>
-      </tr>
-      <tr >
-        <td height="20" colspan="2" align="center" valign="middle" class="cbg"><img src="#application.site.url#assets/img/ptw_sec5.png"/></td>
-        </tr>
-      <tr>
-        <td colspan="2">
-          <div style="line-height:12px">REVALIDATION (By Facility Supervisor)
-            <br/>Maximum validity renewal is 24 Hours</div>
-          <table width="100%" class="tbl" border="0" cellspacing="0" cellpadding="0">
-            <tr>
-              <td align="center" class="left">Validated by</td>
-              <td align="center">Date</td>
-              <td colspan="2" align="center">Valid time</td>
-              </tr>
-<cfquery name="qPV">
-    SELECT
-	    prv.PermitRevalidateId, prv.PermitId, prv.ValidatedByUserId, prv.Date, prv.StartTime, prv.EndTime,
-        CONCAT(u.Surname,' ',u.OtherNames) Name
-    FROM
-    ptw_permit_revalidated AS prv
-    INNER JOIN core_user AS u ON prv.ValidatedByUserId = u.UserId
-    WHERE prv.PermitId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.id#"/>
-</cfquery>
-<cfloop query="qPV">          
-  <tr>
-  <td nowrap class="left">#qPV.Name#</td>
-  <td>#dateformat(Date,'yyyy/mm/dd')#</td>
-  <td colspan="2">#timeformat(Starttime,'HH:MM')# - #timeformat(Endtime,'HH:MM')#</td>
-  </tr>
-</cfloop>
-            </table>
-          
-        </td>
-        </tr>
-      <tr>
-        <td rowspan="2" align="center" valign="middle"><img src="#application.site.url#assets/img/ptw_pa.png"></td>
-        <td align="center" valign="middle" class="cbg"><img src="#application.site.url#assets/img/ptw_sec6.png"/></td>
-      </tr>
-      <tr>
-        <td valign="top">
-          <table width="100%" border="0" cellspacing="0" cellpadding="0">
-            <tr>
-              <td width="17" valign="middle">
-              <cfset wcy = 0/><cfset wcn = 0/>
-			  <cfif qP.Completed eq "yes">
-              	<cfset wcy = 1/>
-              <cfelseif qP.Completed eq "no">
-              	<cfset wcn = 1/>
-              </cfif>
-              <img src="#application.site.url#assets/img/ptw_radio_#wcy#.png" width="12" height="12" /></td>
-              <td valign="middle">Work has been completed and work site cleaned</td>
-              </tr>
-            <tr>
-              <td valign="middle"><img src="#application.site.url#assets/img/ptw_radio_#wcn#.png" width="12" height="12" /></td>
-              <td valign="middle">Work has been suspended / not completed </td>
-              </tr>
-            </table> 
-          <table class="sign" width="100%" border="0" cellspacing="0" cellpadding="0">
-            <tr>
-              <td width="10%" >NAME:</td>
-              <td class="underline">&nbsp;#qP.PAC#</td>
-              <td rowspan="2" align="center" valign="middle">
-              <cfset fl = getSignature(qP.PACloseByUserId)/>
-              <img style="max-width:100px;" src="#application.site.url#doc/photo/core_user/#qP.PACloseByUserId#/#fl#" height="25"></td>
-              </tr>
-            <tr>
-              <td class="pad-right-3">DATE:</td>
-              <td width="35%" class="underline">&nbsp;#dateformat(qP.PACloseDate,'dd/mm/yy')# #timeformat(qP.PACloseDate,'hh:mm tt')#</td>
-              </tr>
-            </table>
-          
-        </td>
-      </tr>
-      <tr>
-        <td rowspan="2" align="center" valign="middle" class="bottom"><img src="#application.site.url#assets/img/ptw_fs.png"></td>
-        <td align="center" valign="middle" class="cbg"><img src="#application.site.url#assets/img/ptw_sec7.png"/></td>
-        </tr>
-      <tr>
-        <td valign="top" class="bottom">I confirm that the work has been completed and work site cleared, PTW is therefore closed
-          <table class="sign" width="100%" border="0" cellspacing="0" cellpadding="0">
-            <tr>
-              <td width="10%" >NAME:</td>
-              <td class="underline">&nbsp;#qP.FSC#</td>
-              <td rowspan="2" align="center" valign="middle">
-              <cfset fl = getSignature(qP.FSCloseByUserId)/>
-              <img style="max-width:100px;" src="#application.site.url#doc/photo/core_user/#qP.FSCloseByUserId#/#fl#" height="25">
+              <td colspan="4" valign="middle"> 
+                SIGNATURE:
+                <cfset fl = application.com.File.GetSignaturePath(qP.PAApprovedByUserId)/>
+                <cfif len(fl)>
+                  <cfhttp url="#fl#" method="get" result="imageData" />
+                  <cfset base64Image = ToBase64(imageData.FileContent) />
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="data:image/png;base64,#base64Image#" height="25px"/>
+                </cfif>
               </td>
-              </tr>
-            <tr>
-              <td class="pad-right-3">DATE:</td>
-              <td width="35%" class="underline">&nbsp;#dateformat(qP.FSCloseDate,'dd/mm/yy')# #timeformat(qP.FSCloseDate,'hh:mm tt')#</td>
-              </tr>
-            </table>
+            </tr>
+          </table>
         </td>
       </tr>
-    </table></td>
+
+      <tr>
+        <td valign="top" colspan="2" class="bg-white">
+          <div style="text-align:center;padding:2px 0 5px 0;"><u>CERTIFICATES REQUIRED FOR THIS PERMIT</u></div>
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <cfloop list="#request.certificate#" index="it">
+              <tr>
+                <td width="15" align="center" valign="middle">
+                <cfset chk = getCheck(qP.certificate,it)/>
+                <img src="#application.site.url#assets/img/ptw_checkbox_#chk#.png" width="9" height="9"></td>
+                <td height="13" valign="middle" nowrap="nowrap">
+                  <table style="padding-top:4px">
+                    <tr>
+                      <td nowrap="nowrap">#it# No:.</td>
+                      <td>&nbsp;<div class="underline"></div></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </cfloop>
+          </table>  
+        </td>
+      </tr>
+      <tr>
+        <td align="center" valign="middle" class="left cbg bottom">
+          <img src="#application.site.url#assets/img/5x/section-3.png" width="25px"/>
+        </td>
+        <td valign="top" >
+          <div style="padding-top:3px;padding-bottom:4px">VALIDITY & RENEWAL OF PERMIT: Maximum renewal is 7 days</div>
+          <table class="tbl" border="0" cellspacing="0" cellpadding="0" width="100%">
+            <tr>
+              <td class="left" width="1px">Date</td>
+              <td width="14%">&nbsp;</td>
+              <td width="14%">&nbsp;</td>
+              <td width="14%">&nbsp;</td>
+              <td width="14%">&nbsp;</td>
+              <td width="14%">&nbsp;</td>
+              <td width="14%">&nbsp;</td>
+              <td width="14%">&nbsp;</td>
+            </tr>
+            <tr>
+              <td class="left">Time</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td class="left bottom">Sign</td>
+              <td class="bottom">&nbsp;</td>
+              <td class="bottom">&nbsp;</td>
+              <td class="bottom">&nbsp;</td>
+              <td class="bottom">&nbsp;</td>
+              <td class="bottom">&nbsp;</td>
+              <td class="bottom">&nbsp;</td>
+              <td class="bottom">&nbsp;</td>
+            </tr>
+          </table>
+          <div style="padding-top:5px;padding-bottom:3px">This PTW is Valid for 7 Consecutive days for the specified work</div>
+        </td>
+        <td class="cbg" width="25px">
+          <img src="#application.site.url#assets/img/5x/section-cbph.png" width="25px"/>
+        </td>
+        <td class="" valign="top" colspan="2">
+          <div style="padding:3px 0 4px 0;">HANDOVER OF WORK</div>
+          <table cellpadding="0" cellspacing="0" border="0" width="100%" class="tbl">
+            <tr>
+              <td class="left">From</td>
+              <td>Sign</td>
+              <td>To</td>
+              <td>Sign</td>
+              <td>Date</td>
+            </tr>
+            <tr>
+              <td class="left">&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td class="left">&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td class="left bottom">&nbsp;</td>
+              <td class="bottom">&nbsp;</td>
+              <td class="bottom">&nbsp;</td>
+              <td class="bottom">&nbsp;</td>
+              <td class="bottom">&nbsp;</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td align="center" valign="middle" class="left cbg bottom">
+          <img src="#application.site.url#assets/img/5x/section-4.png" width="25px"/>
+        </td>
+        <td class="bottom" valign="top">
+          <div style="padding-top:3px;padding-bottom:3px">HANDBACK OF WORK</div>
+          <table>
+            <cfset safelyList="The Job is completed and worksite cleared,The job is suspended/not completed"/>
+            <cfloop list="#safelyList#" index="it">
+            <tr>
+              <td width="15" align="center" valign="top">
+              <cfset chk = getCheck(qP.SafetyRequirement2,it)/>
+              <img src="#application.site.url#assets/img/ptw_checkbox_#chk#.png" width="9px" height="9px"></td>
+              <td><div style="padding-top:2px;">#it#</div></td>
+            </tr>
+            </cfloop>
+            <tr>
+              <td colspan="2">
+                <table style="padding-bottom:5px;">
+                  <tr>
+                    <td nowrap="nowrap">If not, state reasons</td>
+                    <td>&nbsp;<div class="underline"></div></td>
+                  </tr>
+                </table>
+                <table style="padding-bottom:5px;">
+                  <tr>
+                    <td nowrap="nowrap">NAME:</td>
+                    <td>&nbsp;<div class="underline"></div></td>
+                    <td nowrap="nowrap">&nbsp;&nbsp;DEPT:</td>
+                    <td>&nbsp;<div class="underline"></div></td>
+                  </tr>
+                </table>
+                <table>
+                  <tr>
+                    <td nowrap="nowrap">SIGNATURE:</td>
+                    <td>&nbsp;<div class="underline"></div></td>
+                    <td nowrap="nowrap">&nbsp;&nbsp;DATE:</td>
+                    <td>&nbsp;<div class="underline"></div></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+        </td>
+        <td class="bottom cbg">
+          <img src="#application.site.url#assets/img/5x/section-cbs.png" width="25px"/>
+        </td>
+        <td class="bottom" valign="middle" colspan="2">
+          <div style="padding:3px 0 2px 0;">WORK ACCEPTANCE AND CLOSURE</div>
+          <div style="padding-bottom:6px;">Job accepted as stated and PTW Closed</div>
+          <table style="padding-bottom:6px;">
+            <tr>
+              <td nowrap="nowrap">NAME</td>
+              <td>&nbsp;#qP.SVC#<div class="underline"></div></td>
+              <td nowrap="nowrap">&nbsp;&nbsp;DEPT.</td>
+              <td nowrap="nowrap">&nbsp;#qP.SVCDepartment#<div class="underline"></div></td>
+            </tr>
+          </table>
+          <table>
+            <tr>
+              <td nowrap="nowrap">
+                SIGNATURE:
+                <cfset fl = application.com.File.GetSignaturePath(qP.SVCloseByUserId)/>
+                <cfif len(fl)>
+                  <cfhttp url="#fl#" method="get" result="imageData" />
+                  <cfset base64Image = ToBase64(imageData.FileContent) />
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="data:image/png;base64,#base64Image#" height="25px"/>
+                </cfif>
+              </td>
+              <td>&nbsp;<div class="underline"></div></td>
+              <td nowrap="nowrap">&nbsp;&nbsp;DATE</td>
+              <td nowrap="nowrap">&nbsp;#DateTimeFormat(qP.SVCloseDate,'dd-mmm-yyyy hh:mm tt')#<div class="underline"></div></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      
+    </table>
+  </td>
     </tr>
   <tr>
     <td>&nbsp;</td>
-    </tr>
+  </tr>
 </table></td>
 </tr></table>
 <!---<cfdocumentitem type="footer">

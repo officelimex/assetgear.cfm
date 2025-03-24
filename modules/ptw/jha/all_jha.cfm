@@ -31,7 +31,7 @@
     	<cfif !request.IsHSE>
         	<g:Command id="duplicateJHA" icon="tags" help="Duplicate JHA"/>
         </cfif>
-        <g:Command id="editJHA" icon="pencil" help="Edit JHA" condition="row[7]=='o' && row[8]==#request.userinfo.departmentid#" />
+        <g:Command id="editJHA" icon="pencil" help="Edit JHA" condition="row[7]=='Draft' && row[8]==#request.userinfo.departmentid#" />
         <g:Command id="viewJHA" icon="file" help="View JHA" condition="row[7]=='c'"/>
     	<g:Command id="PrintJHA" icon="print" help="Print JHA"/> 
     </g:Commands>

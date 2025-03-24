@@ -51,13 +51,18 @@
         	<div class="scrlx3">
                 <table border="0" class="table table-condensed table-hover table-striped">
                     <tbody class="scrollContent">
-                        <cfquery name="qSOP">
-                        	SELECT
-                            COUNT(s.SOPId) AS Num,s.Acts,DATE_FORMAT(s.SOPDate,'%b-%Y') AS D
-                            FROM sop_card AS s
-                            WHERE DATE_FORMAT(s.SOPDate,'%b-%Y') = '#DateFormat(now(),'mmm-yyyy')#'
-                            GROUP BY s.Acts
-                        </cfquery>
+											<cfquery name="qSOP">
+												SELECT 
+													COUNT(s.SOPId) AS Num, 
+													s.Acts, 
+													DATE_FORMAT(s.SOPDate, '%b-%Y') AS D
+												FROM sop_card AS s
+												WHERE s.SOPDate >= DATE_FORMAT(NOW(), '%Y-%m-01') 
+													AND s.SOPDate < DATE_FORMAT(DATE_ADD(NOW(), INTERVAL 1 MONTH), '%Y-%m-01')
+												GROUP BY s.Acts, D
+											</cfquery>
+
+
                         <cfloop query="qSOP">
                         	<cfif Acts eq "SafeActs">
 								Safe Acts
@@ -83,15 +88,19 @@
                             </tr>
                             <cfset p = 0/>
                             <cfloop query="qD">
-                            	<cfquery name="qSO">
-                                    SELECT
-                                    sum(if(acts = "SafeActs",1,0)) AS SafeActs,
-                                    sum(if(acts = "UnsafeActs",1,0)) AS UnsafeActs,
-                                    sum(if(acts = "UnsafeConditions",1,0)) AS UnsafeConditions,
-                                    DATE_FORMAT(SOPDate,'%b-%Y') AS D
-                                    FROM sop_card
-                                    WHERE DepartmentId = #DepartmentId# AND DATE_FORMAT(SOPDate,'%b-%Y') = '#DateFormat(now(),'mmm-yyyy')#'
-                            	</cfquery>
+															<cfquery name="qSO">
+																	SELECT
+																		SUM(IF(acts = 'SafeActs', 1, 0)) AS SafeActs,
+																		SUM(IF(acts = 'UnsafeActs', 1, 0)) AS UnsafeActs,
+																		SUM(IF(acts = 'UnsafeConditions', 1, 0)) AS UnsafeConditions,
+																		DATE_FORMAT(SOPDate, '%b-%Y') AS D
+																	FROM sop_card
+																	WHERE DepartmentId = <cfqueryparam value="#DepartmentId#" cfsqltype="cf_sql_integer">
+																		AND SOPDate >= DATE_FORMAT(NOW(), '%Y-%m-01') 
+																		AND SOPDate < DATE_FORMAT(DATE_ADD(NOW(), INTERVAL 1 MONTH), '%Y-%m-01')
+																	GROUP BY D
+															</cfquery>
+
                                 <tr>
                                 	<td align="left">#Name#</td>
                                 	<td style="text-align:center" align="center">#val(qSO.SafeActs)#</td>

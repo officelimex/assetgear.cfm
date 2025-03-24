@@ -126,7 +126,22 @@
             </tr>
           <tr>
             <td rowspan="4" align="center" valign="middle" class="left cbg"><img src="#application.site.url#assets/img/sec2.png"/></td>
-            <td colspan="2" rowspan="4" valign="top"><table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <td colspan="2" rowspan="4" valign="top">
+              <!--- <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td height="18" colspan="2" nowrap="nowrap">FACILITIES TO BE ISOLATED BY:</td>
+                </tr>
+                <cfset ftbib = "Spades or Blinds,Physical Separation,Closed valves,De-energising prim mover"/>
+                <cfloop list="#ftbib#" index="it">
+                <tr>
+                  <td width="15" align="center" valign="middle">
+                  <cfset chk = getCheck(qP.SafetyRequirement2,it)/>
+                  <img src="#application.site.url#assets/img/ptw_checkbox_#chk#.png" width="9" height="9"></td>
+                  <td height="13" valign="middle">#it#</td>
+                </tr>
+                </cfloop> 
+              </table> --->
+              <table width="100%" border="0" cellspacing="0" cellpadding="0">
               <tr>
                 <td height="18" colspan="2">SAFETY PRECAUTIONS TO BE TAKEN AT WORK PLACE</td>
                 </tr>
@@ -136,14 +151,16 @@
     <img src="#application.site.url#assets/img/ptw_checkbox_#chk#.png" width="9" height="9"></td>
                 <td >Job Hazard analysis sheet attached </td>
               </tr>
-            </table><br/>
+            </table>
+            <br/>
             <table width="100%" border="0" cellspacing="0" cellpadding="0">
       <tr>
-        <td valign="top"><table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <td valign="top">
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
           <tr>
             <td height="18" colspan="2" nowrap="nowrap">FACILITIES TO BE ISOLATED BY:</td>
           </tr>
-          <cfset ftbib = "Spades or Blinds,Physical seperation,Closed valves,De-energising prim mover"/>
+          <cfset ftbib = "Spades or Blinds,Physical Separation,Closed valves,De-energising prim mover"/>
           <cfloop list="#ftbib#" index="it">
           <tr>
             <td width="15" align="center" valign="middle">
@@ -152,7 +169,8 @@
             <td height="13" valign="middle">#it#</td>
           </tr>
           </cfloop> 
-        </table><br/>
+        </table>
+        <br/>
         <table width="100%" border="0" cellspacing="0" cellpadding="0">
           <tr>
             <td height="18" colspan="2" nowrap="nowrap">FACILITIES TO BE PREPARED BY:</td>
@@ -252,17 +270,17 @@
               <table class="sign" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                 <td width="10%" >NAME:</td>
-                <td colspan="3" class="underline">&nbsp;#qP.HS#</td>
+                <td colspan="3" class="underline">&nbsp;#qP.SV#</td>
                 </tr>
               <tr>
                 <td class="pad-right-3">DATE:</td>
-                <td width="35%" nowrap="nowrap" class="underline">&nbsp;#dateformat(qP.HSApprovedDate,'dd/mm/yy')# #timeformat(qP.HSApprovedDate,'hh:mm tt')#</td>
+                <td width="35%" nowrap="nowrap" class="underline">&nbsp;#dateformat(qP.SVApprovedDate,'dd/mm/yy')# #timeformat(qP.SVApprovedDate,'hh:mm tt')#</td>
                 <td width="16%" class="pad-left-5">COMPANY:</td>
                 <td width="39%" class="underline">#application.appName#</td>
               </tr>
               <tr>
-              <cfset fl = getSignature(qP.HSApprovedByUserId)/>
-                <td colspan="4" height="28" valign="middle">SIGNATURE:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="#application.site.url#doc/photo/core_user/#qP.HSApprovedByUserId#/#fl#" height="25"></td>
+              <cfset fl = getSignature(qP.HVApprovedByUserId)/>
+                <td colspan="4" height="28" valign="middle">SIGNATURE:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="#application.site.url#doc/photo/core_user/#qP.HVApprovedByUserId#/#fl#" height="25"></td>
                 </tr>
               </table></td>
           </tr>
@@ -428,13 +446,13 @@
                   <td width="10%" >NAME:</td>
                   <td class="underline">&nbsp;#qP.FSC#</td>
                   <td rowspan="2" align="center" valign="middle">
-                  <cfset fl = getSignature(qP.FSCloseByUserId)/>
-                  <img style="max-width:100px;" src="#application.site.url#doc/photo/core_user/#qP.FSCloseByUserId#/#fl#" height="25">
+                  <cfset fl = getSignature(qP.SVCloseByUserId)/>
+                  <img style="max-width:100px;" src="#application.site.url#doc/photo/core_user/#qP.SVCloseByUserId#/#fl#" height="25">
                   </td>
                   </tr>
                 <tr>
                   <td class="pad-right-3">DATE:</td>
-                  <td width="35%" class="underline">&nbsp;#dateformat(qP.FSCloseDate,'dd/mm/yy')# #timeformat(qP.FSCloseDate,'hh:mm tt')#</td>
+                  <td width="35%" class="underline">&nbsp;#dateformat(qP.SVCloseDate,'dd/mm/yy')# #timeformat(qP.SVCloseDate,'hh:mm tt')#</td>
                   </tr>
                 </table>
             </td>
