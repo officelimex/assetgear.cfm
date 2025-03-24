@@ -16,7 +16,11 @@
  
     <cfparam name="Attributes.ListValue" type="string" default=""> 
     <cfparam name="Attributes.ListDisplay" type="string" default="#Attributes.ListValue#">
-    <cfparam name="Attributes.delimiters" type="string" default=",">
+    <cfif find('`',Attributes.ListValue)>
+			<cfparam name="Attributes.delimiters" type="string" default="`">
+		<cfelse>
+			<cfparam name="Attributes.delimiters" type="string" default=",">
+    </cfif>
     <cfparam name="Attributes.selected" type="string" default="">
 
     <!--- bind --->
