@@ -96,7 +96,8 @@
 								onSuccess: function(r)	{
 										var an = new aNotify();
 										an.alert('Successful!',r);	
-										_w.close();
+										// _w.close();
+										win_#windowTagData.Attributes.id#.close()
 										tr.highlight('##FF0'); 					
 								},
 								onFailure:function(e)	{
