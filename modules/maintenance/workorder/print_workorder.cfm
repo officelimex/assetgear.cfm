@@ -1,14 +1,13 @@
 <cfoutput>
 <cfset qWO = application.com.WorkOrder.GetWorkOrder(url.id)/>
+<cfset util = application.com.File/>
 <cfquery name="qF" >
 	SELECT * FROM failure_report_integration 
 	WHERE `PK` = <cfqueryparam cfsqltype="cf_sql_int" value="#url.id#" /> AND `IntegrateTable` = "Work Order"
 </cfquery>
 <cfset tsum2 = tsum = tsum3 = 0/>
 
-<cfset _fp = expandPath("../../doc/temp/") & url.id & ".pdf"/>
-
-<cfdocument name="print_out" overwrite="true" pagetype="a4" format="pdf" margintop="0.25" marginbottom="0" marginleft="0.4" marginright="0.4">
+<cfdocument name="print_out" saveasname="WO_#qWO.WorkOrderId#" overwrite="true" pagetype="a4" format="pdf" margintop="0.25" marginbottom="0" marginleft="0.4" marginright="0.4">
 <html>
 <head>
 <cfset bg = "##f0f2f8"/>
@@ -38,6 +37,7 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
 	.a-right{text-align:right !important;}
 	.gray{color:gray;}
 	th{text-align:left !important;}
+  .small {font-size: 10px; color:##0c0c0c; padding-top:4px;}
 </style>
 </head>
 <body>
@@ -51,24 +51,19 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
 </CFIF>
 <cfswitch expression="#qWO.Status#">
 	<cfcase value="open"><cfset sts = "<span style='color:green;'>OPEN</span>"/></cfcase>
-    <cfcase value="close"><cfset sts = "<span style='color:red;'>CLOSE</span>"/></cfcase>
-    <cfcase value="Suspended"><cfset sts = "<span style='color:red;'>SUSPENDED</span>"/></cfcase>
-    <cfdefaultcase><cfset sts = "<span style='color:gray;'>AWAITING PARTS</span>"/></cfdefaultcase>
+  <cfcase value="close"><cfset sts = "<span style='color:red;'>CLOSE</span>"/></cfcase>
+  <cfcase value="Suspended"><cfset sts = "<span style='color:red;'>SUSPENDED</span>"/></cfcase>
+  <cfdefaultcase><cfset sts = "<span style='color:gray;'>AWAITING PARTS</span>"/></cfdefaultcase>
 </cfswitch>
 <cfset request.letterhead.Id="W.O. ## #url.id#"/>
 <cfset request.letterhead.date = "Date : #dateformat(qWO.DateOpened,'dd/mm/yyyy')#&nbsp;&nbsp;&nbsp;Status: #sts#"/>
 <cfset company = ""/>
-<cfif qWO.WorkingForId eq 1>
-  <cfset company = ""/>
-<cfelseif qWO.WorkingForId eq 6>
-  <cfset company = "_uacl"/>
-</cfif>
 <cfinclude template="../../../include/letter_head#company#.cfm"/>
 </cfdocumentitem>
 <tr>
 <td><table width="100%" border="0">
   <tr>
-    <td valign="top" width="60%" align="center"><table width="90%" border="0" cellpadding="0" cellspacing="0" class="head_section">
+    <td valign="top" width="60%" align="center"><table width="100%" border="0" cellpadding="0" cellspacing="0" class="head_section">
       <tr>
         <td width="13%" valign="top" class="left">Asset</td>
         <td width="87%" valign="top" class="right">#qWO.Asset#</td>
@@ -87,14 +82,14 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
         </td>
       </tr>
     </table></td>
-    <td valign="top" width="40%" align="center"><table width="90%" border="0" cellpadding="0" cellspacing="0" class="head_section">
+    <td valign="top" width="40%" align="center"><table width="100%" border="0" cellpadding="0" cellspacing="0" class="head_section">
       <tr>
         <td width="22%" valign="top" nowrap="nowrap" class="left">Department</td>
         <td width="78%" valign="top" class="right" nowrap><span class="right bottom">#qWO.Department#&nbsp;<cfif qWO.Unit neq ""><span class="gray">(#qWO.Unit#)</span></cfif></span></td>
       </tr>
       <tr>
-        <td valign="top" class="left">W.O. Type</td>
-        <td valign="top" class="right">#qWO.JobClass#</td>
+        <td valign="top" class="left bottom">W.O. Type</td>
+        <td valign="top" class="right bottom">#qWO.JobClass#</td>
       </tr>
       <cfif val(qWO.MRId)>
           <tr>
@@ -126,51 +121,94 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
 </td>
 </tr>
 
+<cfquery name="qMN" dbtype="query">
+  SELECT 
+    *
+  FROM qWOI 
+  WHERE ItemId <> ''
+</cfquery>
+<cfif qMN.recordcount>
+  <tr>
+    <td>
+    <div class="sub_head">MATERIALS NEEDED</div>
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" class="tbl">
+      <tr>
+        <th class="left small" width="1px">S/N</th>
+        <th>ICN</th>
+        <th>Description</th>
+        <th>VPN</th>
+        <th align="right">Qty</th>
+        <th>UOM</th>
+      </tr>
+      <cfset nstock =false/>
+      <cfloop query="qMN">
+      <tr <cfif qMN.Currentrow eq qMN.Recordcount> class="bottom" </cfif>>
+        <td valign="top" class="left">#qMN.Currentrow#</td>
+        <td valign="top" class="left">#qMN.Code#</td>
+        <td valign="top">
+          #qMN.Item#
+          <cfif qMN.Purpose NEQ "">
+            <div class="small">For: #qMN.Purpose#</div>
+          </cfif>
+        </td>
+        <td valign="top">#qMN.VPN#&nbsp;</td>
+        <td align="right" valign="top">#qMN.Quantity#</td>
+        <td valign="top">#qMN.UM#&nbsp;</td>
+      </tr>
+      </cfloop>
+    </table><br><br>
 
-<cfif qWOI.recordcount>
-<tr>
-  <td>
-  <div class="sub_head">MATERIALS NEEDED</div>
-  <table width="100%" border="0" cellpadding="0" cellspacing="0" class="tbl">
-    <tr>
-      <th class="left" width="1px">S/N</th>
-      <th>Spare parts</th>
-      <th>Purpose</th>
-      <th colspan="2">Quantity</th>
-      <th class="a-right">Unit Price</th>
-      <th class="a-right">Subtotal</th>
-    </tr>
-    <cfset nstock =false/>
-    <cfloop query="qWOI">
-    <tr <cfif qWOI.Currentrow eq qWOI.Recordcount> class="bottom" </cfif>>
-      <td valign="top" class="left">#qWOI.Currentrow#</td>
-      <td valign="top"><cfif qWOI.Item eq "">* #qWOI.Description#<cfelse>[#qWOI.Code#] #qWOI.Item# #qWOI.VPN#</cfif></td>
-      <td valign="top">#qWOI.Purpose#</td>
-      <td align="right" valign="top" class="no-right">#qWOI.Quantity#</td>
-      <td valign="top">#qWOI.UM#&nbsp;</td>
-      <td align="right" valign="top">#Numberformat(qWOI.UnitPrice,'9,999.99')#</td>
-      <td align="right" class="cbg" valign="top">
-      <cfset qu = qWOI.Quantity*qWOI.UnitPrice/>
-	  <cfif qWOI.Item eq "">
-      	<cfset nstock =true/>
-      	<cfset tsum2 = tsum2 + qu/>
-      </cfif>
+    </td>
+  </tr> 
+</cfif>
 
-        <cfset tsum = tsum + qu/>
-        #NumberFormat(qu, '9,999.99')#</td>
-    </tr>
-    </cfloop>
-    <tr class="bottom">
-      <td colspan="6" valign="middle" class="no-bottom" style="font-size:8px;"><cfif nstock>Item(s) marked with * are non stocked items : total value #Numberformat(tsum2,'9,999.99')#</cfif></td>
-      <td align="right" class="cbg" valign="top">#NumberFormat(tsum, '9,999.99')#</td>
-    </tr>
-  </table><br><br>
+<tr><td></td></tr>
 
-  </td>
-</tr> </cfif>
+<cfquery name="qOO" dbtype="query">
+  SELECT 
+    *
+  FROM qWOI 
+  WHERE ItemId = ''
+</cfquery>
+
+<cfif qOO.recordcount>
+  <tr>
+    <td>
+    <div class="sub_head">MATERIAL REQUEST</div>
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" class="tbl">
+      <tr>
+        <th class="left small" width="1px">S/N</th>
+        <th>Description</th>
+        <th align="right">Qty</th>
+        <th>UOM</th>
+        <th>OEM</th>
+        <th>Part/Serial/Model No.</th>
+      </tr>
+      <cfset nstock =false/>
+      <cfloop query="qOO">
+      <tr <cfif qOO.Currentrow eq qOO.Recordcount> class="bottom" </cfif>>
+        <td valign="top" class="left">#qOO.Currentrow#</td>
+        <td valign="top">
+          #replace(qOO.Description,chr(13),'<br/>','all')#
+        </td>
+        <td valign="top" align="right">#qOO.Quantity#</td>
+        <td valign="top">#qOO.UOM#&nbsp;</td>
+        <td valign="top">#qOO.OEM#</td>
+        <td valign="top" class="small">#qOO.Others#</td>
+      </tr>
+      </cfloop>
+
+    </table>
+    <br><br>
+
+    </td>
+  </tr> 
+</cfif>
+
 <tr>
   <td>
   <cfset qL = application.com.WorkOrder.GetLabourers(url.id)/>
+<cfif qL.recordcount>
 <div class="sub_head">MAN POWER</div>
 <table width="100%" border="0" cellpadding="0" cellspacing="0" class="tbl">
   <tr>
@@ -188,7 +226,8 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
         <td align="right" valign="top">#qL.Hours#</td>
         </tr>
     </cfloop>
-    </table><br><br>
+    </table><br>
+</cfif><br/>
 </td>
 </tr>
 <cfset c1="Naira"/><cfset c2="Kobo"/>
@@ -224,28 +263,30 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
 </tr>
   </cfif>
 
-<cfset gtotal = tsum3+tsum/>
+<cfset gtotal =0/>
 <cfif gtotal gt 0>
 <tr>
   <td><br/>
   <div style="text-align:right; text-decoration:underline; font-style:italic;font-size:11px;">
     
     GRAND TOTAL: <cfif qWOC.Currency == "USD">$<cfset c1="Dollar"/><cfset c2="Cent"/></cfif>#NumberFormat(gtotal,'9,999.99')#</div>
- <div style="text-align:center; font-style:italic; padding-top:8px; font-size:11px;">AMOUNT IN WORDS:
-        <CFSET num = CreateObject("component","assetgear.com.adexfe.util.Finance.NumberToWords").init(NumberFormat(gtotal,'999.99'),'#c1#','#c2#')/>
-        #ucase(num.Convert())# ONLY</div></td>
+  <div style="text-align:center; font-style:italic; padding-top:8px; font-size:11px;">AMOUNT IN WORDS:
+  <CFSET num = CreateObject("component","assetgear.com.adexfe.util.Finance.NumberToWords").init(NumberFormat(gtotal,'999.99'),'#c1#','#c2#')/>
+  #ucase(num.Convert())# ONLY
+  </div></td>
 </tr>
 </cfif>
 <cfif qWO.Status neq "open">
 <tr>
   <td>
 
-    <BR/>
-  <div class="sub_head">WORK DONE</div>
-  <div class="content">
-    #replace(qWO.WorkDone,chr(10),'<br/>','all')#
-  </div>
-
+  <BR/>
+  <cfif len(qWO.WorkDone)>
+    <div class="sub_head">WORK DONE</div>
+    <div class="content">
+      #replace(qWO.WorkDone,chr(10),'<br/>','all')#
+    </div>
+  </cfif>
     </td>
 </tr>
 </cfif>
@@ -259,18 +300,30 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
       <tr class="nopadding">
         <td width="13%" align="right"><br/>
           <br/>
-          <br/></td>
+          <br/>
+        </td>
         <td width="87%" rowspan="2" valign="bottom">
-          <cfif qWO.SupervisedApprovedDate != "">
-            
-            <cfset fl = getSignature(qWO.SupervisedByUserId)/>
-            &nbsp;&nbsp;&nbsp;<img src="../../../doc/photo/core_user/#qWO.SupervisedByUserId#/#fl#" height="30"> <span style="font-size:7px;">#dateformat(qWO.SupervisedApprovedDate,'dd/mm/yyyy')#</span>
-
+        <!--- CreatedByUserId --->
+          <cfif qWO.WorkClassId == 12>
+            <cfset fl = util.GetSignaturePath(qWO.CreatedByUserId)/>
+            <cfset _dc = qWO.DateOpened/>
+            <cfset _sname = qWO.CreatedBy/>
+            <cfset _pos = "Superintendent"/>
+          <cfelse>
+            <cfset fl = util.GetSignaturePath(qWO.SupervisedByUserId)/>
+            <cfset _dc = qWO.SupervisedApprovedDate/>
+            <cfset _sname = qWO.SupervisedBy/>
+            <cfset _pos = "Supervisor"/>
+          </cfif>
+          <cfif len(fl)>
+            <cfhttp url="#fl#" method="get" result="imageData" />
+            <cfset base64Image = ToBase64(imageData.Filecontent) />
+            &nbsp;&nbsp;&nbsp;<img src="data:image/png;base64,#base64Image#" height="30"> 
+            <span style="font-size:7px;">#dateformat(_dc, 'dd/mm/yyyy')#</span>
           <cfelse>
             ....................................................  
           </cfif>
-
-		</td>
+		    </td>
       </tr>
       <tr>
         <td align="right" nowrap="nowrap">Sign / Date:</td>
@@ -278,7 +331,7 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
       <tr>
         <td align="left" colspan="2">
 			<sup style="font-size:7px;">
-        &nbsp;&nbsp;Supervisor: #qWO.SupervisedBy# (
+        &nbsp;&nbsp;#_pos#: #_sname# (
           <cfif qWO.Unit EQ "">
             #qWO.Department#
           <cfelse>
@@ -290,41 +343,36 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
       </tr>
     </table></td>
     <td width="33%" align="center" style="padding-bottom:15px;">
-    <cfif (gtotal) neq 0>
-    <table width="100%" border="0" cellpadding="0" cellspacing="0">
-      <tr class="nopadding">
-        <td width="53%" align="right"><br/>
-          <br/>
-          <br/></td>
-        <td width="47%" valign="top">&nbsp;</td>
-      </tr>
-      <tr>
-        <td align="right">Sign / Date:</td>
-        <td nowrap>
-          <cfif qWO.WHApprovedDate != "">
-            <cfset fl = getSignature(qWO.WHUserId)/>
-            &nbsp;&nbsp;&nbsp;<img src="../../../doc/photo/core_user/#qWO.WHUserId#/#fl#" height="30"> <span style="font-size:7px;">#dateformat(qWO.WHApprovedDate,'dd/mm/yyyy')#</span>
-          <cfelse>
-            ....................................................  
-          </cfif>
-        </td>
-      </tr>
-      <tr>
-        <td align="center" colspan="2">
-          <sup style="font-size:7px;">Material/Logistics: 
+    <cfif ((gtotal) neq 0 || qWO.WHApprovedDate != "")>
+      <table width="100%" border="0" cellpadding="0" cellspacing="0">
+        <tr class="nopadding">
+          <td width="53%" align="right"><br/>
+            <br/>
+            <br/></td>
+          <td width="47%" valign="top">&nbsp;</td>
+        </tr>
+        <tr>
+          <td align="right">Sign / Date:</td>
+          <td nowrap>
             <cfif qWO.WHApprovedDate != "">
-              <cfquery name="qWH">
-                SELECT CONCAT(u.Surname, ' ', u.OtherNames) Name 
-                FROM work_order wo 
-                INNER JOIN core_user u ON u.UserId = wo.WHUserId 
-                WHERE wo.WorkOrderId = #val(url.id)#
-              </cfquery>
-              #qWH.Name#
+            <cfset fl = util.GetSignaturePath(qWO.WHUserId)/>
+            <cfif len(fl)>
+              <cfhttp url="#fl#" method="get" result="imageData" />
+              <cfset base64Image = ToBase64(imageData.Filecontent) />
+              &nbsp;&nbsp;&nbsp;<img src="data:image/png;base64,#base64Image#" height="30"> 
+              <span style="font-size:7px;">#dateformat(qWO.SupervisedApprovedDate, 'dd/mm/yyyy')#</span>
             </cfif>
-          </sup>
-        </td>
-      </tr>
-    </table>
+            <cfelse>
+              ....................................................  
+            </cfif>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" colspan="2">
+            <sup style="font-size:7px;">Warehouse: #qWO.WHPerson#</sup>
+          </td>
+        </tr>
+      </table>
     </cfif>
     </td>
     <td width="33%" align="center" style="padding-bottom:15px;"><table width="100%" border="0" cellpadding="0" cellspacing="0">
@@ -337,24 +385,41 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
       <tr>
         <td align="right">Sign / Date:</td>
         <td>
-          <cfif qWO.FSApprovedDate != "">
-            <cfset fl = getSignature(qWO.FSUserId)/>
-            &nbsp;&nbsp;&nbsp;<img src="../../../doc/photo/core_user/#qWO.FSUserId#/#fl#" height="30"> <span style="font-size:7px;">#dateformat(qWO.FSApprovedDate,'dd/mm/yyyy')#</span>
+          <cfif qWO.WorkClassId == 12>
+            <cfif qWO.FSApprovedDate != "">
+            <cfset fl = util.GetSignaturePath(qWO.FSUserId)/>
+            <cfif len(fl)>
+              <cfhttp url="#fl#" method="get" result="imageData" />
+              <cfset base64Image = ToBase64(imageData.FileContent) />
+              &nbsp;&nbsp;&nbsp;<img src="data:image/png;base64,#base64Image#" height="30"> 
+              <span style="font-size:7px;">#dateformat(qWO.FSApprovedDate, 'dd/mm/yyyy')#</span>
+            </cfif>
+            <cfelse>
+              ....................................................  
+            </cfif>
           <cfelse>
-            ....................................................  
+            <cfif qWO.SupApprovedDate != "">
+            <cfset fl = util.GetSignaturePath(qWO.SupUserId)/>
+            <cfif len(fl)>
+              <cfhttp url="#fl#" method="get" result="imageData" />
+              <cfset base64Image = ToBase64(imageData.FileContent) />
+              &nbsp;&nbsp;&nbsp;<img src="data:image/png;base64,#base64Image#" height="30"> 
+              <span style="font-size:7px;">#dateformat(qWO.SupApprovedDate, 'dd/mm/yyyy')#</span>
+            </cfif>
+            <cfelse>
+              ....................................................  
+            </cfif>          
           </cfif>
         </td>
       </tr>
       <tr>
         <td align="center" colspan="2">
-          <sup style="font-size:7px;">Superintendent: 
-            <cfif qWO.FSApprovedDate != "">
-              <cfquery name="qFS">
-                SELECT CONCAT(u.Surname, ' ', u.OtherNames) Name FROM work_order wo 
-                INNER JOIN core_user u ON u.UserId = wo.FSUserId 
-                WHERE wo.WorkOrderId = #val(url.id)#
-              </cfquery>
-              #qFS.Name#
+          <sup style="font-size:7px;">
+            #qWO.Department#
+            <cfif qWO.WorkClassId == 12>
+               Mgr: #qWO.ManagerName#
+            <cfelse>
+              Superintendent: #qWO.SupName#
             </cfif>
           </sup>
         </td>
@@ -369,8 +434,8 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
     <cfset cb = application.com.User.getUser(val(qWO.CreatedByUserId))/>
     <cfif cb.UserName neq "">
 				Created by #cb.UserName#
-				<cfset fl = getSignature(qWO.CreatedByUserId)/>
-        &nbsp;&nbsp;&nbsp;<img src="../../../doc/photo/core_user/#qWO.CreatedByUserId#/#fl#" height="30"> <span style="font-size:7px;">#dateformat(qWO.DateOpened,'dd/mm/yyyy')#</span>
+<!--- 				<cfset fl = util.GetSignaturePath(qWO.CreatedByUserId)/>
+        &nbsp;&nbsp;&nbsp;<img src="#fl#" height="30"> <span style="font-size:7px;">#dateformat(qWO.DateOpened,'dd/mm/yyyy')#</span> --->
 		<cfelse>
 				System Generated
 		</cfif>
@@ -388,48 +453,33 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
 </cfdocumentitem>
 </table>
 
-<!--- <cfdocumentitem type="pagebreak"/>
-<cfcontent file="http://192.168.2.13:8888/assetgear/doc/attachment/work_order/11312/BLIZER.pdf" type="application/pdf">
- --->
+
 </body>
 </html>
 </cfdocument>
 
 <cfpdf action="merge" name="mergedPdf">
   <cfpdfparam source="print_out">
-  <cfquery name="qf">
+<!---   <cfquery name="qf">
     SELECT `file`, size FROM `file` 
     WHERE Pk = #url.id# AND `Table` = "work_order" 
-  </cfquery>
- 
-  <cfloop query="qf">
-    <cfif findNoCase(".pdf", qf.File)>
-        <cfset filePath = expandPath("../../../doc/attachment/work_order/") & url.id & "/" & qf.file>
-        <cfif fileExists(filePath) and val(qf.Size) >
-          <cfpdfparam source="#filePath#">
-        <cfelse>
-          <!--- dont do anything ---> 
-        </cfif>
+  </cfquery> --->
+  
+<!---   <cfset qf = util.GetDocPaths(url.id, "work_order")/>
+  <cfdump  var="#qf#"> --->
+<!---   <cfloop array="#qf#" index="i">
+    <cfset filePath = qf[i]/>
+    <cfif findNoCase(".pdf", filePath)>
+      <cfif fileExists(filePath)>
+        <cfpdfparam source="#filePath#">
+      <cfelse>
+        <!--- dont do anything ---> 
+      </cfif>
     </cfif>
-</cfloop>
+  </cfloop> --->
 </cfpdf>
 <cfheader name="Content-Disposition" value="inline; filename=WO_#url.id#.pdf">
 <cfcontent type="application/pdf" variable="#ToBinary( mergedPdf )#" reset="true">
 
- 
-
-
-<cffunction name="getSignature" access="private" returntype="string" hint="Get user signatire">
-	<cfargument name="uid" hint="user id" required="yes" type="string"/>
-
-    <cfquery name="qS1" cachedwithin="#CreateTime(1,0,0)#">
-        SELECT * FROM `file`
-        WHERE `Table` = 'core_user'
-          AND `PK` = <cfqueryparam cfsqltype="cf_sql_integer" value="#val(arguments.uid)#"/>
-        LIMIT 0,1
-    </cfquery>
-
-    <cfreturn qS1.File/>
-</cffunction>
 
 </cfoutput>

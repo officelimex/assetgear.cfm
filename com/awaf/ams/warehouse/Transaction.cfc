@@ -5,9 +5,21 @@
 		<cfset this.MR_SQL = '
 			SELECT
 				mr.*,
-				d.Name Department
+				d.Name Department,
+				CONCAT(u.Surname, " ", u.OtherNames) CreatedBy,
+				CONCAT(mgr.Surname, " ", mgr.OtherNames) ManagerName,
+				wo.Description WODescription, CONCAT(cr.Surname, " ", cr.OtherNames) WOCreatedBy, 
+					cr.UserId WOCreatedByUserId,
+					wo.FSUserId, wo.DateOpened WOCreated, wo.FSApprovedDate,
+					un.Name WOUnit, wd.Name WODepartment
 			FROM whs_mr mr
-			LEFT JOIN core_department d ON d.DepartmentId = mr.DepartmentId
+			INNER JOIN core_user u 				ON u.UserId 				= mr.CreatedByUserId
+			LEFT JOIN core_department d 	ON d.DepartmentId 	= mr.DepartmentId
+			LEFT JOIN work_order wo 			ON wo.WorkOrderId 	= mr.WorkOrderId 
+			LEFT JOIN core_user cr 				ON cr.UserId 				= wo.CreatedByUserId
+			LEFT JOIN core_user mgr 			ON mgr.UserId 			= wo.FSUserId
+			LEFT JOIN core_unit un 				ON un.UnitId 				= wo.UnitId
+			LEFT JOIN core_department wd 	ON wd.DepartmentId	= wo.DepartmentId
 		'/>
 		<cfset this.MR_COUNT_SQL = '
 			SELECT COUNT(mr.MRId) C
@@ -17,8 +29,9 @@
 		<cfset this.MR_ITEM_SQL = '
 			SELECT
 				mri.*,
-				CONCAT(wi.Description," ",wi.VPN) Item, CONVERT(CONCAT(wi.Description,"~",wi.ItemId) USING utf8) ItemDescription,
-					wi.Currency,wi.Code,
+		  	CONCAT(wi.Description,"~",wi.ItemId) ItemDescription, 
+				wi.Description,	wi.Obsolete, wi.Status,
+				wi.Currency, wi.Code, wi.VPN ItemVPN, wi.Maker,
 				um.Code UM
 			FROM whs_mr_item mri
 			INNER JOIN whs_item wi ON wi.ItemId = mri.ItemId
@@ -32,23 +45,27 @@
 		'/>
 
 		<cfset this.MI_SQL = '
-            SELECT
-            	mi.*,
-                CONCAT(cu.Surname," ",cu.OtherNames) IssuedBy,CONCAT(cu2.Surname," ",cu2.OtherNames) IssuedTo,
-                d.Name Department
-            FROM whs_issue mi
-        	INNER JOIN core_department d ON mi.DepartmentId = d.DepartmentId
-        	INNER JOIN core_user cu ON mi.IssuedByUserId = cu.UserId
-        	INNER JOIN core_user cu2 ON mi.IssuedToUserId = cu2.UserId
+			SELECT
+				mi.*,
+				CONCAT(cu.Surname," ",cu.OtherNames) IssuedBy,
+				CONCAT(cu2.Surname," ",cu2.OtherNames) IssuedTo,
+				d.Name Department,
+				wo.Description WONote
+			FROM whs_issue mi
+			LEFT JOIN work_order wo 			ON wo.WorkOrderId = mi.WorkOrderId
+			INNER JOIN core_department d 	ON mi.DepartmentId = d.DepartmentId
+			INNER JOIN core_user cu 			ON mi.IssuedByUserId = cu.UserId
+			INNER JOIN core_user cu2 			ON mi.IssuedToUserId = cu2.UserId
 		'/>
 
 		<cfset this.MI_COUNT_SQL = '
-            SELECT
-            	COUNT(mi.IssueId) C
-            FROM whs_issue mi
-        	INNER JOIN core_department d ON mi.DepartmentId = d.DepartmentId
-        	INNER JOIN core_user cu ON mi.IssuedByUserId = cu.UserId
-        	INNER JOIN core_user cu2 ON mi.IssuedToUserId = cu2.UserId
+			SELECT
+				COUNT(mi.IssueId) C
+			FROM whs_issue mi
+			LEFT JOIN work_order wo 			ON wo.WorkOrderId = mi.WorkOrderId
+			INNER JOIN core_department d ON mi.DepartmentId = d.DepartmentId
+			INNER JOIN core_user cu ON mi.IssuedByUserId = cu.UserId
+			INNER JOIN core_user cu2 ON mi.IssuedToUserId = cu2.UserId
 		'/>
 
 		<cfset this.MI_ITEM_SQL = '
@@ -203,7 +220,7 @@
 		<cfquery name="qMRI">
 			#this.MR_NI_ITEM_SQL#
 			WHERE mri.MRId = <cfqueryparam value="#arguments.mrid#" cfsqltype="cf_sql_integer"/>
-            	AND mri.ItemId IS NULL
+        AND mri.ItemId IS NULL
 		</cfquery>
 
 		<cfreturn qMRI/>
@@ -238,96 +255,187 @@
 		<cfset mr = arguments.mr_/>
 		<cfset mrid = mr.id/>
 
-        <cfparam name="form.ServiceRequestId" default="0"/>
-				<!---cfif form.Category eq "r">
-					<cfset form.Note = "For warehouse stock replenishment">
-				</cfif--->
+    <cfparam name="form.ServiceRequestId" default="0"/>
 		<cftransaction action="begin">
 
-            <cfquery result="rt">
-                <cfif mrid eq 0>
-                    INSERT INTO
-                <cfelse>
-                    UPDATE
-                </cfif>
-                    whs_mr SET
-					<cfif val(form.ServiceRequestId)>
-                    	`ServiceRequestId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.ServiceRequestId#">,
+			<cfquery result="rt">
+				<cfif mrid eq 0>
+					INSERT INTO
+				<cfelse>
+					UPDATE
+				</cfif>
+					whs_mr SET
+				<cfif val(form.DepartmentId)>
+					`DepartmentId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.DepartmentId#">,
+				</cfif>
+				`Date` = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(Now(),'dd/mmm/yyyy')#">,
+				`DateRequired` = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(form.DateRequired,'dd/mmm/yyyy')#">,
+				`DateIssued` = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(form.DateIssued,'dd/mmm/yyyy')#">,
+				`Note` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Note#">,
+				`Category` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Category#">,
+				<cfif val(form.WorkOrderId)>
+					`WorkOrderId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.WorkOrderId#">,
+				</cfif>
+					`CreatedByUserId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#Request.UserInfo.UserId#">,
+					`Currency` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Currency#">,
+					`Type` = <cfqueryparam cfsqltype="cf_sql_varchar" value="SI">
+				<cfif mrid neq 0>
+					WHERE MRId = <cfqueryparam cfsqltype="cf_sql_integer" value="#mrid#">
+				</cfif>
+			</cfquery>
+
+			<cfif mrid eq 0>
+				<cfset mrid = rt.GENERATED_KEY/>
+			</cfif>
+
+				<!--- upload attachments --->
+				<cfparam name="form.Attachments" default=""/>
+				<cfif form.Attachments neq "">
+					<cfset f = CreateObject("component","assetgear.com.awaf.util.file").init()/>
+					<cfset s_path = form.AttachmentsSource & "/" & form.Attachments />
+					<cfset d_path = form.AttachmentsDestination & "/whs_mr/" & mrid & "/" />
+					<cfset f.Move('whs_mr', MRId,'a',s_path,d_path)/>
+				</cfif>
+				<!---   update Material Requisition from temp data
+								int0 - Quantity, int1 - Description, int2 - Unit Price ---->
+				<cfset h = createobject('component','assetgear.com.awaf.util.helper').Init()/>
+				<cfset itemObj = createobject('component','assetgear.com.awaf.ams.warehouse.Item').Init()/>
+
+				<cfif mr.Type eq "SI">
+						<!--- update qor --->
+					<cfset qmri = h.GetTempDataToUpdate(mr.MRSIItem)/>
+					<cfloop query="qmri">
+						<cfif mr.id EQ 0>
+							<cfquery>
+								INSERT INTO whs_item SET
+									QOR = QOR + #qmri.int1#
+								WHERE ItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qmri.int0#"/>
+							</cfquery>
+						</cfif>
+					</cfloop>
+					<cfset h.SaveFromTempTable(mr.MRSIItem,
+						"whs_mr_item",
+						"ItemId,Quantity,UnitPrice",
+						"int0,int1,float0",
+						"MRItemId","MRId",mrid)/>
+				<cfelse> <!--- NI --->
+					<!--- create items form wo --->
+					<!--- delete non invetory items in work order --->
+					<cfquery>
+						DELETE FROM work_order_item WHERE WorkOrderId = #val(form.WorkOrderId)#
+					</cfquery>
+					<cfset qmri = h.GetTempDataToUpdate(mr.ItemFromWO)/>
+					<cfloop query="qmri">
+						<cfquery result="rt">
+							INSERT INTO whs_item SET
+								Description = <cfqueryparam cfsqltype="cf_sql_varchar" value="#qmri.text0#"/>,
+								UMId 				= <cfqueryparam cfsqltype="cf_sql_varchar" value="#itemObj.GetUMByCode(qmri.text1).UMId#"/>,
+								VPN 				= <cfqueryparam cfsqltype="cf_sql_varchar" value="#qmri.text3#"/>,
+								Maker 			= <cfqueryparam cfsqltype="cf_sql_varchar" value="#qmri.text2#"/>,
+								QOR 				= <cfqueryparam cfsqltype="cf_sql_integer" value="#qmri.int0#"/>
+						</cfquery>
+						<cfset item_id = setCode(rt.GENERATED_KEY)/>
+						<cfquery>
+							INSERT INTO whs_mr_item SET 
+								ItemId 		= <cfqueryparam cfsqltype="cf_sql_integer" value="#item_id#"/>,
+								Quantity 	= <cfqueryparam cfsqltype="cf_sql_integer" value="#qmri.int0#"/>,
+								MRId 			= <cfqueryparam cfsqltype="cf_sql_integer" value="#mrid#"/>
+						</cfquery> 
+						<cfquery>
+							INSERT INTO work_order_item SET 
+								ItemId = #item_id#,
+								WorkOrderId = #val(form.WorkOrderId)#,
+								Quantity = #val(qmri.int0)#,
+								Status = "Close"
+						</cfquery>
+					</cfloop>
+
+					<cfset qmri2 = h.GetTempDataToUpdate(mr.DirectItems)/>
+					<cfloop query="qmri2">
+						<cfquery>
+							UPDATE whs_item SET 
+								QOR = QOR + #qmri2.int1#
+							WHERE ItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qmri2.int0#"/>
+						</cfquery>
+						<cfquery>
+							INSERT INTO whs_mr_item SET 
+								ItemId 		= <cfqueryparam cfsqltype="cf_sql_integer" value="#qmri2.int0#"/>,
+								Quantity 	= <cfqueryparam cfsqltype="cf_sql_integer" value="#qmri2.int1#"/>,
+								MRId 	= <cfqueryparam cfsqltype="cf_sql_integer" value="#mrid#"/>
+						</cfquery> 
+						<cfquery>
+							INSERT INTO work_order_item SET 
+								ItemId = #qmri2.int0#,
+								WorkOrderId = #val(form.WorkOrderId)#,
+								Quantity = #val(qmri2.int1)#,
+								Status = "Close"
+						</cfquery>
+					</cfloop>
+				</cfif>
+				<!--- update totalvalue in MR --->
+				<cfquery>
+					UPDATE `whs_mr` SET
+						TotalValue = (
+							SELECT SUM(UnitPrice*Quantity)
+							FROM `whs_mr_item`
+							WHERE MRId = #mrid#
+						)
+					WHERE MRId = #mrid#
+				</cfquery>
+				<!--- update wo --->
+				<cfif val(form.WorkOrderId)>
+					<cfquery>
+						UPDATE work_order SET 
+							MRId = <cfqueryparam cfsqltype="cf_sql_integer" value="#mrid#"/>,
+							Status2 = "Sent to Manager"
+						WHERE WorkOrderId = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.WorkOrderId#"/>
+					</cfquery>
+				<cfelse>
+					<!--- send to Manager to sign off--->
+					<cfif form.DepartmentId == 16>
+						<cfset to_email = application.com.User.GetEmailsInRole("MS")/>
+					<cfelse>
+						<cfset to_email = application.com.User.GetEmailsInRoleAndDept("MGR", form.DepartmentId)/>
 					</cfif>
-					<cfif val(form.DepartmentId)>
-                    	`DepartmentId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.DepartmentId#">,
+					<cfif to_email eq "">
+						<cfset to_email = "adexfe@live.com"/>
 					</cfif>
-                    `Date` = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(Now(),'dd/mmm/yyyy')#">,
-                    `DateRequired` = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(form.DateRequired,'dd/mmm/yyyy')#">,
-                    `DateIssued` = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(form.DateIssued,'dd/mmm/yyyy')#">,
-                    `Note` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Note#">,
-                    `Category` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Category#">,
+					<cfset wh_admin = application.com.User.GetEmailsInRole("WH_SV")/>
 					<cfif val(form.WorkOrderId)>
-                   		`WorkOrderId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.WorkOrderId#">,
+						<cfquery name="qWOC">
+							SELECT u.Email, wo.Description FROM work_order wo
+							INNER JOIN core_user u ON u.UserId = wo.CreatedByUserId
+						</cfquery>
+						<cfif listLen(to_email) AND application.LIVE EQ application.MODE>
+							<cfmail from="AssetGear <do-not-reply@assetgear.net>" to="adexfe@live.com" cc="#wh_admin#,#qWOC.Email#" subject="Matateria Requisition for WO ###form.WorkOrderId#" type="html">
+								Hello,
+								<p>
+										The following work order requires your attention & approval :
+										<br/> Work Order ###form.WorkOrderId# : #qWOC.Description#
+								</p>
+								<p>
+									Kindly login to <a href="#application.site.url#">AssetGear</a>
+								</p>
+								<p>Thank you<br/>
+							</cfmail>
+						</cfif>
 					</cfif>
-                    `CreatedByUserId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#Request.UserInfo.UserId#">,
-                    `Currency` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Currency#">,
-                    `Type` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.type#">
-                <cfif mrid neq 0>
-                    WHERE MRId = <cfqueryparam cfsqltype="cf_sql_integer" value="#mrid#">
-                </cfif>
-            </cfquery>
-
-            <cfif mrid eq 0>
-                <cfset mrid = rt.GENERATED_KEY/>
-            </cfif>
-
-            <!---   update Material Requisition from temp data
-                    int0 - Quantity, int1 - Description, int2 - Unit Price ---->
-            <cfset h = createobject('component','assetgear.com.awaf.util.helper').Init()/>
-
-            <cfif mr.Type eq "SI">
-                <!--- update qor --->
-                <cfset qmri = h.GetTempDataToUpdate(mr.MRSIItem)/>
-                <cfloop query="qmri">
-                	<cfquery>
-                    	UPDATE whs_item SET
-                        	<cfif mr.id eq 0>
-                        		QOR = QOR + #qmri.int1#
-                            <cfelse>
-                            	<!--- qor = qor - oldqor + newqor --->
-                                QOR = ABS(QOR - (SELECT Quantity FROM whs_mr_item WHERE ItemId = #qmri.int0# AND MRId = #mrid#) + #qmri.int1#)
-                            </cfif>
-                        WHERE ItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qmri.int0#"/>
-                    </cfquery>
-                </cfloop>
-                <cfset h.SaveFromTempTable(mr.MRSIItem,
-                    "whs_mr_item",
-                    "ItemId,Quantity,UnitPrice",
-                    "int0,int1,float0",
-                    "MRItemId","MRId",mrid)/>
-            <cfelse><!--- NI --->
-                <cfset h.SaveFromTempTable(mr.MRNIItem,
-                    "whs_mr_item",
-                    "VPN,Quantity,UnitPrice",
-                    "text0,float0,float1",
-                    "MRItemId","MRId",mrid)/>
-            </cfif>
-            <!--- update totalvalue in MR --->
-            <cfquery>
-                UPDATE `whs_mr` SET
-                    TotalValue = (
-                        SELECT SUM(UnitPrice*Quantity)
-                        FROM `whs_mr_item`
-                        WHERE MRId = #mrid#
-                    )
-                WHERE MRId = #mrid#
-            </cfquery>
-            <!--- update wo --->
-            <cfif form.WorkOrderId neq "">
-                <cfquery>
-                    UPDATE work_order SET MRId = <cfqueryparam cfsqltype="cf_sql_integer" value="#mrid#"/>
-                    WHERE WorkOrderId = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.WorkOrderId#"/>
-                </cfquery>
-            </cfif>
+				</cfif>
 		</cftransaction>
 
 		<cfreturn mrid/>
+	</cffunction>
+
+	<cffunction name="SetCode">
+   	<cfargument name="id" required="yes" type="numeric"/>
+
+		<cfquery>
+			UPDATE whs_item SET 
+				Code = #arguments.id#
+			WHERE ItemId = #arguments.id#
+		</cfquery>
+
+		<cfreturn arguments.id/>
 	</cffunction>
 
    <cffunction name="ReturnMaterialToWarehouse" returntype="void" access="public">

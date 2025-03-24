@@ -26,6 +26,7 @@
 <cfquery name="qSL" cachedwithin="#CreateTime(5,0,0)#">
 	SELECT * FROM shelf_location
     WHERE ShelfLocationId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qWI.ShelfLocationId#">
+    ORDER BY CAST(SUBSTRING(code, 2) AS UNSIGNED)
 </cfquery>
 
 <cfquery name="qD" cachedwithin="#CreateTime(5,0,0)#">

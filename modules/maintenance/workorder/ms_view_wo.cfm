@@ -132,8 +132,6 @@
     <f:TextArea name="Comment" value="" rows="6" Label="Comments/Remarks"  class="span10"/>
   </div>
   
-
-    
   <div id="#Id4#"> 
     <util:FileView type="a" table="work_order" pk="#url.id#" source="doc/attachment/" column="4"/>
   </div>

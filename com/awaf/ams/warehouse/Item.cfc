@@ -2,15 +2,29 @@
 
 	<cffunction name="Init" access="public" returntype="Item">
 
-		<cfset this.WAREHOUSE_ITEM_SQL = '
+<!--- 		<cfset this.WAREHOUSE_ITEM_SQL = '
 			SELECT
-				whi.*, CONCAT("[",whi.Code,"] ",whi.Description," ",whi.VPN) ItemDescription,
+				whi.*, CONCAT("[",whi.Code,"] ",whi.Description," [",whi.VPN,"]") ItemDescription,
 				sl.Code Location,
 				um.Title UM
             FROM whs_item whi
 			INNER JOIN um ON whi.UMId = um.UMId
 			INNER JOIN shelf_location sl ON whi.ShelfLocationId = sl.ShelfLocationId
+		'/> --->
+		<cfset this.WAREHOUSE_ITEM_SQL = '
+			SELECT 
+				whi.*, 
+				CONCAT("[", whi.Code, "] ", whi.Description, " [", whi.VPN, "]") AS ItemDescriptionWithVPN,
+				CONCAT("[", whi.Code, "] ", whi.Description, " [", whi.VPN, "] [QTY: ", whi.QOH, "]") AS ItemDescriptionWithVPNAndQOH,
+				CONCAT("[", whi.Code, "] ", whi.Description, " [QTY : ", whi.QOH, "]") AS ItemDescriptionWithQOH,
+				CONCAT("[",whi.Code,"] ", whi.Description) ItemDescription, 
+				sl.Code AS Location,
+				um.Title AS UM
+			FROM whs_item AS whi
+			INNER JOIN um ON whi.UMId = um.UMId
+			LEFT JOIN shelf_location AS sl ON whi.ShelfLocationId = sl.ShelfLocationId
 		'/>
+<!--- 			; --->
 
 		<cfset this.WAREHOUSE_ITEM_COUNT_SQL = '
 			SELECT count(whi.ItemId) c
@@ -22,14 +36,27 @@
     </cffunction>
 
     <cffunction name="GetItem" access="public" returntype="query" hint="get al item in the warehouse">
-        <cfargument name="wi" type="numeric" required="yes" hint="get Warehouse Item"/>
+			<cfargument name="wi" type="numeric" required="yes" hint="get Warehouse Item"/>
 
-        <cfquery name="qI_">
-            #this.WAREHOUSE_ITEM_SQL#
-            WHERE ItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.wi#">
-        </cfquery>
+			<cfquery name="qI_">
+				#this.WAREHOUSE_ITEM_SQL#
+				WHERE ItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.wi#">
+			</cfquery>
 
-        <cfreturn qI_/>
+			<cfreturn qI_/>
+    </cffunction>
+
+    <cffunction name="GetUMByCode" access="public" returntype="query">
+			<cfargument name="title" type="string" required="yes"/>
+
+			<cfquery name="qI_" >
+				SELECT * FROM um
+				WHERE 
+					Code LIKE <cfqueryparam cfsqltype="cf_sql_varchar" value="%#trim(arguments.title)#%" /> OR
+					Title LIKE <cfqueryparam cfsqltype="cf_sql_varchar" value="%#trim(arguments.title)#%" />
+			</cfquery>
+
+			<cfreturn qI_/>
     </cffunction>
 
     <cffunction name="GetItems" access="public" returntype="query" hint="get al item in the warehouse">
@@ -44,40 +71,40 @@
     </cffunction>
 
     <cffunction name="GetAllUM" access="public" returntype="query" hint="get unit of measurment">
-        <cfquery name="qum" cachedwithin="#createTime(5,0,0)#">
-            SELECT * FROM `um`
-            ORDER BY `title`
-        </cfquery>
+			<cfquery name="qum" cachedwithin="#createTime(5,0,0)#">
+				SELECT * FROM `um`
+				ORDER BY `title`
+			</cfquery>
 
-        <cfreturn qum/>
+			<cfreturn qum/>
     </cffunction>
 
     <cffunction name="GetShelfLocations" access="public" returntype="query" hint="get shelf locations">
 
-        <cfquery name="qsl" cachedwithin="#createTime(5,0,0)#">
-             SELECT * FROM `shelf_location`
-             ORDER BY `code`
-        </cfquery>
+			<cfquery name="qsl" cachedwithin="#createTime(5,0,0)#">
+				SELECT * FROM `shelf_location`
+				ORDER BY CAST(SUBSTRING(code, 2) AS UNSIGNED)
+			</cfquery>
 
-        <cfreturn qsl/>
+			<cfreturn qsl/>
     </cffunction>
 
     <cffunction name="SaveWarehouseItem" access="public" returntype="numeric" output="true">
     	<cfargument name="form_" type="struct" required="yes" hint="Warehouse Item Data"/>
 
-        	<cfset form = arguments.form_/>
-            <cfset form.unitprice = val(trim(replace(form.unitprice,',','','all')))/>
-        	<cfset _id = form.id/>
-            <cfparam name="form.departmentids" default=""/>
-            <cfparam name="form.Currency" default=""/>
+			<cfset form = arguments.form_/>
+			<cfset form.unitprice = val(trim(replace(form.unitprice,',','','all')))/>
+			<cfset _id = form.id/>
+			<cfparam name="form.departmentids" default=""/>
+			<cfparam name="form.Currency" default=""/>
 
 			<cfset h = createobject('component','assetgear.com.awaf.util.helper').init()/>
 
 			<!--- get associate asset (Int0 = AssetIds)--->
-            <cfset assetIds_ = h.GetTempDataToUpdate(form.AssetIds)/>
-            <cfset assetIds_d = h.GetTempDataToDelete(form.AssetIds)/>
-            <cfset assetIds_d = valuelist(assetIds_d.Int0)/>
-            <cfset assetIds_ = valuelist(assetIds_.Int0)/>
+			<cfset assetIds_ = h.GetTempDataToUpdate(form.AssetIds)/>
+			<cfset assetIds_d = h.GetTempDataToDelete(form.AssetIds)/>
+			<cfset assetIds_d = valuelist(assetIds_d.Int0)/>
+			<cfset assetIds_ = valuelist(assetIds_.Int0)/>
 
 			<cftransaction action="begin">
                 <cfquery result="rt">
@@ -107,7 +134,7 @@
                     </cfif>
                 </cfquery>
                 <cfif form.id eq 0>
-                    <cfset form.id = rt.GENERATED_KEY/>
+                  <cfset form.id = rt.GENERATED_KEY/>
                 </cfif>
                 <!--- update each asset (items id) for each asset in assetIds_ --->
                 <cfset updateItemIdsInAsset(form.id,assetIds_,assetIds_d)/>
@@ -118,14 +145,20 @@
                 <cfset f = CreateObject("component","assetgear.com.awaf.util.file").init()/>
                 <!--- upload attachments --->
                 <cfset s_path = form.AttachmentsSource & "/" & form.Attachments />
-     			<cfset d_path = form.AttachmentsDestination & "/whs_item/" & form.id & "/" />
+     						<cfset d_path = form.AttachmentsDestination & "/whs_item/" & form.id & "/" />
                 <cfset f.Move('whs_item',form.id,'a',s_path,d_path)/>
                 <!--- upload photos --->
                 <cfset s_path = form.PhotosSource & "/" & form.Photos />
-     			<cfset d_path = form.PhotosDestination & "/whs_item/" & form.id & "/" />
+     						<cfset d_path = form.PhotosDestination & "/whs_item/" & form.id & "/" />
                 <cfset f.Move('whs_item',form.id,'p',s_path,d_path)/>
 
+							<cfif form.Code == "" && val(form.id)>
+								<cfquery>	
+									UPDATE whs_item SET Code = #form.id# WHERE ItemId = #val(form.id)#
+								</cfquery>
+							</cfif>
             </cftransaction>
+						
 
         <cfreturn form.id/>
 	</cffunction>
@@ -172,25 +205,25 @@
 
     <cffunction name="DeductFromQOH" access="public" returntype="void" hint="deduct form quantity on hand">
     	<cfargument name="id" required="yes" type="numeric" hint="item id"/>
-        <cfargument name="qty" required="yes" type="numeric" hint="quantity to remove"/>
+			<cfargument name="qty" required="yes" type="numeric" hint="quantity to remove"/>
 
-        <cfset qI = GetItem(arguments.id)/>
-        <cfif arguments.qty gt qI.QOH>
-        	<cfthrow message="The Quantity (#arguments.qty#) you want to issue out for Item '#qI.Description#' is more than the quantity on hand (#qI.QOH#)"/>
-        <cfelse>
-        	<cfquery>
-            	UPDATE whs_item SET QOH = QOH - #arguments.qty#
-                WHERE ItemId = #arguments.id#
-            </cfquery>
-        </cfif>
+			<cfset qI = GetItem(arguments.id)/>
+			<cfif arguments.qty gt qI.QOH>
+				<cfthrow message="The Quantity (#arguments.qty#) you want to issue out for Item '#qI.Description#' is more than the quantity on hand (#qI.QOH#)"/>
+			<cfelse>
+				<cfquery>
+					UPDATE whs_item SET QOH = QOH - #arguments.qty#
+					WHERE ItemId = #arguments.id#
+				</cfquery>
+			</cfif>
 
     </cffunction>
 
-   <cffunction name="ReceiveItem" access="public" returntype="void" hint="update the stock price">
+	<cffunction name="ReceiveItem" access="public" returntype="void" hint="update the stock price">
    	<cfargument name="id" required="yes" type="numeric" hint="item id"/>
-      <cfargument name="qty" required="yes" type="numeric" hint="qty to reive"/>
+		<cfargument name="qty" required="yes" type="numeric" hint="qty to reive"/>
 		<cfargument name="up" required="yes" type="numeric" hint="the new unit price"/>
-      <cfargument name="mr" required="yes" type="numeric" hint="MR Id"/>
+		<cfargument name="mr" required="no" type="numeric" hint="MR Id"/>
 
 		<cfset qI = GetItem(arguments.id)/>
 		<cfset np = arguments.up/>
@@ -202,13 +235,13 @@
 		--->
 
 		<cfquery>
-		   UPDATE whs_item SET
+			UPDATE whs_item SET
 				<cfif arguments.up neq 0>
-		   		UnitPrice = #arguments.up#,
+					UnitPrice = #arguments.up#,
 				</cfif>
-		      QOH = QOH + #arguments.qty#,
-				QOR = QOR - #arguments.qty#
-		   WHERE ItemId = #arguments.id#
+				QOH = #val(qI.QOH)+val(arguments.qty)#,
+				QOR = #val(qI.QOR)-val(arguments.qty)#
+			WHERE ItemId = #arguments.id#
 		</cfquery>
 		<cfquery name="qD">
 			SELECT * FROM whs_item
@@ -223,13 +256,13 @@
 			<cfquery>
 				UPDATE whs_mr_item SET
 					`Status` = "Close"
-			   WHERE ItemId = #arguments.id# AND MRId = #arguments.mr#
+			   WHERE ItemId = #arguments.id# AND MRId = #val(arguments.mr)#
 			</cfquery>
 		</cfif>
 
-    </cffunction>
+  </cffunction>
 
-    <cffunction name="CorrectItem" access="public" returntype="numeric" hint="correct stock qoh,qor and price">
+  <cffunction name="CorrectItem" access="public" returntype="numeric" hint="correct stock qoh,qor and price">
 		<cfargument name="f" required="yes" type="struct" hint="struct data"/>
 
 		<cftransaction action="begin">

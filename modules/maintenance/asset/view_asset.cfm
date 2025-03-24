@@ -244,7 +244,7 @@
 			<div id="qrcode_#url.id#"></div>
 			<script type="text/javascript">
 				var qrcode = new QRCode("qrcode_#url.id#", {
-					text: "http://#lcase(application.appName)#.assetgear.net/services/v.cfm?id=#url.id#",
+					text: "https://#lcase(application.appName)#.assetgear.net/services/v.cfm?id=#url.id#",
 					width: 250, height: 250,  correctLevel : QRCode.CorrectLevel.M
 				});
 			</script>

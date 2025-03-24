@@ -71,7 +71,7 @@
 					Status 	= 'Close'
 				WHERE MRId = #qW.MRId#
 			</cfquery>
-			<cfset logComment(form.id, form.Comment, "wo") />
+			<cfset application.com.Helper.logComment(form.id, form.Comment, "wo") />
 		<cfscript>
 			if(application.MODE == application.LIVE)	{
 				ws_email = userObj.GetEmailsInRole("WH_SUP")
@@ -107,7 +107,7 @@
 					Status2 = 'Sent to Warehouse'
 				WHERE WorkOrderId = #form.id#
 			</cfquery>
-			<cfset logComment(form.id, form.Comment, "wo") />
+			<cfset application.com.Helper.LogComment(form.id, form.Comment, "wo") />
 		<cfscript>
 			if(application.MODE == application.LIVE)	{
 				ws_email = userObj.GetEmailsInRole("WH_SUP")
@@ -216,8 +216,8 @@
 				</cfhttp>
 
 				<cfmail from="AssetGear <do-not-reply@assetgear.net>" 
-					to="adexfe@live.com" 
-					cc="#ws_email#,#qW.cb_Email#"
+					to="#qW.cb_Email#" 
+					cc="#ws_email#,chichineme.okonkwo@#application.domain#,procurement@#application.domain#"
 					subject="MR ###qW.MRId# Approved" type="html">
 						Hello, 
 						<p>
@@ -310,41 +310,7 @@
 
 		<cfset SaveWorkOrderFirst()/>
 
-		<cfset qW = getWO(form.id)/>
-		<cfset qU = getUser(val(qW.DepartmentId), qW.UnitId, "SUP")/>
-
-		<cftransaction>
-
-			<cfif qU.Recordcount>
-				<cfquery>
-					UPDATE work_order SET 
-						<cfif request.IsSV>
-							SupervisedByUserId = #request.userInfo.UserId#,
-							SupervisedApprovedDate = <cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#"/>,
-						</cfif>
-						Status2 = 'Sent to Superintendent'
-					WHERE WorkOrderId = #form.id#
-				</cfquery>
-
-				<cfif application.mode EQ application.LIVE>
-					<cfset application.com.Notice.SendEmail(
-						to			: qU.columnData("Email").toList(),
-						cc  		: qW.cb_Email,
-						subject	: "Work Order ###qW.WorkOrderId#",
-						msg 		: "
-							Hello, 
-							<p>
-								Work Order ###qW.WorkOrderId# has been sent to you for approval <br/>
-								==================<br/>
-								#qW.Description#<br/>
-								==================<br/>
-							</p> 
-							Thank you
-						"
-					)/>
-				</cfif>
-			</cfif>	
-		</cftransaction>
+		<cfset application.com.WorkOrder.SentToSuperintendent(form.id)/>
 		WorkOrder ###form.id# Was sent to Superintendent
 	</cfcase>
 
@@ -1593,20 +1559,6 @@
 	<cfreturn newId/>
 </cffunction>
 
-<cffunction name="logComment">
-  <cfargument name="key" required="yes" type="numeric">
-  <cfargument name="comment" required="yes" type="string">
-  <cfargument name="model" required="yes" type="string" default="wo">
-  
-  <cfquery>
-  	INSERT INTO core_comment SET 
-      `PK` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.key#"/>,
-      CommentByUserId = <cfqueryparam cfsqltype="cf_sql_integer" value="#request.userInfo.userId#"/>,
-      Comments = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.comment#"/>,
-      `Table` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.model#"/>
-  </cfquery>
-  
-  <cfreturn true />
-</cffunction>
+
 
 <cfobjectcache action="clear"/>

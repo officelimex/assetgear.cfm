@@ -73,7 +73,19 @@
 
 </div>
 <div id="#Id2#" align="center">
- 	<textarea id="TaskDetails" name="TaskDetails" style="width:94%; height:270px;">#qPM.TaskDetails#</textarea>
+	<script>
+		<cfset dd= "_#CreateUUID()#"/>
+		CKEDITOR.replaceAll('#dd#');
+		var editor = CKEDITOR.instances['TaskDetails'], _txteditor = $$('.#dd#')[0];
+		editor.on( 'key', function( e ) {
+			_txteditor.set('text',e.editor.getData());
+		});
+		editor.on( 'blur', function( e ) {
+			_txteditor.set('text',e.editor.getData());
+		});
+	</script>
+<!---   <textarea id="WorkDetails" name="WorkDetails" style="width:85%; height:110px;" class="#dd#">#qWO.WorkDetails#</textarea></td> --->
+ 	<textarea id="TaskDetails" name="TaskDetails" style="width:94%; height:370px;" class="#dd#">#qPM.TaskDetails#</textarea>
 </div>
 <div id="#Id4#" align="center">
 	<textarea id="Note" name="Note" style="width:94%; height:270px;">#qPM.Note#</textarea>

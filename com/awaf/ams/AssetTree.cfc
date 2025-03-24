@@ -35,7 +35,7 @@ component returnFormat="json" {
         "id": "loc_" & loc.LocationId,   // Prefix with "loc_"
         "originalId": loc.LocationId,     // Keep original ID
         "text": loc.Name,
-        "icon": "fas fa-map-signs",
+        "icon": "fas fa-map-signs light-blue",
         "children": true,
         "type": "location"
       });

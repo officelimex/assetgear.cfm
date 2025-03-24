@@ -146,11 +146,19 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
   </tr>
   <tr>
     <td align="right">Sign / Date:</td>
-    <td>........................................................</td>
+    <td>
+      <cfset fl = util.GetSignaturePath(qMR.ReceivedByUserId)/>
+      <cfif len(fl)>
+        <cfhttp url="#fl#" method="get" result="imageData" />
+        <cfset base64Image = ToBase64(imageData.Filecontent) />
+        &nbsp;&nbsp;&nbsp;<img src="data:image/png;base64,#base64Image#" height="30"> 
+        <span style="font-size:7px;">#dateformat(qMR.Date, 'dd/mm/yyyy')#</span>
+      </cfif>    
+    </td>
   </tr>
   <tr>
     <td align="right">&nbsp;</td>
-    <td><sup style="font-size:7px;">Material/Logistics: </sup></td>
+    <td><sup style="font-size:7px;">Received by: #qMR.ReceivedBy#</sup></td>
   </tr>
 </table></td>
   </tr>

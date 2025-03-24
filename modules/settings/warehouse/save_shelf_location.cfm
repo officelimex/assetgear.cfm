@@ -12,6 +12,7 @@
 <cfquery name="qP">
 	SELECT * FROM shelf_location
     WHERE ShelfLocationId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.id#"/>
+		ORDER BY CAST(SUBSTRING(code, 2) AS UNSIGNED)
 </cfquery>
 
 

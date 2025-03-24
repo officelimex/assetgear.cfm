@@ -40,22 +40,25 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
 <cfinclude template="../../../../include/letter_head.cfm"/>
 </cfdocumentitem>
 <tr>
-  <td><table width="100%" border="0">
-    <tr>
-      <td valign="top" width="65%" align="right"><table width="50%" border="0" cellpadding="0" cellspacing="0" class="head_section">
+  <td>
+    <table width="100%" border="0">
+      <tr>
+        <td valign="top" width="30%" align="left"><table width="100%" border="0" cellpadding="0" cellspacing="0" class="head_section">
         <tr>
-          <td width="21%" valign="top" class="left bottom">Department</td>
-          <td width="79%" valign="top" nowrap="nowrap" class="right bottom">#qMI.Department#</td>
-        </tr>
-        </table></td>
-      <td valign="top" width="35%" align="center"><table width="90%" border="0" cellpadding="0" cellspacing="0" class="head_section">
-        <tr>
-          <td width="40%" valign="top" class="left">Date issued</td>
-          <td width="60%" valign="top" class="right">#Dateformat(qMI.DateIssued,'dd-mmm-yyyy')#</td>
+          <td width="80px" valign="top" class="left bottom">Department</td>
+          <td  valign="top" nowrap="nowrap" class="right bottom">#qMI.Department#</td>
         </tr>
         <tr>
-          <td valign="top" nowrap="nowrap" class="left bottom">Worder Order ##</td>
-          <td valign="top" class="right bottom">#qMI.WorkOrderId#&nbsp;</td>
+          <td  valign="top" class="left">Date issued</td>
+          <td valign="top" class="right bottom">#Dateformat(qMI.DateIssued,'dd-mmm-yyyy')#</td>
+        </tr>
+    </table>
+      </td>
+        <td valign="top" width="70%" align="left">
+        <table width="100%" border="0" cellpadding="0" cellspacing="0" class="head_section">
+        <tr>
+          <td valign="top" width="80px" nowrap="nowrap" class="left bottom">Worder Order </td>
+          <td valign="top" class="right bottom"><u><b>###qMI.WorkOrderId#</b></u>&nbsp;#qMI.WONote#</td>
         </tr>
         </table></td>
       </tr>

@@ -14,7 +14,7 @@
         </cfquery>
         <cfquery>
             UPDATE whs_issue_item SET 
-                UnitPrice = <cfqueryparam cfsqltype="cf_sql_float" value="#qI.unitprice#"/>,
+                UnitPrice = <cfqueryparam cfsqltype="cf_sql_float" value="#val(qI.unitprice)#"/>,
                 Currency = <cfqueryparam cfsqltype="cf_sql_varchar" value="#qI.Currency#"/>
             WHERE ItemIssueId = #qIItem.ItemIssueId#
         </cfquery>

@@ -8,8 +8,6 @@
 <cfimport taglib="../../../assets/awaf/tags/xForm_1001/" prefix="f" />
 <cfimport taglib="../../../assets/awaf/tags/xEditTable/" prefix="et" />
 
-<!---<cfset qJR = application.com.WorkOrder.GetServiceRequest(url.id)/>--->
-<!---<cfset qA = application.com.Asset.GetAllAsset()/>--->
 <cfset qCU = application.com.User.GetUsers()/>
 <cfset qAL = application.com.Asset.GetLocationInGroup(' &mdash; ')/>
 
@@ -34,14 +32,14 @@
     <td valign="top" colspan="2">
 
     <div class="alert alert-warning">NB: The materials below should be non work related, for work related materials, use Work Order</div>
-        <et:Table allowInput height="200px" id="ServiceRequestItem">
-            <et:Headers>
-                <et:Header title="Material needed" size="8" type="text"/>
-                <et:Header title="Unit price" size="2" type="float"/>
-                <et:Header title="Qty" size="1" type="int" />
-                <et:Header title="" size="1"/>
-            </et:Headers>
-        </et:Table>
+      <et:Table allowInput height="200px" id="ServiceRequestItem">
+        <et:Headers>
+          <et:Header title="Material needed" size="8" type="text"/>
+          <et:Header title="Unit price" size="2" type="float"/>
+          <et:Header title="Qty" size="1" type="int" />
+          <et:Header title="" size="1"/>
+        </et:Headers>
+      </et:Table>
     </td>
   </tr>
   <tr>
@@ -64,12 +62,12 @@
  <tr>
  	<td colspan="2">
 <cfquery name="qA">
-	SELECT
-    	CONCAT(a.Description,' @ ',l.Name,' ', IFNULL(al.LocDescription,'')) Asset, a.AssetId, al.AssetLocationId
-    FROM asset a
-    LEFT JOIN asset_location al ON (al.AssetId = a.AssetId)
-    INNER JOIN location l ON (l.LocationId = al.LocationId)
-    WHERE al.Status = "Online"
+  SELECT
+    CONCAT(a.Description,' @ ',l.Name,' ', IFNULL(al.LocDescription,'')) Asset, a.AssetId, al.AssetLocationId
+  FROM asset a
+  LEFT JOIN asset_location al ON (al.AssetId = a.AssetId)
+  INNER JOIN location l ON (l.LocationId = al.LocationId)
+  WHERE al.Status = "Online"
 </cfquery>
 <f:Select name="AssetLocationId" label="Asset" required ListValue="#valuelist(qA.AssetLocationId,'`')#" autoselect delimiters="`" ListDisplay="#valuelist(qA.Asset,'`')#" class="span10"/>
 </td>
@@ -86,9 +84,9 @@
   </div>
 
 <cfif url.id eq 0>
-    <f:ButtonGroup>
-        <f:Button id="yy" beforeSave="if (!confirm('This record can not be edited after saving. \nDo you want to save this record?')) return True"   value="Create Request" class="btn-primary" IsSave/>
-    </f:ButtonGroup>
+  <f:ButtonGroup>
+    <f:Button id="yy" beforeSave="if (!confirm('This record can not be edited after saving. \nDo you want to save this record?')) return True" value="Create Request" class="btn-primary" IsSave/>
+  </f:ButtonGroup>
 </cfif>
 </f:Form>
 <script>

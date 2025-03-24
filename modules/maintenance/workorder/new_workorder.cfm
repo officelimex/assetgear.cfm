@@ -245,8 +245,8 @@
 				<nt:NavTab renderTo="#woId#">
 					<nt:Tab>
 						<nt:Item title="Open Section" isactive/>
-						<nt:Item title="Material In Stock"/>
-						<nt:Item title="Material Out of Stock"/>
+						<nt:Item title="Warehouse Inventory"/>
+						<nt:Item title="Non-Stocked Materials"/>
 						<nt:Item title="Labour Section"/>
 						<nt:Item title="Supervision"/>
 						<nt:Item title="Contractors"/>

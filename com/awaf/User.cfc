@@ -2,40 +2,39 @@
 
 	<cffunction name="Init" access="public" returntype="User" hint="Init the component">
 
-        <cfset this.SQL_USER = '
-				SELECT
-					u.*,
-					CONCAT(u.Surname," ",u.OtherNames) AS `UserName`,
-					l.Role,
-					cc.Name as Company,
-					s.Height,s.Width,
-					d.`Name` AS DepartmentName
-				FROM
-					core_user AS u
-				LEFT JOIN core_login AS l ON u.UserId = l.UserId
-				INNER JOIN core_department AS d ON u.DepartmentId = d.DepartmentId
-				INNER JOIN core_company cc ON u.CompanyId = cc.CompanyId
-				LEFT JOIN signature s ON u.UserId = s.UserId
-		'/>
-        <cfset this.SQL_USER_LOGIN = '
-            SELECT
-                u.UserId, u.Email, CONCAT(u.Surname," ",u.OtherNames) User, u.Email EmployeeEmail,
-                l.Role
-            FROM
-            	core_user u
-			LEFT JOIN core_login l ON l.UserId = u.UserId
+		<cfset this.SQL_USER = '
+			SELECT
+				u.*,
+				CONCAT(u.Surname," ",u.OtherNames) AS `UserName`,
+				l.Role,
+				cc.Name as Company,
+				s.Height,s.Width,
+				d.`Name` AS DepartmentName
+			FROM
+				core_user AS u
+			LEFT JOIN core_login AS l ON u.UserId = l.UserId
+			INNER JOIN core_department AS d ON u.DepartmentId = d.DepartmentId
+			INNER JOIN core_company cc ON u.CompanyId = cc.CompanyId
+			LEFT JOIN signature s ON u.UserId = s.UserId
+	'/>
+	<cfset this.SQL_USER_LOGIN = '
+		SELECT
+			u.UserId, u.Email, CONCAT(u.Surname," ",u.OtherNames) User, u.Email EmployeeEmail,
+			l.Role
+		FROM
+			core_user u
+		LEFT JOIN core_login l ON l.UserId = u.UserId
+	'/>
+
+		<cfset this.DEPARTMENT_SQL = '
+				SELECT d.* FROM core_department d
 		'/>
 
-        <cfset this.DEPARTMENT_SQL = '
-            SELECT d.* FROM core_department d
-        '/>
-
-        <cfset this.SQL_UNIT = '
-            SELECT * FROM core_unit
-        '/>
+		<cfset this.SQL_UNIT = '
+				SELECT * FROM core_unit
+		'/>
 		
-		<cfset this.SQL_COMPANY = '
-            SELECT * FROM core_company
+		<cfset this.SQL_COMPANY = '  SELECT * FROM core_company
         '/>
 		
 		<cfset this.SQL_DCOMPANY = '
@@ -206,6 +205,38 @@
 		<cfreturn qEmp />
 	</cffunction>
 
+	<cffunction name="GetEmailsInRole" access="public" returntype="string" hint="Get all employees in a particular role">
+		<cfargument name="r" hint="role" required="yes" type="string">
+
+		<cfquery name="qEmp">
+			SELECT
+				u.Email EmployeeEmail
+			FROM
+				core_user u
+			LEFT JOIN core_login l ON l.UserId = u.UserId
+			WHERE l.Role IN (<cfqueryparam value = "#arguments.r#" CFSQLType = "cf_sql_varchar" list="true"/>)
+		</cfquery>
+
+		<cfreturn qEmp.columnData("EmployeeEmail").toList() />
+	</cffunction>
+
+	<cffunction name="GetEmailsInRoleAndDept" access="public" returntype="string" hint="Get all employees in a particular role">
+		<cfargument name="r" hint="role" required="yes" type="string">
+		<cfargument name="d" hint="department id" required="yes" type="numeric">
+
+		<cfquery name="qEmp">
+			SELECT
+				u.Email EmployeeEmail
+			FROM
+				core_user u
+			LEFT JOIN core_login l ON l.UserId = u.UserId
+			WHERE l.Role IN (<cfqueryparam value = "#arguments.r#" CFSQLType = "cf_sql_varchar" list="true"/>)
+				AND u.DepartmentId = #val(arguments.d)#
+		</cfquery>
+
+		<cfreturn qEmp.columnData("EmployeeEmail").toList() />
+	</cffunction>
+
     <cffunction name="NewUser" hint="create new employee" returntype="numeric" access="public">
     	<cfargument name="data" hint="struct data containing employee details" required="yes" />
 
@@ -256,9 +287,7 @@
         	SELECT * FROM core_login
             WHERE UserId = <cfqueryparam cfsqltype="cf_sql_integer" value="#d.UserId#"/>
         </cfquery>
-				<cfset systemOutput(d.Role, true)/>
-				<cfoutput>
-				</cfoutput>
+
         <cfquery>
         	<cfif qL.Recordcount>
             	UPDATE
@@ -476,42 +505,37 @@
     </cffunction>
 
     <cffunction name="ResetPIN" hint="reset employee PIN" returntype="string" access="public">
-        <cfargument name="eid" required="yes" hint="employrr id" type="numeric"/>
+			<cfargument name="eid" required="yes" hint="employrr id" type="numeric"/>
 
-        <cfset qUser = GetUser(arguments.eid)/>
-        <cfset s = CreateObject("component","assetgear.com.awaf.Security").init()/>
-        <cfset l = CreateObject("component","assetgear.com.awaf.Login").init()/>
-        <cfset qLog = l.GetUserByEmail(qUser.Email)/>
+			<cfset qUser = GetUser(arguments.eid)/>
+			<cfset s = CreateObject("component","assetgear.com.awaf.Security").init()/>
+			<cfset l = CreateObject("component","assetgear.com.awaf.Login").init()/>
+			<cfset qLog = l.GetUserByEmail(qUser.Email)/>
 
-        <cfif !qLog.recordcount>
-        	<cfthrow message="User does not have login detail"/>
-        </cfif>
+			<cfif !qLog.recordcount>
+				<cfthrow message="User does not have login detail"/>
+			</cfif>
 
-        <!--- create new pwd key --->
-        <cfset npin = randrange(1000,9999)/>
-        <cfset nkey = s.EncryptPassword(qLog.Role,qUser.Email,npin)/>
+			<!--- create new pwd key --->
+			<cfset npin = randrange(1000,9999)/>
+			<cfset nkey = s.EncryptPassword(qLog.Role,qUser.Email,npin)/>
 
-        <cfquery result="r">
-        	UPDATE core_login SET
-            PINKey = <cfqueryparam cfsqltype="cf_sql_varchar" value="#nkey#"/>
-          WHERE LoginId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qLog.LoginId#"/>
-        </cfquery>
+			<cfquery result="r">
+				UPDATE core_login SET
+					PINKey = <cfqueryparam cfsqltype="cf_sql_varchar" value="#nkey#"/>
+				WHERE LoginId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qLog.LoginId#"/>
+			</cfquery>
 
-        <!--- send pin via mail --->
+			<!--- send pin via mail --->
 
-        <cfreturn npin/>
+			<cfreturn npin/>
     </cffunction>
 
     <cffunction name="getRole" access="public" returntype="struct" hint="get all roles">
-			<!--- 			
-				<cfreturn {
-					Code : "UR,FS,SV,MS,HSE,PS,AD,WH",
-					Title : "User,F.S,Supervisor,Main. Supervisor,HSE,Production Supv.,IT,Warehouse"
-				}/> 
-			--->
+
 			<cfreturn {
-				Code  : "UR,SUP,SV,MS,IT,WH,WH_SV,WH_SUP",
-				Title : "User,Supritendent,Supervisor,Maintenance Mgr,IT,Warehouse Uesr,Warehouse Supervisor,Warehouse Supritendent"
+				Code  : "UR,SUP,SV,MGR,MS,IT,WH,WH_SV,WH_SUP",
+				Title : "User,Superintendent,Supervisor,Manager,Maintenance Mgr,IT,Warehouse User,Warehouse Supervisor,Warehouse Superintendent"
 			}/>
 
 		</cffunction>

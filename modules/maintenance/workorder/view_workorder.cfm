@@ -173,7 +173,6 @@
 </f:Form>
 
 <script>
-	/* $$('##__workorder_c_all_workorder#url.cid##url.filter#_#url.id# div.dbx-but-frame a.btn').setStyle('display','none'); */
  
 	function #woId#changePT(d)	{ 
 		if(d.value == 'm')	{

@@ -11,11 +11,11 @@ component {
 
 	include "env.cfm"; 
 	this.name = "#variables.appName#_ams";
-	this.applicationTimeout = createTimeSpan(1, 0, 0, 0);
+	this.applicationTimeout = createTimeSpan(100, 0, 0, 0);
 	this.clientmanagement = "yes";
 	this.ClientStorage = "cookie";
 	this.sessionmanagement = "yes";
-	this.sessiontimeout = createTimeSpan(0, 5, 0, 0);
+	this.sessiontimeout = createTimeSpan(100, 5, 0, 0);
 	this.setClientCookies = "yes";
 	this.datasource = variables.datasources["dsn"];
 	this.pdf.type = "classic";
@@ -73,12 +73,14 @@ component {
 		param name="request.IsHost" default="false" type="boolean";
 		param name="request.IsWarehouseMan" default="false" type="boolean";
 		param name="request.IsMS" default="false" type="boolean";
+		param name="request.IsMGR" default="false" type="boolean";
 		param name="request.IsAdmin" default="false" type="boolean";
 		param name="request.IsHSE" default="false" type="boolean";
 		param name="request.IsPS" default="false" type="boolean";
 		param name="request.IsSV" default="false" type="boolean";
 		param name="request.IsSup" default="false" type="boolean";
 		param name="request.IsFS" default="false" type="boolean";
+		param name="request.IsUser" default="false" type="boolean";
 
 		if (isDefined("request.userinfo.role")) {
 			switch (request.userinfo.role) {
@@ -94,6 +96,18 @@ component {
 				case "SV":
 					request.IsSV = true;
 					break;
+				case "MS":
+				case "MGR":
+					request.IsMGR = true;
+					break;
+				case "WH":
+				case "WH_SV":
+				case "WH_SUP":
+					request.IsWarehouseMan = true;
+					break;
+				case "UR":
+					request.IsUser = true;
+					break;
 			}
 
 			switch (request.userinfo.role) {
@@ -106,18 +120,10 @@ component {
 						case "HSE":
 							request.IsHSE = true;
 							break;
-						case "Warehouse":
-							request.IsWarehouseMan = true;
-							break;
 						case "Maintenance":
 							request.IsMtnc = true;
 							break;
-					}
-					break;
-				case "WH":
-				case "WH_SV":
-				case "WH_SUP":
-					request.IsWarehouseMan = true;
+					} 
 				break
 			}
 		}
@@ -160,6 +166,8 @@ component {
 		application.com.Notice = createObject('component', 'assetgear.com.awaf.ams.Notice').init();
 		application.com.Incident = createObject('component', 'assetgear.com.awaf.ams.maintenance.Incident').init();
 		application.com.File = createObject('component', 'assetgear.com.awaf.util.file').init();
+		application.com.Helper = createObject('component', 'assetgear.com.awaf.util.helper').init()
+
 	}
 
 }

@@ -19,20 +19,25 @@
 
 	<div class="span2" style="position:fixed;">
 		<n:Nav renderTo="#trans#">
+		<!--- subpageId="save_mr_ni" ReloadURL="modules/warehouse/transaction/received/save_m_received.cfm?newpage=true"/> --->
+
+			<n:NavItem type="header" title="Issuance"/>
 			<n:NavItem title="Issue Out Material" url="modules/warehouse/transaction/issue/save_material_issue.cfm?newpage=true" id="save_material_issue"/>
+			<n:NavItem title="Material Issued" isactive url="modules/warehouse/transaction/issue/material_issue.cfm" id="material_issue"/>
 			<n:NavItem title="Return Material back" url="modules/warehouse/transaction/save_material_returned.cfm?newpage=true" id="save_material_returned"/>
-			<n:navItem type="divider">
-			<n:NavItem title="New MR (Stocked)" url="modules/warehouse/transaction/save_mr.cfm?newpage=true" id="save_mr"/>
-			<n:NavItem title="New MR (Non-Stocked)" url="modules/warehouse/transaction/save_mrni.cfm?newpage=true" id="save_mrni"/>
-			<n:navItem type="divider">
-			<n:NavItem title="Material Issue" isactive url="modules/warehouse/transaction/issue/material_issue.cfm" id="material_issue"/>
 			<n:NavItem title="Material Returns" url="modules/warehouse/transaction/return/material_returned.cfm" id="material_returned"/>
-			<n:navItem type="divider">
-			<n:NavItem title="Material Received" url="modules/warehouse/transaction/received/m_received.cfm" id="material_received"/>
-			<n:navItem type="divider">
+			
+			<n:NavItem type="header" title="Material Requisition"/>
+			<n:NavItem title="New MR (Stocked)" url="modules/warehouse/transaction/save_mr.cfm?newpage=true" id="save_mr"/>
+			<n:NavItem title="New MR (Non-Stocked)" url="modules/warehouse/transaction/new_mrni.cfm?newpage=true" id="new_mrni"/>
 			<n:NavItem title="M.R. (In Stock)" url="modules/warehouse/transaction/mr/all_mr.cfm" id="all_mr"/>
 			<n:NavItem title="M.R. (Not In Stock)" url="modules/warehouse/transaction/mr/all_mrni.cfm"  id="all_mrni"/>
 			<n:navItem type="divider">
+			<n:NavItem title="Receive into Store" url="modules/warehouse/transaction/received/save_m_received.cfm?newpage=true" id="save_mr_ni"/>
+			<n:NavItem title="Material Received" url="modules/warehouse/transaction/received/m_received.cfm" id="material_received"/>
+			
+			<!--- <n:navItem type="divider"> --->
+			<n:NavItem type="header" title="Delivery"/>
 			<n:NavItem title="M.R. Delivery Note" url="modules/warehouse/transaction/delivery/all_delivery_note.cfm"  id="all_delivery_note"/>
 			<n:NavItem title="Material Delivery Note" url="modules/warehouse/transaction/delivery/all_mdelivery_note.cfm"  id="all_mdelivery_note"/>
 			<n:NavItem type="header" title="Reports"/>

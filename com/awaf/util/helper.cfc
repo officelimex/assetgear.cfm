@@ -59,6 +59,7 @@
 		<cfargument name="fk_field" hint="foringe key field" required="true" type="string"/>
 		<cfargument name="fk_value" hint="foringe key value" required="true" type="numeric" />
 		
+
 		<cfset llen = listlen(arguments.fld_des)/>
 		
 		<cftransaction action="begin">
@@ -94,9 +95,15 @@
 		                    	`#fld_d#` = 
 									<cfswitch expression="#ttype#">
 										<cfcase value="int"><cfqueryparam cfsqltype="cf_sql_integer" value="#val(evaluate(fld_s))#"/></cfcase>
-                                        <cfcase value="float"><cfqueryparam cfsqltype="cf_sql_decimal" value="#val(evaluate(fld_s))#"/></cfcase>
+                    <cfcase value="float"><cfqueryparam cfsqltype="cf_sql_decimal" value="#val(evaluate(fld_s))#"/></cfcase>
 										<cfcase value="date"><cfqueryparam cfsqltype="cf_sql_date" value="#evaluate(fld_s)#"/></cfcase>
-										<cfdefaultcase><cfqueryparam cfsqltype="cf_sql_varchar" value="#evaluate(fld_s)#"/></cfdefaultcase>
+										<cfdefaultcase>
+											<cfset rst = evaluate(fld_s)>
+											<cfif listFindNoCase("text1,text2,text3,text4,text5,text6", rst) && len(rst) == 5>
+												<cfset rst = ""/>
+											</cfif>
+											<cfqueryparam cfsqltype="cf_sql_varchar" value="#rst#"/>
+										</cfdefaultcase>
 									</cfswitch>
 									<cfif llen neq i>,</cfif>
 							</cfloop>
@@ -118,13 +125,19 @@
                                     <cfset fld_s = listgetat(arguments.fld_src,i)/>
                                     <cfset ttype = left(fld_s,len(fld_s)-1)/>
                                     `#fld_d#` = 
-                                        <cfswitch expression="#ttype#">
-                                            <cfcase value="int"><cfqueryparam cfsqltype="cf_sql_integer" value="#val(evaluate(fld_s))#"/></cfcase>
-                                            <cfcase value="date"><cfqueryparam cfsqltype="cf_sql_date" value="#evaluate(fld_s)#"/></cfcase>
-                                            <cfcase value="float"><cfqueryparam cfsqltype="cf_sql_decimal" value="#val(evaluate(fld_s))#"/></cfcase>
-                                            <cfdefaultcase><cfqueryparam cfsqltype="cf_sql_varchar" value="#evaluate(fld_s)#"/></cfdefaultcase>
-                                        </cfswitch>
-                                        <cfif llen neq i>,</cfif>
+																			<cfswitch expression="#ttype#">
+																				<cfcase value="int"><cfqueryparam cfsqltype="cf_sql_integer" value="#val(evaluate(fld_s))#"/></cfcase>
+																				<cfcase value="date"><cfqueryparam cfsqltype="cf_sql_date" value="#evaluate(fld_s)#"/></cfcase>
+																				<cfcase value="float"><cfqueryparam cfsqltype="cf_sql_decimal" value="#val(evaluate(fld_s))#"/></cfcase>
+																				<cfdefaultcase>
+																					<cfset rst = evaluate(fld_s)>
+																					<cfif listFindNoCase("text1,text2,text3,text4,text5,text6", rst) && len(rst) == 5>
+																						<cfset rst = ""/>
+																					</cfif>
+																					<cfqueryparam cfsqltype="cf_sql_varchar" value="#rst#"/>
+																				</cfdefaultcase>
+																			</cfswitch>
+																			<cfif llen neq i>,</cfif>
                                 </cfloop>
                         <cfelse>
                         	<!--- make query not emplty --->
@@ -206,5 +219,21 @@
         </cfquery>
     	
     </cffunction>
-    
+
+		<cffunction name="LogComment">
+			<cfargument name="key" required="yes" type="numeric">
+			<cfargument name="comment" required="yes" type="string">
+			<cfargument name="model" required="yes" type="string" default="wo">
+			
+			<cfquery>
+				INSERT INTO core_comment SET 
+					`PK` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.key#"/>,
+					CommentByUserId = <cfqueryparam cfsqltype="cf_sql_integer" value="#request.userInfo.userId#"/>,
+					Comments = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.comment#"/>,
+					`Table` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.model#"/>
+			</cfquery>
+			
+			<cfreturn true />
+		</cffunction>
+
 </cfcomponent>

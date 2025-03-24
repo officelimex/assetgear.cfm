@@ -280,8 +280,7 @@
 			<cfif wo.DateClosed lt wo.DateOpened>
 				<cfthrow message="Date closed can not be less than date work was Opened (#dateformat(wo.DateOpened,'dd-mm-yyyy')#)."/>
 			</cfif>
-		</cfif>
-
+		</cfif> 
 
 		<cftransaction action="begin">
 			<!--- update the status of the Service request --->
@@ -328,7 +327,7 @@
 				<cfelse>
 					<!--- if the user is just creating the work order, add the department --->
 					<cfif val(wo.CreatedByUserId)>
-						WorkingForId =  <cfqueryparam cfsqltype="cf_sql_int" value="#request.UserInfo.WorkingForId#"/>,
+						<!--- WorkingForId =  <cfqueryparam cfsqltype="cf_sql_int" value="#request.UserInfo.WorkingForId#"/>,--->
 						`CreatedByUserId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#wo.CreatedByUserId#"/>,
 					</cfif>
 				</cfif>
@@ -342,7 +341,7 @@
 				<cfelse>
 					`AssetLocationIds` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#wo.AssetLocationIds#"/>,
 				</cfif>
-			<cfif wo.WorkClassId == "">
+			<cfif wo.WorkClassId EQ "">
 				<cfabort showerror="Please select a work class"/>
 			</cfif>
 			<cfif wo.WorkClassId>
@@ -373,7 +372,6 @@
 				</cfif>
 
 				<cfset f = CreateObject("component","assetgear.com.awaf.util.file").init()/>
-
 				<!--- upload attachments --->
 				<cfparam name="wo.Attachments" default=""/>
 				<cfif wo.Attachments neq "">
@@ -448,9 +446,13 @@
 				WHERE WorkOrderId = #WOId#
 			</cfquery>
 
-			<cfif qpts.recordcount>
-				<cfset _emails = application.com.User.GetEmailsInRole("WH_SUP,WHS_SV")/> 
-				<cfif wo.WorkClassId == 12 && wo.Status == "Open">
+			<cfif qpts.recordcount AND wo.Status EQ "Open">
+				<cfset sentTo = "sup"/>
+				<cfif wo.WorkClassId EQ 12 AND request.IsSup>
+					<cfset sentTo = "warehouse"/>
+				</cfif>
+
+				<cfif sentTo EQ "warehouse">
 					<cfset _emails = application.com.User.GetEmailsInRole("WH_SUP")/> 
 					<cfquery name="qpts">
 						UPDATE work_order SET
@@ -458,7 +460,7 @@
 							Status2 = "Sent to Warehouse"
 						WHERE WorkOrderId = #WOId#
 					</cfquery>
-					<cfif listLen(_emails) && application.mode == application.LIVE && !arguments.draft>
+					<cfif application.mode EQ application.LIVE && !arguments.draft>
 
 						<cfmail from="AssetGear <do-not-reply@assetgear.net>" to="#_emails#" subject="Work Order ###WOId#" type="html">
 							Hello,
@@ -477,15 +479,104 @@
 							<p>Thank you<br/> 
 						</cfmail>
 					</cfif>
+				<cfelse>
+					<!--- send to supritendent to approve --->
+					<cfset SentToSuperintendent(WOId)/>				
 				</cfif>
 
 			</cfif>
+
  		</cftransaction>
 
 		<cfreturn WOId/>
 	</cffunction>
 
+<cfscript>
+	public query function getWO(required numeric id) {
+		
+		var qW = queryExecute("
+			SELECT 
+				wo.SupervisedByUserId, wo.WorkOrderId, wo.DepartmentId, wo.UnitId,
+					wo.Description, wo.Status2,
+					wo.SupervisedApprovedDate,
+					wo.MRId,
+				-- u.Email,
+				cb.Email cb_Email
+			FROM work_order wo
+			-- INNER JOIN core_user u ON u.UserId = wo.SupervisedByUserId
+			LEFT  JOIN core_user cb ON cb.UserId = wo.CreatedByUserId
+			WHERE WorkOrderId = ? 
+		", [arguments.id])
 
+		return qW
+	}
+</cfscript>
+
+
+<cffunction name="getUser">
+  <cfargument name="dept_id" required="no" type="string">
+  <cfargument name="unit_id" required="no" type="string">
+  <cfargument name="role" required="yes" type="string">
+
+	<cfset uid = val(arguments.unit_id)/>
+	<cfset did = val(arguments.dept_id)/>
+	<cfquery name="q" cachedwithin="#createTime(0,0,0)#">
+		SELECT 
+			u.Email
+		FROM core_user  u
+		INNER JOIN core_login l ON l.UserId = u.UserId
+		WHERE l.Role IN (<cfqueryparam value = "#arguments.role#" CFSQLType = "cf_sql_varchar" list="true"/>)
+			<cfif did>
+				AND u.DepartmentId = #val(did)#
+			</cfif>
+			<cfif uid>
+				AND u.UnitId = #uid#
+			</cfif>
+	</cfquery>
+
+	<cfreturn q/>
+</cffunction>
+
+
+	<cffunction name="SentToSuperintendent">
+		<cfargument name="id" type="numeric" required="true"/>
+	
+		<cfset qW = getWO(arguments.id)/>
+		<cfset qU = getUser(val(qW.DepartmentId), qW.UnitId, "SUP")/>
+	
+		<cftransaction>
+	
+			<cfif qU.Recordcount>
+				<cfquery>
+					UPDATE work_order SET 
+						<cfif request.IsSV>
+							SupervisedByUserId = #request.userInfo.UserId#,
+							SupervisedApprovedDate = <cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#"/>,
+						</cfif>
+						Status2 = 'Sent to Superintendent'
+					WHERE WorkOrderId = #arguments.id#
+				</cfquery>
+	
+				<cfif application.mode EQ application.LIVE>
+					<cfset application.com.Notice.SendEmail(
+						to			: qU.columnData("Email").toList(),
+						cc  		: qW.cb_Email,
+						subject	: "Work Order ###qW.WorkOrderId#",
+						msg 		: "
+							Hello, 
+							<p>
+								Work Order ###qW.WorkOrderId# has been sent to you for approval <br/>
+								==================<br/>
+								#qW.Description#<br/>
+								==================<br/>
+							</p> 
+							Thank you
+						"
+					)/>
+				</cfif>
+			</cfif>	
+		</cftransaction>
+	</cffunction>
 
 	<cffunction name="SaveServiceRequest" access="public" returntype="numeric">
 		<cfargument name="sr_" hint="struct containing job request data" required="true" type="struct"/>

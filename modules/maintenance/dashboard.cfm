@@ -78,25 +78,34 @@
           
           <span class="label label-success"><a class="button" style="color:##F5F5F5 !important" href="##popup1">Maintenance Report</a></span>
           <strong>&nbsp; | &nbsp;Open WO -</strong> 
-          <cfif request.userinfo.role eq "FS">
+          <cfif request.userinfo.role eq "MS">
             <cfquery name="qFSW">
               SELECT
-              cd.`Name`, Count(w.WorkOrderId) PM,cd.DepartmentId
-              FROM core_department AS cd
-              INNER JOIN work_order AS w ON w.DepartmentId = cd.DepartmentId
-              WHERE w.`Status` = "Open" 
-              GROUP BY cd.`Name`
-            </cfquery>
-            <cfloop query="qFSW">#Name# <span class="badge badge-inverse"><a href="modules/maintenance/workorder/print_open_wo.cfm?departmentid=#DepartmentId#&status=open" target="_blank" style="color:##F8F5F5">#PM#</a></span> &nbsp;</cfloop>
-          <cfelseif  request.userinfo.role eq "MS">
-            <cfquery name="qFSW">
-              SELECT
-              cd.`Name`, Count(w.WorkOrderId) PM,cd.UnitId
+                cd.`Name`, 
+                COUNT(w.WorkOrderId) AS PM, 
+                cd.UnitId
               FROM core_unit AS cd
               INNER JOIN work_order AS w ON w.UnitId = cd.UnitId
-              WHERE w.`Status` = "Open" GROUP BY cd.`Name`
+              WHERE w.`Status` = "Open"
+              GROUP BY cd.`Name`, cd.UnitId
             </cfquery>
-            <cfloop query="qFSW">#Name# <span class="badge badge-inverse"><a href="modules/maintenance/workorder/print_open_wo.cfm?unitid=#request.userinfo.unitid#&status=open" target="_blank" style="color:##F8F5F5">#PM#</a></span> &nbsp;</cfloop>
+            <cfloop query="qFSW">#Name# <span class="badge badge-inverse"><a href="modules/maintenance/workorder/print_open_wo.cfm?unitid=#qFSW.unitid#&status=open" target="_blank" style="color:##F8F5F5">#PM#</a></span> &nbsp;</cfloop> 
+<!---             <cfloop query="qFSW">
+              #Name# <span class="badge badge-inverse"><a href="modules/maintenance/workorder/print_open_wo.cfm?departmentid=#DepartmentId#&status=open" target="_blank" style="color:##F8F5F5">#PM#</a></span> &nbsp;
+            </cfloop> --->
+            
+<!---           <cfelseif  request.userinfo.role eq "MS">
+            <cfquery name="qFSW">
+              SELECT
+                cd.`Name`, 
+                COUNT(w.WorkOrderId) AS PM, 
+                cd.UnitId
+              FROM core_unit AS cd
+              INNER JOIN work_order AS w ON w.UnitId = cd.UnitId
+              WHERE w.`Status` = "Open"
+              GROUP BY cd.`Name`, cd.UnitId
+            </cfquery>
+            <cfloop query="qFSW">#Name# <span class="badge badge-inverse"><a href="modules/maintenance/workorder/print_open_wo.cfm?unitid=#request.userinfo.unitid#&status=open" target="_blank" style="color:##F8F5F5">#PM#</a></span> &nbsp;</cfloop> --->
           <cfelse>
             <cfquery name="qFSW">
               SELECT COUNT(WorkOrderId) AS i FROM work_order WHERE DepartmentId = #request.userinfo.DepartmentId# AND `Status` = "Open"
@@ -159,7 +168,7 @@
         <!---<cfif !(request.IsHost or request.IsAdmin)>
         	AND wo.DepartmentId = <cfqueryparam value="#request.userinfo.departmentid#" cfsqltype="cf_sql_integer"/>
         </cfif>--->
-		AND wo.WorkingForId = <cfqueryparam cfsqltype="cf_sql_int" value="#request.userinfo.WorkingForId#"/>
+
 </cfquery>
 
 <cfquery name="qAL" cachedwithin="#createtimespan(0,6,0,0)#">
@@ -285,16 +294,16 @@
 
 <br>
 
-<cjs:Chart caption="#dateformat(now(),'mmmm')# Work Order" width="100%" height="200">
+  <cjs:Chart caption="#dateformat(now(),'mmmm')# Work Order" width="100%" height="200">
 
-  <cjs:Data query="#qC1#" y="WCount" label="mc" type="column" name="PM task" showlegend toolTip="Day {label}<br/> {y} {name}"/>
-  <cjs:Data query="#qC2#" y="WCount" label="mc" type="column" name="Corrective task" showlegend toolTip="Day {label}<br/> {y} {name}"/>
-  <cjs:Data query="#qC3#" y="WCount" label="mc" type="column" name="Other task" showlegend toolTip="Day {label}<br/> {y} {name}"/>
+    <cjs:Data query="#qC1#" y="WCount" label="mc" type="column" name="PM task" showlegend toolTip="Day {label}<br/> {y} {name}"/>
+    <cjs:Data query="#qC2#" y="WCount" label="mc" type="column" name="Corrective task" showlegend toolTip="Day {label}<br/> {y} {name}"/>
+    <cjs:Data query="#qC3#" y="WCount" label="mc" type="column" name="Other task" showlegend toolTip="Day {label}<br/> {y} {name}"/>
 
-</cjs:Chart>
+  </cjs:Chart>
 
 
-      </div>
+</div>
       <div class="span6">
             <!---Open work order till date --->
 <cfquery name="qwotd">
@@ -348,14 +357,13 @@
 </cfquery>
 <cfquery name="qC3" cachedwithin="#CreateTime(1,0,0)#">
 	SELECT
-    DATE_FORMAT(wo.DateOpened,'%d') MonthOpen, FORMAT(COUNT(wo.WorkOrderId)/#qTWO.Total#*100,1) WCount ,
+    FORMAT(COUNT(wo.WorkOrderId)/#qTWO.Total#*100,1) WCount,
     jc.Class WorkClass, wo.WorkClassId
   FROM work_order wo
   INNER JOIN job_class jc ON jc.JobClassId = wo.WorkClassId
   WHERE DateOpened >= <cfqueryparam cfsqltype="cf_sql_date" value="#startd#"/>
     AND DateOpened <= <cfqueryparam cfsqltype="cf_sql_date" value="#endd#"/>
-  -- GROUP BY wo.WorkClassId
-  GROUP BY wo.WorkClassId, MonthOpen, WorkClass
+  GROUP BY wo.WorkClassId, wo.WorkClassId
 </cfquery>
 <br/>
 <cjs:Chart width="100%" height="300">
@@ -363,17 +371,6 @@
 </cjs:Chart>
 </div>
 	</div>
-   <!--- <div class="row-fluid">
-    	<!---<div class="span6">
-
-
-
-        </div>--->
-
-        <div class="span6" align="center">
-
-        </div>
-	</div>--->
 
 </div>
 

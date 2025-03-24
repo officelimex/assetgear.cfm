@@ -42,13 +42,16 @@
           background-image: none;
           content: "-";
           font-size: 16px;
-          color: #000;
+          /* color: #000; */
         }
         .jstree-default .jstree-closed > .jstree-anchor > .jstree-icon {
           background-image: none;
           content: "+";
           font-size: 16px;
-          color: #000;
+          /* color: #000; */
+        }
+        .light-blue {
+          color: #007bff;
         }
       </style>
     </head>
@@ -256,7 +259,7 @@
                           type: "location"
                         },
                         success: function (response) {
-                          const newIcon = "fas fa-map-signs";
+                          const newIcon = "fas fa-map-signs light-blue";
                           tree.create_node(node, {
                             text: newName,
                             id: response.id, 

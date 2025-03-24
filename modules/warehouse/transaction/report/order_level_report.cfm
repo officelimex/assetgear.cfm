@@ -42,7 +42,10 @@ border-bottom:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
 <cfquery name="qI">
     SELECT * FROM whs_item i
     WHERE
-        (i.MinimumInStore >= i.QOH) AND i.Obsolete = "No" AND i.Status <> "Deleted"
+      (i.MinimumInStore >= i.QOH) 
+      AND i.Obsolete = "No" 
+      AND i.Status <> "Deleted"
+      AND i.MinimumInStore > 0
     ORDER BY i.Description
 </cfquery>
 

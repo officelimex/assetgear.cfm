@@ -139,17 +139,17 @@ label to edit</div>
  	<div class="alert alert-info">Add spares from the warehouse to this Asset</div>
     <et:Table allowInput="true" allowUpdate="true" height="240px" id="ItemIds">
         <et:Headers>
-            <et:Header title="Spare parts" size="11" type="int">
-                <et:Select ListValue="#Valuelist(qI.ItemId,'`')#" ListDisplay="#Valuelist(qI.Description,'`')#" delimiters="`"/>
+            <et:Header title="Description" size="11" type="int">
+              <et:Select ListValue="#Valuelist(qI.ItemId,'`')#" ListDisplay="#Valuelist(qI.Description,'`')#" delimiters="`"/>
             </et:Header>
             <et:Header title="" size="1"/>
         </et:Headers>
         <!--- convert list to query --->
         <cfquery name="qAI">
-            SELECT CONCAT(Description,' ',VPN,' ~',ItemId) Description, ItemId
-            FROM whs_item
-            WHERE ItemId IN (#qA.ItemIds#<cfif qA.ItemIds eq "">0</cfif>) AND
-			Obsolete = "No" AND Status <> "Deleted"
+					SELECT CONCAT(Description,' ',VPN,' ~',ItemId) Description, ItemId
+					FROM whs_item
+					WHERE ItemId IN (#qA.ItemIds#<cfif qA.ItemIds eq "">0</cfif>)
+						AND Obsolete = "No" AND Status <> "Deleted"
         </cfquery>
         <et:Content Query="#qAI#" Columns="Description" type="int-select" PKField="ItemId"/>
     </et:Table>
@@ -212,11 +212,11 @@ The program will automatically inform you when they are nearing expirations</div
     	<nt:Item id="#Id1#" isactive/>
         <nt:Item id="#Id2#"/>
     	<nt:Item id="#Id3#"/>
-        <nt:Item id="#Id4#"/>
-        <nt:Item id="#Id5#"/>
-        <nt:Item id="#Id6#"/>
-        <nt:Item id="#Id7#"/>
-        <nt:Item id="#Id8#"/>
+			<nt:Item id="#Id4#"/>
+			<nt:Item id="#Id5#"/>
+			<nt:Item id="#Id6#"/>
+			<nt:Item id="#Id7#"/>
+			<nt:Item id="#Id8#"/>
     </nt:Content>
 </nt:NavTab>
 

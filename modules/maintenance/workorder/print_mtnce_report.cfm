@@ -44,7 +44,6 @@
 </cfquery>
 <cfquery name="qWO" cachedwithin="#createTimespan(1,0,0,0)#">
 	SELECT 
-		-- sum(if(isnull(wi.ItemId) , wi.UnitPrice * wi.Quantity, if(wt.Currency = "USD",#EXCHANGE_RATE# * wt.UnitPrice * wi.Quantity ,wt.UnitPrice * wi.Quantity ))) AS TCOST,							
 		SUM(cn.Cost) AS ContractCost,
 		wo.TotalCost,
 		wo.ManHours,
@@ -68,7 +67,6 @@
 	INNER JOIN `job_class` jc ON jc.JobClassId = wo.WorkClassId 
 	LEFT JOIN `service_request` sr ON sr.ServiceRequestId = wo.ServiceRequestId 
 	LEFT JOIN `core_user` rb ON rb.UserId = sr.RequestByUserId 
-	-- users 
 	LEFT JOIN `core_user` cu ON cu.UserId = wo.ClosedByUserId 
 	LEFT JOIN `core_user` su ON su.UserId = wo.SupervisedByUserId 
     WHERE wo.UnitId IN (#mtnid#) AND wo.Status <> "Decline" 
@@ -85,7 +83,9 @@
 	WHERE wo.UnitId IN (#mtnid#) AND wo.Status = "Close" 
 	AND DateOpened >= <cfqueryparam cfsqltype="cf_sql_date" value="#startd#"/>
 	AND DateOpened <= <cfqueryparam cfsqltype="cf_sql_date" value="#endd#"/> #qselect#
-	GROUP BY wo.WorkOrderId
+	-- GROUP BY wo.WorkOrderId
+	GROUP BY wo.WorkOrderId, wo.UnitId, wo.DepartmentId, c.Currency, c.Cost;
+
 </cfquery>
 
 <cfquery name="qWC" cachedwithin="#createTimespan(1,0,0,0)#">
@@ -439,7 +439,7 @@
         <cfif arguments.u neq ""> <cfset au = " AND "/></cfif>
 
         <cfquery name="q" dbtype="query">
-            SELECT COUNT(WorkOrderId) AS tSum FROM qWO WHERE WorkingForId = 1 AND Status ='#arguments.st#' #au# #qu# #acl# #qcl#
+            SELECT COUNT(WorkOrderId) AS tSum FROM qWO WHERE Status ='#arguments.st#' #au# #qu# #acl# #qcl#
         </cfquery>
 
         <cfreturn val(q.tSum)/>

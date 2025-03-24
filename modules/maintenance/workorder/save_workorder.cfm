@@ -144,7 +144,14 @@
         	SELECT * FROM qOI
           WHERE ItemId <> '' AND ItemStatus = 'Online' AND Obsolete = 'No'
       </cfquery>
-        <et:Table allowInput height="200px" id="WorkOrderItem">
+			<cfset aInput = true/>
+			<cfif qWO.Status2 eq "Approved">
+				<cfset aInput = false/>
+				<cfif request.IsSup>
+					<cfset aInput = true/>
+				</cfif>
+			</cfif>
+        <et:Table allowInput="#aInput#" height="200px" id="WorkOrderItem">
 					<et:Headers>
 						<et:Header title="Description" size="6" type="int">
 							<et:Select ListValue="#Valuelist(qWI.ItemId,'`')#" ListDisplay="#Valuelist(qWI.ItemDescriptionWithVPNAndQOH,'`')#" delimiters="`"/>
@@ -157,18 +164,18 @@
         </et:Table>
     </div>
 
-	<div id="#Id3#">
+		<div id="#Id3#">
     	<div class="alert alert-info">Use this area to add materials not stocked in the warehouse</div>
 			<cfquery name="qOI_2" dbtype="query">
 				SELECT * FROM qOI
 				WHERE ItemId = ''
 			</cfquery>
-			<et:Table allowInput height="200px" id="WorkOrderItem2">
+			<et:Table allowInput="#aInput#" height="200px" id="WorkOrderItem2">
 				<et:Headers>
 					<et:Header title="Material Description" size="5" type="text"/>
 					<et:Header title="Qty" size="1" type="int"/>
 					<et:Header title="UOM" size="1" type="text">
-						<et:Select listvalue="#ValueList(qUM.Title,'`')#" delimiters="`"/>
+						<et:Select listValue="#ValueList(qUM.Title,'`')#" delimiters="`"/>
 					</et:Header>
 					<et:Header title="OEM" size="2" type="text" required="false"/>
 					<et:Header title="Part No./Model/Serial" size="2" type="text" required="false"/> 
@@ -283,8 +290,8 @@
     <nt:NavTab renderTo="#woId#">
 			<nt:Tab>
 				<nt:Item title="Open Section" isactive/>
-				<nt:Item title="Material In Stock"/>
-				<nt:Item title="Material Out of Stock"/>
+				<nt:Item title="Warehouse Inventory"/>
+				<nt:Item title="Non-Stocked Materials"/>
 				<nt:Item title="Labour Section"/>
 				<nt:Item title="Contractors"/>
 				<nt:Item title="Close Section"/>
@@ -300,7 +307,7 @@
 				<nt:Item id="#Id7#"/>
 			</nt:Content>
     </nt:NavTab>
-
+		<cfset nobutton = true/>
     <f:ButtonGroup>
 			<cfif qWO.WorkClassId == 12 && request.IsSUP>
       	<f:Button IsSave 
@@ -309,22 +316,26 @@
 				/>
       	<f:Button value="Save & Send to Warehouse" class="btn-primary" IsSave onSuccess="win_save_wo_window.close()"/>
 			<cfelse>
-				<cfif request.IsSV>
+				<cfif request.IsSV AND qWO.Status2 NEQ "Approved">
       		<f:Button value="Save Only" class="btn-primary" IsSave onSuccess="win_save_wo_window.close()"/>
       		<f:Button 
 						value="Save & Send to Superintendent" 
 						actionURL="modules/ajax/maintenance.cfm?cmd=sendToSuperintendent"
 						class="btn-success" IsSave 
 						onSuccess="win_save_wo_window.close()"/>
-				<cfelseif request.IsSUP>
+					<cfset nobutton = false/>
+				</cfif>
+				<cfif request.IsSUP and qWO.Status2 NEQ "Approved">
       		<f:Button value="Save Only" class="btn-primary" IsSave onSuccess="win_save_wo_window.close()"/>
       		<f:Button 
 						value="Approve" 
 						actionURL="modules/ajax/maintenance.cfm?cmd=ApproveAndSendToWarehouse"
 						class="btn-success" IsSave 
-						onSuccess="win_save_wo_window.close()"/>					
-				<cfelse>
-      		<f:Button value="Save" class="btn-primary" IsSave onSuccess="win_save_wo_window.close()"/>
+						onSuccess="win_save_wo_window.close()"/>	
+					<cfset nobutton = false/>
+				</cfif>
+				<cfif nobutton>
+					<f:Button value="Save" class="btn-primary"  IsSave onSuccess="win_save_wo_window.close()"/>
 				</cfif>
 			</cfif>
     </f:ButtonGroup>

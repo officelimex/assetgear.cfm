@@ -8,7 +8,8 @@
    		<g:Column id="IssueID" caption="##" field="IssueId" sortable searchable/>
          <g:Column id="MRId" Caption="MR ##" searchable field="m.MRId" hide/>
          <g:Column id="WorkOrderId" caption="WO ##" searchable field="mi.WorkOrderId"/>
-         <g:Column id="Remark"/>
+         <g:Column id="Remark" searchable  hide/>
+         <g:Column id="WONote" caption="Purpose"/>
          <g:Column id="DateIssued" caption="Date Issued"/>
          <g:Column id="IssuedBy" caption="Issued By" hide/>
          <g:Column id="IssuedTo" caption="Received by"/>

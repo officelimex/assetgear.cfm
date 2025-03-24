@@ -24,9 +24,10 @@
     where wr.ReturnId =  <cfqueryparam cfsqltype="cf_sql_integer" value="#url.Id#">
 </cfquery> 
 
-<cfquery name="qID">
+<!--- <cfquery name="qID">
 	SELECT * FROM whs_item
-</cfquery> 
+</cfquery>  --->
+<cfset qID = application.com.Item.GetItems()/> 
 
 <cfquery name="qCU">
 	SELECT * FROM core_user 
@@ -54,7 +55,7 @@
 					<et:Table allowInput height="180px" id="ItemReturn" bind="IssueId" Event="keyup" data="modules/ajax/warehouse.cfm?cmd=getIssue">
 						<et:Headers>
 							<et:Header title="Description" size="10" type="int">
-								<et:Select ListValue="#Valuelist(qID.ItemId,'`')#" ListDisplay="#Valuelist(qID.Description,'`')#" delimiters="`"/>
+								<et:Select ListValue="#Valuelist(qID.ItemId,'`')#" ListDisplay="#Valuelist(qID.ItemDescription,'`')#" delimiters="`"/>
 							</et:Header>
 							<et:Header title="Qty" size="1" type="int"/>
 							<et:Header title="" size="1"/>

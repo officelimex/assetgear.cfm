@@ -14,7 +14,7 @@
       <div class="span2" style="position:fixed;">
         <n:Nav renderTo="#astId#">
 				<n:NavItem type="header" title="Asset"/>
-					<cfif (request.userinfo.role == "HT") || (request.userinfo.role == "MS") || (request.isWarehouseMan) || request.userinfo.email == "ejiro.onavwie@pesoenergy.com">
+					<cfif (request.userinfo.role == "HT") || (request.userinfo.role == "MS") || (request.isWarehouseMan) || request.userinfo.email == "ejiro.onavwie@#application.domain#">
 						<n:NavItem title="<strong>New Asset</strong>" url="modules/maintenance/asset/save_asset.cfm" id="new_asset"/>
 					</cfif>
 				<n:NavItem title="All Asset" isactive url="modules/maintenance/asset/all_asset.cfm" id="all_asset"/>

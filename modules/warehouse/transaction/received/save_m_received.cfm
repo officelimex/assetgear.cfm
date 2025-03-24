@@ -24,20 +24,16 @@
     where ii.IssueId =  <cfqueryparam cfsqltype="cf_sql_integer" value="#url.Id#">
 </cfquery> --->
 
-<cfquery name="qID" cachedwithin="#CreateTime(1,0,0)#">
+<!--- <cfquery name="qID" cachedwithin="#CreateTime(1,0,0)#">
 	SELECT ItemId, CONCAT("[",Code,"] ",Description,' ',VPN) Description FROM whs_item
 	WHERE Obsolete = "No" AND Status <> "Deleted"
   ORDER BY Description ASC
-</cfquery>
+</cfquery> --->
+<cfset qID = application.com.Item.GetItems()/> 
 
 <cfquery name="qD">
 	SELECT * FROM core_department
     ORDER BY Name
-</cfquery>
-
-<cfquery name="qWR">
-	SELECT * FROM whs_mr
-    ORDER BY Note
 </cfquery>
 
 <cfquery name="qCU">
@@ -66,16 +62,16 @@
 
         <et:Table allowInput="#editable#" allowUpdate="#editable#" height="240px" id="ItemReceived" bind="MRId" Event="keyup" data="modules/ajax/warehouse.cfm?cmd=getMaterialToReceive">
             <et:Headers>
-                <et:Header title="Item description" size="5" type="int" disabled>
-                    <et:Select ListValue="#Valuelist(qID.ItemId,'`')#" ListDisplay="#Valuelist(qID.Description,'`')#" delimiters="`"/>
-                </et:Header>
-                <et:Header title="Qty" size="1" type="int"/>
-                <et:Header title="Currency" size="1" disabled>
-                    <et:Select ListValue="NGN,USD"/>
-                </et:Header>
-                <et:Header title="Unit price" size="2" type="float"/>
-                <et:Header title="Waybill / Invoice ##" required type="text" size="2"/>
-                <et:Header title="" size="1"/>
+							<et:Header title="Item description" size="5" type="int" disabled>
+								<et:Select ListValue="#Valuelist(qID.ItemId,'`')#" ListDisplay="#Valuelist(qID.ItemDescription,'`')#" delimiters="`"/>
+							</et:Header>
+							<et:Header title="Qty" size="1" type="int"/>
+							<et:Header title="Currency" size="1" disabled>
+									<et:Select ListValue="NGN,USD"/>
+							</et:Header>
+							<et:Header title="Unit price" size="2" type="float"/>
+							<et:Header title="Waybill / Invoice ##" required type="text" size="2"/>
+							<et:Header title="" size="1"/>
             </et:Headers>
             <!---<et:Content Query="#qI#" Columns="Description,Quantity" type="int-select,int" PKField="ItemIssueId"/> --->
         </et:Table>
@@ -86,7 +82,12 @@
 
 </div>
 
-
+	<cfparam name="url.newpage" default="false">
+	<cfif url.newpage>
+		<f:ButtonGroup>
+			<f:Button value="Receive Materials" class="btn-primary" IsSave subpageId="save_mr_ni" ReloadURL="modules/warehouse/transaction/received/save_m_received.cfm?newpage=true"/>
+		</f:ButtonGroup>
+  </cfif>
 
 </f:Form>
 

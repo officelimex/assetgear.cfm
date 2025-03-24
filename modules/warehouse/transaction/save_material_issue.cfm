@@ -24,10 +24,11 @@
     where ii.IssueId =  <cfqueryparam cfsqltype="cf_sql_integer" value="#url.Id#">
 </cfquery> 
 
-<cfquery name="qID" cachedwithin="#CreateTime(1,0,0)#">
+<!--- <cfquery name="qID" cachedwithin="#CreateTime(1,0,0)#">
 	SELECT ItemId, CONVERT(CONCAT(Description,' ',VPN) USING utf8) Description FROM whs_item
     ORDER BY Description ASC
-</cfquery>
+</cfquery> --->
+<cfset qID = application.com.Item.GetItems()/> 
 
 <cfquery name="qD">
 	SELECT * FROM core_department
@@ -72,7 +73,7 @@
         <et:Table allowInput="#editable#" allowUpdate="#editable#" height="170px" id="ItemIssue" bind="WorkOrderId" Event="keyup" data="modules/ajax/warehouse.cfm?cmd=getWorkOrderItems2">
             <et:Headers>
                 <et:Header title="Description" size="10" type="int" disabled>
-                    <et:Select ListValue="#Valuelist(qID.ItemId,'`')#" ListDisplay="#Valuelist(qID.Description,'`')#" delimiters="`"/>
+                    <et:Select ListValue="#Valuelist(qID.ItemId,'`')#" ListDisplay="#Valuelist(qID.ItemDescription,'`')#" delimiters="`"/>
                 </et:Header>
                 <et:Header title="Qty" size="1" type="int"/>
                 <et:Header title="" size="1"/>
