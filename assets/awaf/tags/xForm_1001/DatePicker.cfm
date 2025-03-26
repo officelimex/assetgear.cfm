@@ -32,7 +32,8 @@
 <!---    <cfif FindNoCase('integer',Attributes.Validate)>
     	<cfset vali = ListAppend(vali,'validate-integer',' ')/>
     </cfif>--->
-	<input type="text" id="#request.form.formid##Attributes.id#" autocomplete="off" name="#Attributes.name#" class="<cfif Attributes.type eq "date">span5</cfif> #Attributes.class# #req# #vali#" value="#Attributes.value#"/> 
+	<!--- <input type="text" id="#request.form.formid##Attributes.id#" autocomplete="off" name="#Attributes.name#" class="<cfif Attributes.type eq "date">span5</cfif> #Attributes.class# #req# #vali#" value="#Attributes.value#"/> ---> 
+	<input type="text" id="#request.form.formid##Attributes.id#" autocomplete="off" name="#Attributes.name#" class=" #Attributes.class# #req# #vali#" value="#Attributes.value#"/> 
     <cfif Attributes.InlineHelp neq ""><span class="help-block">#Attributes.inlinehelp#</span></cfif>
     <cfif Attributes.Help neq ""><p class="help-block">#Attributes.Help#</p></cfif>
 <cfelse>

@@ -94,7 +94,7 @@
 		</cfloop>
 		<cfif IsUpdate>
 			WHERE `TempDataId` = <cfqueryparam value="#pk#" cfsqltype="CF_SQL_INTEGER"/>
-			-- AND `Flag` <> 'd'	
+			<!--- -- AND `Flag` <> 'd'	--->
 		</cfif>
 </cfquery>
 
