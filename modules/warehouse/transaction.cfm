@@ -28,10 +28,10 @@
 			<n:NavItem title="Material Returns" url="modules/warehouse/transaction/return/material_returned.cfm" id="material_returned"/>
 			
 			<n:NavItem type="header" title="Material Requisition"/>
-			<n:NavItem title="New MR (Stocked)" url="modules/warehouse/transaction/save_mr.cfm?newpage=true" id="save_mr"/>
-			<n:NavItem title="New MR (Non-Stocked)" url="modules/warehouse/transaction/new_mrni.cfm?newpage=true" id="new_mrni"/>
-			<n:NavItem title="M.R. (In Stock)" url="modules/warehouse/transaction/mr/all_mr.cfm" id="all_mr"/>
-			<n:NavItem title="M.R. (Not In Stock)" url="modules/warehouse/transaction/mr/all_mrni.cfm"  id="all_mrni"/>
+			<!--- <n:NavItem title="New MR (Stocked)" url="modules/warehouse/transaction/save_mr.cfm?newpage=true" id="save_mr"/> --->
+			<n:NavItem title="New MR" url="modules/warehouse/transaction/new_mrni.cfm?newpage=true" id="new_mrni"/>
+			<n:NavItem title="All M.R." url="modules/warehouse/transaction/mr/all_mr.cfm" id="all_mr"/>
+			<!--- <n:NavItem title="M.R. (Not In Stock)" url="modules/warehouse/transaction/mr/all_mrni.cfm"  id="all_mrni"/> --->
 			<n:navItem type="divider">
 			<n:NavItem title="Receive into Store" url="modules/warehouse/transaction/received/save_m_received.cfm?newpage=true" id="save_mr_ni"/>
 			<n:NavItem title="Material Received" url="modules/warehouse/transaction/received/m_received.cfm" id="material_received"/>

@@ -341,13 +341,15 @@
 								Quantity 	= <cfqueryparam cfsqltype="cf_sql_integer" value="#qmri.int0#"/>,
 								MRId 			= <cfqueryparam cfsqltype="cf_sql_integer" value="#mrid#"/>
 						</cfquery> 
-						<cfquery>
-							INSERT INTO work_order_item SET 
-								ItemId = #item_id#,
-								WorkOrderId = #val(form.WorkOrderId)#,
-								Quantity = #val(qmri.int0)#,
-								Status = "Close"
-						</cfquery>
+						<cfif val(form.WorkOrderId)>
+							<cfquery>
+								INSERT INTO work_order_item SET 
+									ItemId = #item_id#,
+									WorkOrderId = #val(form.WorkOrderId)#,
+									Quantity = #val(qmri.int0)#,
+									Status = "Close"
+							</cfquery>
+						</cfif>
 					</cfloop>
 
 					<cfset qmri2 = h.GetTempDataToUpdate(mr.DirectItems)/>
@@ -363,13 +365,15 @@
 								Quantity 	= <cfqueryparam cfsqltype="cf_sql_integer" value="#qmri2.int1#"/>,
 								MRId 	= <cfqueryparam cfsqltype="cf_sql_integer" value="#mrid#"/>
 						</cfquery> 
-						<cfquery>
-							INSERT INTO work_order_item SET 
-								ItemId = #qmri2.int0#,
-								WorkOrderId = #val(form.WorkOrderId)#,
-								Quantity = #val(qmri2.int1)#,
-								Status = "Close"
-						</cfquery>
+						<cfif val(form.WorkOrderId)>
+							<cfquery>
+								INSERT INTO work_order_item SET 
+									ItemId = #qmri2.int0#,
+									WorkOrderId = #val(form.WorkOrderId)#,
+									Quantity = #val(qmri2.int1)#,
+									Status = "Close"
+							</cfquery>
+						</cfif>
 					</cfloop>
 				</cfif>
 				<!--- update totalvalue in MR --->

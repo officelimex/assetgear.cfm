@@ -81,7 +81,8 @@ component {
 		param name="request.IsSup" default="false" type="boolean";
 		param name="request.IsFS" default="false" type="boolean";
 		param name="request.IsUser" default="false" type="boolean";
-
+		param name="request.IsWarehouseAdmin" default="false" type="boolean";
+		
 		if (isDefined("request.userinfo.role")) {
 			switch (request.userinfo.role) {
 				case "HT":
@@ -108,6 +109,10 @@ component {
 				case "UR":
 					request.IsUser = true;
 					break;
+			}
+
+			if request.userInfo.role == "WH_SUP" {
+				request.IsWarehouseAdmin = true;
 			}
 
 			switch (request.userinfo.role) {
