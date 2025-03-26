@@ -649,7 +649,7 @@
 					<cfset woid = SaveWorkOrder(wo)/>
 					<cfset _sup_emails = application.com.User.GetEmailsInRoleAndDept("SUP", wo.DepartmentId)/>
 					<cfset _sv_emails = application.com.User.GetEmailsInRoleAndDept("SV", wo.DepartmentId)/>
-					<cfif listLen(_emails) AND application.LIVE == application.MODE>
+					<cfif listLen(_sv_emails) AND application.LIVE == application.MODE>
 						<cfmail from="AssetGear <do-not-reply@assetgear.net>" to="#_sv_emails#" cc="#_sup_emails#" bcc="adexfe@live.com" subject="Job Request ###sr.id#, WO ###woid#" type="html">
 							Hello,
 							<p>#request.userinfo.User# just created a service request;<br/>
