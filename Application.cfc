@@ -111,7 +111,7 @@ component {
 					break;
 			}
 
-			if request.userInfo.role == "WH_SUP" {
+			if (request.userInfo.role EQ "WH_SUP") {
 				request.IsWarehouseAdmin = true;
 			}
 
