@@ -34,13 +34,14 @@
 <table width="100%" border="0">
   <tr>
     <td width="50%" valign="top"> 
-      <f:TextBox name="Note" requiredclass="span10"/>
-      <f:DatePicker name="DateIssued" label="Date Issued" required />
-      <f:DatePicker name="DateRequired" label="Date Required" required/>
+      <f:TextBox name="Note" class="span10"/>
+			<f:TextBox name="Ref" label="Ref info" class="span10"/>
+      <f:DatePicker name="DateIssued" label="Date Issued" required class="span8"/>
+      <f:DatePicker name="DateRequired" label="Date Required" required class="span8"/>
     </td>
     <td class="horz-div" valign="top"> 
       <f:Select name="Currency" required ListValue="NGN,USD" ListDisplay="Naira,Dollars" class="span4"/>        
-      <f:Select name="DepartmentId" label="Department" required ListValue="#Valuelist(qD.DepartmentId)#" ListDisplay="#Valuelist(qD.Name)#" />
+      <f:Select name="DepartmentId" label="Department" required ListValue="#ValueList(qD.DepartmentId)#" ListDisplay="#Valuelist(qD.Name)#" />
       <f:TextBox name="WorkOrderId" label="Work Order ##" class="span5"/>
     </td>
   </tr> 

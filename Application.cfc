@@ -87,6 +87,7 @@ component {
 			switch (request.userinfo.role) {
 				case "HT":
 					request.IsHost = true;
+					request.IsWarehouseMan = true;
 					break;
 				case "SUP":
 					request.IsSup = true;

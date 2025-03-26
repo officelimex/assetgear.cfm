@@ -1,6 +1,20 @@
 <cfcomponent>
 
-	<cffunction name="init" returntype="Transaction" access="public">
+	<cffunction name="init" returnType="Transaction" access="public">
+
+		<cfset this.PO_SQL = '
+			SELECT
+				po.*,
+				CONCAT(u.Surname, " ", u.OtherNames) CreatedBy
+			FROM whs_po po
+			INNER JOIN core_user u 	ON u.UserId = po.CreatedByUserId
+			INNER JOIN whs_mr mr 		ON mr.MRId 	= po.MRId 
+		'/>
+
+		<cfset this.PO_COUNT_SQL = '
+			SELECT COUNT(po.POId) C
+			FROM whs_po po
+		'/>
 
 		<cfset this.MR_SQL = '
 			SELECT
@@ -250,7 +264,6 @@
 
 	<cffunction name="SaveMR" returntype="numeric" access="public" hint="Save material requisition">
 		<cfargument name="mr_" hint="material requisition data in struct form" type="struct" required="true"/>
-		<cfparam name="form.Category"default="">
 
 		<cfset mr = arguments.mr_/>
 		<cfset mrid = mr.id/>
@@ -271,14 +284,14 @@
 				`Date` = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(Now(),'dd/mmm/yyyy')#">,
 				`DateRequired` = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(form.DateRequired,'dd/mmm/yyyy')#">,
 				`DateIssued` = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(form.DateIssued,'dd/mmm/yyyy')#">,
+				`Ref` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Ref#">,
 				`Note` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Note#">,
-				`Category` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Category#">,
 				<cfif val(form.WorkOrderId)>
 					`WorkOrderId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.WorkOrderId#">,
 				</cfif>
-					`CreatedByUserId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#Request.UserInfo.UserId#">,
-					`Currency` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Currency#">,
-					`Type` = <cfqueryparam cfsqltype="cf_sql_varchar" value="SI">
+				`CreatedByUserId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#Request.UserInfo.UserId#">,
+				`Currency` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Currency#">,
+				`Type` = <cfqueryparam cfsqltype="cf_sql_varchar" value="SI">
 				<cfif mrid neq 0>
 					WHERE MRId = <cfqueryparam cfsqltype="cf_sql_integer" value="#mrid#">
 				</cfif>
@@ -404,7 +417,7 @@
 					<cfif to_email eq "">
 						<cfset to_email = "adexfe@live.com"/>
 					</cfif>
-					<cfset wh_admin = application.com.User.GetEmailsInRole("WH_SV")/>
+					<cfset wh_admin = application.com.User.GetEmailsInRole("WH_SUP")/>
 					<cfif val(form.WorkOrderId)>
 						<cfquery name="qWOC">
 							SELECT u.Email, wo.Description FROM work_order wo

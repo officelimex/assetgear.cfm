@@ -25,17 +25,17 @@
 <table width="100%" border="0">
   <tr>
     <td width="50%" valign="top">
-			<f:Select name="Category" required ListValue="r,m" ListDisplay="Stock Replenishment,Material Requisition" Selected="#qMR.Category#" class="span9" onChange="#mrId#changeWI(this)"/>
 			<f:DatePicker name="DateIssued" label="Date Issued" required value="#dateformat(qMR.Date,'yyyy/mm/dd')#"/>
 			<f:DatePicker name="DateRequired" label="Date Required" required value="#dateformat(qMR.DateRequired,'yyyy/mm/dd')#"/>
 			<f:Select name="DepartmentId" label="Department" required ListValue="#Valuelist(qD.DepartmentId)#" ListDisplay="#Valuelist(qD.Name)#" Selected="#qMR.DepartmentId#"/>
     </td>
     <td class="horz-div" valign="top">
 			<f:Select name="Currency" required ListValue="NGN,USD" ListDisplay="Naira,Dollars" Selected="#qMR.Currency#" class="span4"/>
-			<f:TextArea name="Note" required value="#qMR.Note#" class="span10"/>
+			<f:TextArea name="Note" required value="#qMR.Note#" class="span11"/>
 			<div id="#mrId#frm1" style="display:none">
 				<f:TextBox name="WorkOrderId" required label="Work Order ##" value="#qMR.WorkOrderId#" class="span4"/>
 			</div>
+			<f:TextBox name="Ref" label="Ref info" value="#qMR.Ref#" class="span11"/>
     </td>
   </tr>
   <tr>
