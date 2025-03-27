@@ -27,7 +27,7 @@
 <script type="text/javascript" src="assets/awaf/UI/datepicker/dp.js"></script> 
 <link href="assets/awaf/UI/datepicker/css/datepicker_vista.css" rel="stylesheet" type="text/css" media="screen" />
 
-<link href="assets/awaf/UI/css/aGrid.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="assets/awaf/UI/css/aGrid.css?v=0.1" rel="stylesheet" type="text/css" media="screen" />
 <link href="assets/awaf/UI/css/aWindow.css" rel="stylesheet" type="text/css" media="screen" />
 <link href="assets/awaf/UI/css/bootstrap.min.2.2.1.css" rel="stylesheet" type="text/css" media="screen" />
 <link href="assets/awaf/UI/css/Style.css?v=0.2.3.21" rel="stylesheet" type="text/css" media="screen" />

@@ -3,24 +3,31 @@
 	background-color: #FFFFE6 !important; 
 }*/
 /** footer **/
-.table tfoot input[type='text'], .table tfoot select	{
-	margin-bottom: 0px; 
+.table tfoot input[type='text'],
+.table tfoot select {
+	margin-bottom: 0px;
 	margin-right: 5px;
-	width:120px;
-} 
-.table tfoot input[type='button']	{
-	margin-bottom: 0px; 	margin-bottom: 0px; 
+	width: 120px;
+}
+
+.table tfoot input[type='button'] {
+	margin-bottom: 0px;
+	margin-bottom: 0px;
 	margin-right: 5px;
 }
 
-.table tfoot tr td div{
-	position:absolute;
-	bottom:2px;  
-	padding:5px 0px 5px 5px; 	
+
+.table tfoot {
+	position: fixed;
+	bottom: -3px;
+}
+
+.table tfoot tr td {
+	border-top: none !important;
 }
 
 .table tfoot a {
-	cursor:pointer; 
+	cursor: pointer;
 }
 
 .table tfoot span.moo-foot-left {
@@ -37,36 +44,84 @@
 .table tfoot .search {
 	float: left;
 	padding-left: 8px;
-	margin:0px
-}
- 
-.table span.moo-foot-right a, .table span.moo-active-page, .table .moo-active-page-noclick { 
-  padding: 5px 14px; 
+	margin: 0px
 }
 
-.table .moo-active-page-noclick {color:#ccc;}
+.table span.moo-foot-right a,
+.table span.moo-active-page,
+.table .moo-active-page-noclick {
+	padding: 5px 14px;
+}
+
+.table .moo-active-page-noclick {
+	color: #ccc;
+}
 
 .table tfoot span.moo-foot-right a:hover {
 	background-color: #E5E6E6;
-	color:#000;
-	text-shadow:#fff 0 1px 0; 
+	color: #000;
+	text-shadow: #fff 0 1px 0;
 }
+
 .table span.moo-active-page {
 	background-color: #FFF;
-	color:#000;
-	text-shadow:#fff 0 1px 0; 
-	border-radius:4px;
-}  
-
-.moo-table td.cmd 	{ 
-	 vertical-align:bottom;  	 	
+	color: #000;
+	text-shadow: #fff 0 1px 0;
+	border-radius: 4px;
 }
-.cmd .btn-group{float:right !important;}
 
-.moo-table td.cmd a	{
+.moo-table td.cmd {
+	vertical-align: bottom;
+}
+
+.cmd .btn-group {
+	float: right !important;
+}
+
+.moo-table td.cmd a {
 	margin-bottom: 0px;
-} 
+}
 
 /* Used inside the grid for coloumn item */
-.grb1	{color:gray;  font-size:11px;}
-.grb1:before{content:" - "; color:gray;}
+.grb1 {
+	color: gray;
+	font-size: 11px;
+}
+
+.grb1:before {
+	content: " - ";
+	color: gray;
+}
+
+/* Hide table when tbody is empty */
+table:has(tbody:empty) {
+	position: relative;
+	width: 100%;
+	border-collapse: collapse;
+}
+
+/* When tbody is empty, hide the whole table */
+table:has(tbody:empty) tbody,
+table:has(tbody:empty) thead {
+	display: none;
+}
+
+table:has(tbody:empty) tfoot {
+	bottom: 1px;
+}
+
+table:has(tbody:empty)::before {
+	margin-top: 130px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	text-align: center;
+	gap: 10px;
+	height: 200px;
+	font-size: 18px;
+	color: #555;
+	background: url('https://cdn-icons-png.flaticon.com/512/1178/1178479.png') no-repeat center top;
+	background-size: 80px;
+	content: "No record at the moment, Refresh!";
+}
