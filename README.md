@@ -42,6 +42,8 @@ AssetGear is a web application designed for managing assets and maintenance task
 - [ ] ===============
 - [ ] Once approved, dont allow supervisor to add new or edit warehouse material
 
+- UOM and QOH should show the while issue out
+
 -[*] While viewing the Work Order, change the Spareparts to Descriptions -[ ] Add Item Code to everywhere that you have item list -[ ] Add QOO -[ ] Audit trail on who so ever update the inventor -[ ] Pagination should show total number of items -[ ] When new WO is created and it involve materials, it should send a mail to warehouse -[ ] Show wo created WO without printing -[ ] Merging of item as in Code -[ ] Add grcode to workorder -[ ] On the new issue: add item Code to the material list area -[ ] QOH should show while in work order mode -[ ] Assign ItemId to Item Code, and allow Admin Overise the Item Code -[ ] Add money type to Textbox (input box) -[ ] Warehouse items -[ ] Sort by the most recent item -[ ] Remove VPN attached to Item description in warehous item view -[ ] Turn Quantity to integer
 
 ## Bug

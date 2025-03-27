@@ -593,14 +593,14 @@
     	<cfswitch expression="#url.filter#">
             	<cfcase value="date">
 								<cfif url.cid neq "">
-                        WHERE pm.FrequencyId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.cid#"/>
-                       	<cfif !(request.IsHost or request.IsAdmin)>
-                        	AND pm.DepartmentId = #request.userinfo.DepartmentId#
-                            <cfif val(request.userinfo.UnitId)>AND pm.UnitId=#request.userinfo.UnitId#</cfif>
-                        </cfif>
-                        <cfif structkeyexists(url,'keyword')>
+								WHERE pm.FrequencyId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.cid#"/>
+								<cfif !(request.IsHost or request.IsAdmin)>
+									AND pm.DepartmentId = #request.userinfo.DepartmentId#
+										<cfif val(request.userinfo.UnitId)>AND pm.UnitId=#request.userinfo.UnitId#</cfif>
+								</cfif>
+								<cfif structkeyexists(url,'keyword')>
     						AND #url.Field# LIKE "%#url.keyword#%"
-    					</cfif>
+    						</cfif>
                     <cfelse>
                         <cfif structkeyexists(url,'keyword')>
                             WHERE #url.Field# LIKE "%#url.keyword#%"
@@ -613,26 +613,26 @@
                     </cfif>
                 </cfcase>
                 <cfcase value="milestone">
-					<cfif url.cid neq "">
-                        WHERE pm.ReadingTypeId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.cid#"/>
-                        <cfif structkeyexists(url,'keyword')>
-                            AND #url.Field# LIKE "%#url.keyword#%"
-                        </cfif>
-                    <cfelse>
-                        <cfif structkeyexists(url,'keyword')>
-                            WHERE #url.Field# LIKE "%#url.keyword#%"
-                        </cfif>
-                    </cfif>
+									<cfif url.cid neq "">
+										WHERE pm.ReadingTypeId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.cid#"/>
+										<cfif structkeyexists(url,'keyword')>
+											AND #url.Field# LIKE <cfqueryparam cfsqltype="cf_sql_varchar" value="%#url.keyword#%"/>
+										</cfif>
+									<cfelse>
+										<cfif structkeyexists(url,'keyword')>
+											WHERE #url.Field# LIKE <cfqueryparam cfsqltype="cf_sql_varchar" value="%#url.keyword#%"/>
+										</cfif>
+									</cfif>
                 </cfcase>
             	<cfdefaultcase>
                 	WHERE pm.DepartmentId
-                        <cfif request.IsHost or request.IsAdmin>
-                            IS NOT NULL
-                       <cfelse>
-                        = #request.userinfo.DepartmentId# <cfif val(request.userinfo.UnitId)>AND pm.UnitId=#request.userinfo.UnitId#</cfif>
-                       </cfif>
+									<cfif request.IsHost or request.IsAdmin>
+										IS NOT NULL
+									<cfelse>
+										= #request.userinfo.DepartmentId# <cfif val(request.userinfo.UnitId)>AND pm.UnitId=#request.userinfo.UnitId#</cfif>
+									</cfif>
                 	<cfif structkeyexists(url,'keyword')>
-                    	AND #url.Field# LIKE "%#url.keyword#%"
+										AND #url.Field# LIKE <cfqueryparam cfsqltype="cf_sql_varchar" value="%#url.keyword#%"/>
                 	</cfif>
                 </cfdefaultcase>
             </cfswitch>

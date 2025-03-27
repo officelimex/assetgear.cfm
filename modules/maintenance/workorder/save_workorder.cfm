@@ -151,17 +151,17 @@
 					<cfset aInput = true/>
 				</cfif>
 			</cfif>
-        <et:Table allowInput="#aInput#" height="200px" id="WorkOrderItem">
-					<et:Headers>
-						<et:Header title="Description" size="6" type="int">
-							<et:Select ListValue="#Valuelist(qWI.ItemId,'`')#" ListDisplay="#Valuelist(qWI.ItemDescriptionWithVPNAndQOH,'`')#" delimiters="`"/>
-						</et:Header>
-						<et:Header title="Purpose" size="4" type="text" required="false" />
-						<et:Header title="Qty" size="1" type="int" />
-						<et:Header title="" size="1"/>
-					</et:Headers>
-					<et:Content Query="#qOI_#" Columns="ItemDescription,Purpose,Quantity" type="int-select,text,int" PKField="WorkOrderItemId"/>
-        </et:Table>
+			<et:Table allowInput="#aInput#" height="200px" id="WorkOrderItem">
+				<et:Headers>
+					<et:Header title="Description" size="6" type="int">
+						<et:Select ListValue="#Valuelist(qWI.ItemId,'`')#" ListDisplay="#Valuelist(qWI.ItemDescriptionWithVPNAndQOH,'`')#" delimiters="`"/>
+					</et:Header>
+					<et:Header title="Purpose" size="4" type="text" required="false" />
+					<et:Header title="Qty" size="1" type="int" />
+					<et:Header title="" size="1"/>
+				</et:Headers>
+				<et:Content Query="#qOI_#" Columns="ItemDescription,Purpose,Quantity" type="int-select,text,int" PKField="WorkOrderItemId"/>
+			</et:Table>
     </div>
 
 		<div id="#Id3#">

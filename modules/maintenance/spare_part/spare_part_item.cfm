@@ -27,11 +27,12 @@
 			<g:Column id="VPN" searchable />
 			<g:Column id="QOH" caption="Qty"/>
 			<g:Column id="QOR"/>
+			<g:Column id="QOO" hide/>
 			<g:Column id="MinimumInStore" caption="Order Lv"/>
 			<g:Column id="UnitPrice" caption="Unit Price" hide />
 			<g:Column id="Location" field="sl.Code" caption="Shelf Location"/>
 			<g:Column id="Obsolete" hide/>
-			<g:Column id="AssetCategoryid" hide />
+			<g:Column id="AssetCategoryId" hide />
 			<g:Column id="UMId" hide />
 			<g:Column id="ShelfLocationId" hide />
 			<g:Column id="DepartmentId" hide />

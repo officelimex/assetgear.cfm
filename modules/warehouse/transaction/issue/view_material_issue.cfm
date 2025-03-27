@@ -22,7 +22,7 @@
 <cfquery name="qI">
     SELECT
     	ii.*,
-    	it.Description, it.VPN,
+    	it.Description, it.VPN, it.Code,
         um.Code UM 
     FROM
     	whs_issue_item AS ii
@@ -32,26 +32,6 @@
     WHERE ii.IssueId =  <cfqueryparam cfsqltype="cf_sql_integer" value="#url.Id#">
 </cfquery> 
 
-<cfquery name="qID" cachedwithin="#CreateTime(1,0,0)#">
-	SELECT ItemId, CONVERT(CONCAT(Description,' ',VPN) USING utf8) Description FROM whs_item
-    ORDER BY Description ASC
-</cfquery>
-
-<cfset qD = application.com.User.GetDepartments()/>
-<cfset qCU = application.com.User.GetUsers()/>
-<!---<cfquery name="qD">
-	SELECT * FROM core_department
-    ORDER BY Name 
-</cfquery>--->
-
-<cfquery name="qWR">
-	SELECT * FROM whs_mr
-    ORDER BY Note
-</cfquery>
-
-<!---<cfquery name="qCU">
-	SELECT UserId,concat(Surname," ", OtherNames) as Names FROM core_user 
-</cfquery>--->
 <cfset editable=false/>
  
 <f:Form id="#mrId#frm" action="x"> 
@@ -66,7 +46,7 @@
         
     </td>
     <td class="horz-div" valign="top"> 
-        <f:Label name="Date Issued" required value="#dateformat(qWI.DateIssued,'yyyy/mm/dd')#"/>
+        <f:Label name="Date Issued" required value="#dateFormat(qWI.DateIssued,'yyyy/mm/dd')#"/>
 		<f:Label name="Remark" value="#qWI.Remark#" />
         <f:Label name="Received by" value="#qWI.IssuedToUser#"/>
     </td>
@@ -77,6 +57,7 @@
 <thead>
   <tr>
   	<th width="1">##</th>
+  	<th width="1">ICN</th>
     <th>Description</th>
     <th width="1">Quantity</th>
     <th nowrap="nowrap" width="65">Unit price</th>
@@ -87,7 +68,8 @@
 	<cfset tsum=0/>
   <cfloop query="qI">
   <tr>
-  	<td>#qI.ItemId#</td>
+  	<td>#qI.Currentrow#</td>
+  	<td>#qI.Code#</td>
     <td>#qI.Description# #qI.VPN#</td>
     <td>#qI.Quantity# #qI.UM#</td>
     <td style="text-align:right;">#numberformat(qI.Unitprice,'9,999.99')#</td>
@@ -99,7 +81,7 @@
   </cfloop>
   <tr>
     <td colspan="4"></td>
-    <td style="text-align:right;">#numberformat(tsum,'9,999.99')#</td>
+    <td style="text-align:right;">#numberFormat(tsum,'9,999.99')#</td>
   </tr>
   
 </tbody>
