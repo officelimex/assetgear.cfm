@@ -5,8 +5,8 @@
     <cfparam name="Attributes.Title" type="string" default=""/>	<!--- Use d[0,1,2] to capture the title of the wind e.g "'Edit '" + d[2] ---->
     <cfparam name="Attributes.warnBeforeClose" type="boolean" default="false"/>
     <cfparam name="Attributes.ShowHideButton" type="boolean" default="true"/>
-    <cfparam name="Attributes.width" type="string" default="600px"/>
-    <cfparam name="Attributes.height" type="string" default="300px"/>
+    <cfparam name="Attributes.width" type="string" default=""/>
+    <cfparam name="Attributes.height" type="string" default=""/>
     <cfparam name="Attributes.IdFromGrid" type="string" default="d[0]"/>
     <cfparam name="Attributes.id" type="string" default="_#createuniqueid()#"/>
 		<cfif trim(Attributes.id) EQ "">
@@ -39,9 +39,9 @@
 						hide: #Attributes.ShowHideButton#
 					},
 					size : {
-						width: '#Attributes.width#',
-						height : '#Attributes.height#'
-					},
+						width: Math.min(window.innerWidth * 0.9, parseInt('#Attributes.width#') || 1300) + 'px',
+						height: Math.min(window.innerHeight * 0.75, parseInt('#Attributes.height#') || 600) + 'px'
+				},
 					url :         
 				<cfif  Attributes.IdFromGrid eq "">
 					#Attributes.URL#
@@ -53,7 +53,6 @@
 					</cfif>
 				</cfif>
 				}); 
-	
 				win_#Attributes.id#.addCloseButton();                
 			</cfdefaultcase>
 
