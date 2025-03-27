@@ -54,7 +54,10 @@
                                 <cfcase value="ppt,pptx" delimiters=","><img src="assets/awaf/tags/xUploader_1000/img/txt.png" align="left"/></cfcase>
                                 <cfdefaultcase><img src="assets/awaf/tags/xUploader_1000/img/na.png" align="left"/></cfdefaultcase>
                             </cfswitch>
-                            <a target="_blank" href="#Attributes.source##Attributes.table#/#Attributes.pk#/#s_flname#">#flname#.#ext#</a><br/><span style="color:gray; font-size:11px">#ConvertByte(qF.Size[i])#</span>
+                            <cfset _fn = urlDecode(s_flname)/>
+							<cfset p = s3generatePresignedUrl("#application.s3.bucket##Attributes.source##Attributes.table#/#Attributes.pk#/#_fn#")/>
+                            <a target="_blank" href="#p#">#flname#.#ext#</a><br/><span style="color:gray; font-size:11px">#ConvertByte(qF.Size[i])#</span>
+                            <!--- <a target="_blank" href="#Attributes.source##Attributes.table#/#Attributes.pk#/#s_flname#">#flname#.#ext#</a><br/><span style="color:gray; font-size:11px">#ConvertByte(qF.Size[i])#</span> --->
                         <cfelse>
                             <cfset _fn = urlDecode(s_flname)/>
 							<cfset p = s3generatePresignedUrl("#application.s3.bucket##Attributes.source##Attributes.table#/#Attributes.pk#/#_fn#")/>
