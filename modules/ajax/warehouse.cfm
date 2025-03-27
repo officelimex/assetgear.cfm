@@ -128,7 +128,7 @@
 					{"total": #qT.c#,
 							"page": #url.page#,
 							"rows":[<cfloop query="q">
-							[#q.Itemid#,#serializeJSON(q.Code)#,#serializeJSON(q.Description)#,#serializeJSON(q.VPN)#, "#q.QOH#","#q.QOR#","#q.MinimumInStore#", "<cfif q.Currency eq 'NGN'>&##8358;<cfelseif q.Currency eq 'USD'>$</cfif> #NumberFormat(q.Unitprice,'9,999.99')#",
+							[#q.Itemid#,#serializeJSON(q.Code)#,#serializeJSON(q.Description)#,#serializeJSON(q.VPN)#, "#q.QOH#","#q.QOR#","#q.QOO#","#q.MinimumInStore#", "<cfif q.Currency eq 'NGN'>&##8358;<cfelseif q.Currency eq 'USD'>$</cfif> #NumberFormat(q.Unitprice,'9,999.99')#",
 								"#q.Location#",
 									<cfswitch expression="#q.Obsolete#">
 										<cfcase value="Yes">#serializeJSON('<span class="label">Yes</span>')#</cfcase>
@@ -203,7 +203,7 @@
 					"rows":[
 					<cfloop query="q">
 						[
-							#q.POId#, #q.MRId#, #serializeJSON(q.Ref)#, "#DateFormat(q.Date,'dd-mmm-yyyy')#"
+							#q.POId#, #q.MRId#, #serializeJSON(q.Note)#, #serializeJSON(q.Ref)#, "#DateFormat(q.Date,'dd-mmm-yyyy')#", "#q.Status#"
 						]
 						<cfif q.recordcount neq q.currentrow>,</cfif>
 					</cfloop>
@@ -392,6 +392,14 @@
 				<cfset form.Type = url.Type/>
 				<cfset mrid = application.com.Transaction.SaveMR(form)/>
 				MR #mrid# was updated...
+
+			</cfcase>
+
+			<!---SavePO--->
+			<cfcase value="SavePO">
+
+				<cfset poid = application.com.Transaction.SavePO(form)/>
+				PO #poid# was updated...
 
 			</cfcase>
 
@@ -653,43 +661,49 @@
 
 			</cfcase>
 
-
+			<!--- Receive Materials from Purchase Order --->
+			<cfcase value="ReceiveOrder">
+				<cftransaction action="begin">
+					<cfset form.ReceivedByUserId = request.UserInfo.UserId/>
+					<cfset qItems = application.com.Helper.GetTempDataToUpdate(form.POItemId)/>
+					<cfloop query="qItems">
+						<cfquery name="qP">
+							SELECT ItemId FROM whs_po_item WHERE POItemId = #val(qItems.PK)#
+						</cfquery>
+						<cfquery>
+							UPDATE whs_item SET
+								QOH = QOH + #val(qItems.int1)#,
+								QOO = QOO - #val(qItems.int1)#
+							WHERE ItemId = #val(qP.ItemId)#
+						</cfquery>
+					</cfloop>
+					<cfset application.com.Helper.SaveFromTempTable(form.POItemId,
+						"whs_po_item",
+						"RQuantity,Ref",
+						"int1,text1",
+						"POItemId","POId", val(form.id))/>
+					<cfquery>
+						UPDATE whs_po SET
+							`Status` = "Close",
+							ReceivedByUserId = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.ReceivedByUserId#"/>,
+							DateReceived = <cfqueryparam cfsqltype="cf_sql_date" value="#form.DateReceived#"/>,
+							DeliveryInfo = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.DeliveryInfo#"/>
+						WHERE POId = #val(form.id)#
+					</cfquery>
+					<cfquery>
+						UPDATE whs_mr SET
+							`Status` = "Close"
+						WHERE MRId = #val(form.MRId)#
+					</cfquery>
+				</cftransaction>
+			</cfcase>
+			
 			<!---SaveMaterialReturn--->
 			<cfcase value="SaveMaterialReturn">
 
-					<cfset form.ReturnedToUserId = Request.UserInfo.UserId/>
-					<cfset application.com.Transaction.ReturnMaterialToWarehouse(form)/>
+				<cfset form.ReturnedToUserId = Request.UserInfo.UserId/>
+				<cfset application.com.Transaction.ReturnMaterialToWarehouse(form)/>
 
-			</cfcase>
-
-			<cfcase value="getxxx">
-				<cfquery name="qE" cachedwithin="#CreateTime(1,0,0)#">
-						SELECT
-								CONVERT(CONCAT(i.Description,'~',i.ItemId) USING utf8) Item, i.ItemId,
-									mri.Quantity, mri.MRItemId
-							FROM whs_mr_item mri
-							INNER JOIN whs_item i ON i.ItemId = mri.ItemId
-							WHERE MRId = <cfqueryparam value="#val(url.id)#" cfsqltype="cf_sql_integer"/>
-					</cfquery>
-					<!--- clear temp data --->
-					<cfquery>
-							UPDATE temp_data SET `Flag` = "d"
-							WHERE `Session` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#url.s#"/>
-					</cfquery>
-					{"data":[
-							<cfloop query="qE">
-								<cfquery result="rt">
-										INSERT INTO temp_data SET
-										`Session` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#url.s#"/>,
-											`int0` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#qE.ItemId#"/>,
-											`int1` = <cfqueryparam cfsqltype="cf_sql_integer" value="#qE.Quantity#"/>,
-											<!---`PK` = <cfqueryparam cfsqltype="cf_sql_integer" value="#qE.MRItemId#"/>,--->
-											`Flag` = "n",
-											`TimeCreated` = <cfqueryparam cfsqltype="cf_sql_date" value="#now()#"/>
-									</cfquery>
-								[#SerializeJSON(qE.Item)#,#qE.Quantity#,#rt.GENERATED_KEY#]<cfif qE.recordcount neq qE.currentrow>,</cfif>
-							</cfloop>
-					]}
 			</cfcase>
 
 			<cfcase value="getWorkOrderNI">
@@ -813,18 +827,24 @@
 				{"data":[
 					<cfloop query="qE">
 						<cfquery result="rt">
+						<!--- 
+							int0 - qty req 
+							int1 - qty ordered 
+							int2 - mr item id
+							int3 - item id
+							float0 - unit price
+						--->
 							INSERT INTO temp_data SET
 								`Session` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#url.s#"/>,
-								`int0` = <cfqueryparam cfsqltype="cf_sql_integer" value="#qE.ItemId#"/>,
+								`int0` = <cfqueryparam cfsqltype="cf_sql_integer" value="#qE.Quantity#"/>,
 								`int1` = <cfqueryparam cfsqltype="cf_sql_integer" value="#qE.Quantity#"/>,
-								`int2` = <cfqueryparam cfsqltype="cf_sql_integer" value="#qE.Quantity#"/>,
-								`text0` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#qE.Currency#"/>,
+								`int2` = <cfqueryparam cfsqltype="cf_sql_integer" value="#qE.MRItemId#"/>,
+								`int3` = <cfqueryparam cfsqltype="cf_sql_integer" value="#qE.ItemId#"/>,
 								`float0` = <cfqueryparam cfsqltype="cf_sql_integer" value="#qE.UnitPrice#"/>,
-								`text1` = "#qE.ItemDescription#",
 								`Flag` = "n",
 								`TimeCreated` = <cfqueryparam cfsqltype="cf_sql_date" value="#now()#"/>
 						</cfquery>
-						[#SerializeJSON(qE.ItemDescription)#,#qE.Quantity#,#qE.Quantity#,"#qE.Currency#",#Numberformat(qE.UnitPrice,'999.99')#,#rt.GENERATED_KEY#]<cfif qE.recordcount neq qE.currentrow>,</cfif>
+						[#SerializeJSON(qE.ItemDescription)#,#qE.Quantity#,#qE.Quantity#,#Numberformat(qE.UnitPrice,'999.99')#,#rt.GENERATED_KEY#]<cfif qE.recordcount neq qE.currentrow>,</cfif>
 					</cfloop>
 				]}
 		</cfcase>

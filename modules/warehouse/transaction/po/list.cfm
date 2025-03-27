@@ -6,18 +6,22 @@
     <g:Columns>
       <g:Column id="POId" caption="##" sortable searchable/>
       <g:Column id="MRId" caption="MR ##" searchable/>
+      <g:Column id="Note" caption="Note" searchable />
       <g:Column id="Ref" caption="Ref" searchable />
       <g:Column id="Date"/>      
+      <g:Column id="Status"/>      
     </g:Columns>
     <g:Commands>
-      <g:Command id="editMR" text="Edit" help="Edit MR" class="btn btn-mini"/>
+      <g:Command id="viewPO" text="View" help="view PO" class="btn btn-mini"/>
+      <g:Command id="receivePO" text="Receive" condition="row[5]!='Close'" help="Receive PO" class="btn btn-info btn-mini"/>
     </g:Commands>
          
-    <g:Event command="editMR">
-      <g:Window title="'Edit material requisition ## '+d[0] " width="850px" height="440px" url="'modules/warehouse/transaction/mr/save_mr.cfm'">
-        <g:Button value="Decline MR" class="btn-success" icon="icon-remove icon-white" executeURL="'controllers/Warehouse.cfc?method=declineMR'"/>
-        <g:Button IsSave /> 
-      </g:Window>
+    <g:Event command="viewPO">
+      <g:Window title="'View Purchase Order ## '+d[0] " url="'modules/warehouse/transaction/po/view.cfm'"/>
+    </g:Event>
+
+    <g:Event command="receivePO">
+      <g:Window title="'Receive Purchase Order ## '+d[0] " url="'modules/warehouse/transaction/po/receive.cfm'" id="receive_po"/>
     </g:Event>
   </g:Grid> 
    

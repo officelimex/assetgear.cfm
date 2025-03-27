@@ -22,6 +22,7 @@
 		<g:Column id="VPN" searchable />
 		<g:Column id="QOH" sortable/>
 		<g:Column id="QOR" sortable/>
+		<g:Column id="QOO" sortable/>
 		<g:Column id="MinimumInStore" caption="Order Lv"/>
 		<g:Column id="UnitPrice" caption="Unit Price" />
 		<g:Column id="Location" searchable field="sl.Code" caption="Shelf Location"/>

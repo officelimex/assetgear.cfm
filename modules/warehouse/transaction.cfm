@@ -23,7 +23,7 @@
 
 			<n:NavItem type="header" title="Issuance"/>
 			<n:NavItem title="Issue Out Material" url="modules/warehouse/transaction/issue/save_material_issue.cfm?newpage=true" id="save_material_issue"/>
-			<n:NavItem title="Material Issued" isactive url="modules/warehouse/transaction/issue/material_issue.cfm" id="material_issue"/>
+			<n:NavItem title="Material Issued" isActive url="modules/warehouse/transaction/issue/material_issue.cfm" id="material_issue"/>
 			<n:NavItem title="Return Material back" url="modules/warehouse/transaction/save_material_returned.cfm?newpage=true" id="save_material_returned"/>
 			<n:NavItem title="Material Returns" url="modules/warehouse/transaction/return/material_returned.cfm" id="material_returned"/>
 			

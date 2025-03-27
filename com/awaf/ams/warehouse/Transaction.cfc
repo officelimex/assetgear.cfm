@@ -5,15 +5,32 @@
 		<cfset this.PO_SQL = '
 			SELECT
 				po.*,
-				CONCAT(u.Surname, " ", u.OtherNames) CreatedBy
+				mr.Note,
+				CONCAT(u.Surname, " ", u.OtherNames) CreatedBy,
+				CONCAT(r.Surname, " ", r.OtherNames) ReceivedBy
 			FROM whs_po po
 			INNER JOIN core_user u 	ON u.UserId = po.CreatedByUserId
+			LEFT  JOIN core_user r 	ON r.UserId = po.ReceivedByUserId
 			INNER JOIN whs_mr mr 		ON mr.MRId 	= po.MRId 
 		'/>
 
 		<cfset this.PO_COUNT_SQL = '
 			SELECT COUNT(po.POId) C
 			FROM whs_po po
+			INNER JOIN core_user u 	ON u.UserId = po.CreatedByUserId
+			INNER JOIN whs_mr mr 		ON mr.MRId 	= po.MRId 
+		'/>
+
+		<cfset this.PO_ITEM_SQL = '
+			SELECT
+				poi.*,
+				i.Description ItemDescription, i.Code ICN,
+				um.Code UM,
+				po.Currency
+			FROM whs_po_item poi
+			INNER JOIN whs_item i ON i.ItemId = poi.ItemId
+			INNER JOIN um 				ON um.UMId 	= i.UMId
+			INNER JOIN whs_po po 	ON po.POId 	= poi.POId
 		'/>
 
 		<cfset this.MR_SQL = '
@@ -195,6 +212,17 @@
 		<cfreturn qMR/>
 	</cffunction>
 
+	<cffunction name="GetPO" return="query" access="public">
+		<cfargument name="poid" hint="po id" required="true" type="numeric"/>
+
+		<cfquery name="qPO">
+			#this.PO_SQL#
+			WHERE po.POId = <cfqueryparam value="#arguments.poid#" cfsqltype="cf_sql_integer"/>
+		</cfquery>
+
+		<cfreturn qPO/>
+	</cffunction>
+
 	<cffunction name="GetMaterialReceived" return="query" access="public">
 		<cfargument name="mrid" hint="material received id" required="true" type="numeric"/>
 
@@ -226,6 +254,18 @@
 		</cfquery>
 
 		<cfreturn qMRI/>
+	</cffunction>
+
+	
+	<cffunction name="GetPOItems" return="query" access="public">
+		<cfargument name="poid" hint="po id" required="true" type="numeric"/>
+
+		<cfquery name="qPOI">
+			#this.PO_ITEM_SQL#
+			WHERE poi.POId = <cfqueryparam value="#arguments.poid#" cfsqltype="cf_sql_integer"/>
+		</cfquery>
+
+		<cfreturn qPOI/>
 	</cffunction>
 
 	<cffunction name="GetMRNIItems" return="query" access="public">
@@ -441,6 +481,80 @@
 		</cftransaction>
 
 		<cfreturn mrid/>
+	</cffunction>
+
+
+	<cffunction name="SavePO" returntype="numeric" access="public" hint="Save purchase order">
+		<cfargument name="po_" hint="po data in struct form" type="struct" required="true"/>
+
+		<cfset po = arguments.po_/>
+		<cfset poid = po.id/>
+
+		<cfparam name="po.Currency" default="NGN"/>
+
+		<cftransaction action="begin">
+			<cfquery result="rt">
+				<cfif poid eq 0>
+					INSERT INTO
+				<cfelse>
+					UPDATE
+				</cfif>
+					whs_po SET
+				<cfif poid eq 0>
+					`Date` = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(Now(),'dd/mmm/yyyy')#">,
+					`CreatedByUserId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#Request.UserInfo.UserId#">,
+					</cfif>
+					`Ref` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#po.Ref#">,
+					`MRId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#po.MRId#">,
+					`Currency` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#po.Currency#">
+				<cfif poid neq 0>
+					WHERE POId = <cfqueryparam cfsqltype="cf_sql_integer" value="#poid#">
+				</cfif>
+			</cfquery>
+
+			<cfif poId eq 0>
+				<cfset poId = rt.GENERATED_KEY/>
+			</cfif>
+
+			<!--- upload attachments --->
+			<cfparam name="po.Attachments" default=""/>
+			<cfif po.Attachments neq "">
+				<cfset s_path = po.AttachmentsSource & "/" & po.Attachments />
+				<cfset d_path = form.AttachmentsDestination & "/whs_po/" & poId & "/" />
+				<cfset application.com.File.Move('whs_po', poId,'a',s_path,d_path)/>
+			</cfif>
+			<!--- 
+				int0 - qty req 
+				int1 - qty ordered 
+				int2 - mr item id
+				int3 - item id
+				float0 - unit price
+			--->
+			<cfset qpo_items = application.com.Helper.GetTempDataToUpdate(po.ItemsFromMR)/>
+			<cfloop query="qpo_items">
+				<!--- update qoo and qor --->
+				<cfquery>
+					UPDATE whs_item SET
+						QOR = QOR - #qpo_items.int1#,
+						QOO = QOO + #qpo_items.int1#
+					WHERE ItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qpo_items.int3#"/>
+				</cfquery>
+			</cfloop>
+			<!--- save into po_items --->
+			<cfset application.com.Helper.SaveFromTempTable(po.ItemsFromMR,
+				"whs_po_item",
+				"ItemId,MRItemId,Quantity,UnitPrice",
+				"int3,int2,int1,float0",
+				"POItemId","POId",poid)/>
+
+			<cfquery>
+				UPDATE whs_mr SET 
+					Status = "Ordered"
+				WHERE MRId = <cfqueryparam cfsqltype="cf_sql_integer" value="#po.MRId#"/>
+			</cfquery>
+		</cftransaction>
+
+		<cfreturn poid/>
 	</cffunction>
 
 	<cffunction name="SetCode">
