@@ -28,33 +28,33 @@
         <g:Column id="DepartmentId" hide/>
 	</g:Columns>
     <g:Commands>
-    	<cfif !request.IsHSE>
+    		<cfif !request.IsHSE>
         	<g:Command id="duplicateJHA" icon="tags" help="Duplicate JHA"/>
         </cfif>
-        <g:Command id="editJHA" icon="pencil" help="Edit JHA" condition="row[7]=='Draft' && row[8]==#request.userinfo.departmentid#" />
-        <g:Command id="viewJHA" icon="file" help="View JHA" condition="row[7]=='c'"/>
+        <g:Command id="editJHA" icon="pencil" help="Edit JHA" condition="(row[7]=='Draft' || row[7]=='Open') && row[8]==#request.userinfo.departmentid#" />
+        <g:Command id="viewJHA" icon="file" help="View JHA" condition="row[7]!='Close'"/>
     	<g:Command id="PrintJHA" icon="print" help="Print JHA"/> 
     </g:Commands>
-	<cfif !request.IsHSE>
-        <g:Event command="duplicateJHA">
-            <g:Window title="'Duplicate JHA ## '+d[0]" width="1050px" height="430px" url="'modules/ptw/jha/duplicate.cfm?cid=#url.cid#'" id="">                
-            	<g:Button IsSave value="Duplicate" />                
-            </g:Window>
-        </g:Event>
-    </cfif>
+		<cfif !request.IsHSE>
+			<g:Event command="duplicateJHA">
+				<g:Window title="'Duplicate JHA ## '+d[0]" width="1050px" height="430px" url="'modules/ptw/jha/duplicate.cfm?cid=#url.cid#'" id="">                
+					<g:Button IsSave value="Duplicate" />                
+				</g:Window>
+			</g:Event>
+		</cfif>
     
 	<g:Event command="viewJHA">
-    	<g:Window title="'JHA ## '+d[0]" width="1050px" height="430px" url="'modules/ptw/jha/view_jha.cfm?cid=#url.cid#'" id=""/>  
+    	<g:Window title="'JHA ## '+d[0]" width="1050px" height="430px" url="'modules/ptw/jha/view_jha.cfm?cid=#url.cid#'" id="view_jha"/>  
     </g:Event>
     
 	<g:Event command="editJHA">
     	<g:Window title="'JHA ## '+d[0]" width="1050px" height="430px" url="'modules/ptw/jha/save_jha.cfm?cid=#url.cid#'" id="">
         	<cfif request.IsHSE>
             	<g:Button value="Reject" icon="icon-off icon-white" executeURL="'modules/ajax/ptw.cfm?cmd=RejectJHA'"/>
-                <g:Button value="Approve" executeURL="'modules/ajax/ptw.cfm?cmd=ApproveJHA'" class="btn-success"/>
-            <cfelse>
+              <g:Button value="Approve" executeURL="'modules/ajax/ptw.cfm?cmd=ApproveJHA'" class="btn-success"/>
+          <cfelse>
             	<g:Button IsSave />
-            </cfif> 
+          </cfif> 
         </g:Window>
     </g:Event>     
 	<g:Event command="PrintJHA">

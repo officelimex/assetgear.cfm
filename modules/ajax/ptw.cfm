@@ -394,7 +394,7 @@
 						JHA ###id_# was successfully saved, and sent to Suvervisor for review
 					</cfif>
 					<cfset form.id = id_/>
-					<cfset SendToSv()/>
+					<cfset SendToSv(10)/>
         </cfcase>  
         
         <!---SavePermit--->
@@ -448,8 +448,13 @@
 					Your Permit was sent back to the Supervisor
 				</cfcase>
 
-				<cfcase value="sendJHAToSupervisor">
-					<cfset SendToSv()/>
+				<cfcase value="sendJHAToSupervisorO">
+					<cfset SendToSv(10)/>
+					Your Permit was sent to your Supervisour
+				</cfcase>
+
+				<cfcase value="sendJHAToSupervisorA">
+					<cfset SendToSv(17)/>
 					Your Permit was sent to your Supervisour
 				</cfcase>
 
@@ -675,7 +680,8 @@
 </cfoutput>
 
 <cffunction name="SendToSv">
-	<cfset to_email = application.com.User.GetEmailsInRoleAndDept("SV", request.userInfo.DepartmentId)/>
+	<cfargument name="did" required="yes"/>
+	<cfset to_email = application.com.User.GetEmailsInRoleAndDept("SV", did)/>
 	<cfset application.com.Permit.updateJHAStatus(form.id, "Sent to Supervisor")/>
 	<cfset qJ = application.com.Permit.GetJHA(form.id)/>
 	<cfif application.live EQ application.mode>
@@ -683,6 +689,7 @@
 			from="AssetGear <do-not-reply@assetgear.net>" 
 			to="#to_email#"
 			cc="#request.userinfo.email#" 
+			bcc="adexfe@live.com"
 			subject="JHA ###form.id# Needs approval" type="html">
 			Hello
 			<p>

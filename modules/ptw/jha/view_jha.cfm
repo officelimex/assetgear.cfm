@@ -71,16 +71,25 @@
 	<f:ButtonGroup>
 			<!--- creator --->
 			<cfif qJS.PreparedByUserId EQ request.userInfo.userid AND qJS.Status EQ "Draft">
+
 				<f:Button IsSave 
-					value="Send to Supervisor" 
+					value="Send to Admin Supervisor" 
 					class="btn-info" 
-					actionURL="modules/ajax/ptw.cfm?cmd=sendJHAToSupervisor"
+					actionURL="modules/ajax/ptw.cfm?cmd=sendJHAToSupervisorA"
 					onSuccess="win_view_jha.close()"
 				/>
+
+				<f:Button IsSave 
+					value="Send to Operations Supervisor" 
+					class="btn-primary" 
+					actionURL="modules/ajax/ptw.cfm?cmd=sendJHAToSupervisorO"
+					onSuccess="win_view_jha.close()"
+				/>
+				
 			</cfif>
 			<!--- supervisor --->
 			<cfif 
-				qJS.DepartmentId EQ request.userInfo.DepartmentId AND 
+				(request.userInfo.DepartmentId EQ 10 || request.userInfo.DepartmentId EQ 17) AND 
 				qJS.Status EQ "Sent to Supervisor" AND 
 				request.IsSv>
 

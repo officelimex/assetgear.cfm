@@ -10,6 +10,7 @@
 <cfset status ="-"/>
 <cfif request.IsSV>
 	<cfset status = "Sent to Supervisor"/>
+	<cfset dept = "0"/>
 </cfif>
 <cfif request.IsHSE>
 	<cfset status = "Sent to HSE"/>
