@@ -13,14 +13,14 @@
 <cfif url.id eq 0><br/></cfif>
 <f:Form id="#locId#frm" action="modules/ajax/ptw.cfm?cmd=saveJHA" EditId="#url.id#"> 
 	<table width="100%"  border="0">
-    	<tr>
-        	<td width="26%" >
-    			<f:TextBox name="WorkOrderId" label="Work Order ##" required value="#qJS.WorkOrderId#" class="span9"/>
-            </td>
-            <td class="horz-div" valign="top">
-                <f:TextBox name="EquipmentToUse" required label="Equipment/Tools to be used" value="#qJS.EquipmentToUse#" class="span11" />
-            </td> 
-        </tr>
+		<tr>
+			<td width="26%" >
+			<f:TextBox name="WorkOrderId" label="Work Order ##" required value="#qJS.WorkOrderId#" class="span9"/>
+			</td>
+			<td class="horz-div" valign="top">
+				<f:TextBox name="EquipmentToUse" required label="Equipment/Tools to be used" value="#qJS.EquipmentToUse#" class="span11" />
+			</td> 
+		</tr>
         <tr>
         	<td></td>
         </tr>

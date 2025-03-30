@@ -21,7 +21,7 @@
     <cfquery name="qGT">
 			SELECT
 				gt.*, 
-					Date_Format(gt.Date,'%d-%m-%y %r') Dates
+				Date_Format(gt.Date,'%d-%m-%y %r') Dates
 			FROM
 				ptw_gas_test AS gt
 			INNER JOIN ptw_permit AS pp ON gt.PermitId = pp.PermitId 
@@ -39,6 +39,7 @@
 						<td width="50%" valign="top">
 							<f:TextBox name="JHAId" label="JHA ##" required value="#qPM.JHAId#" class="span5"/>
 							<f:RadioBox ShowLabel Label="Job type" name="WorkType" ListValue="Hot Work,Cold Work,Electrical Work" selected="#qPM.WorkType#" Inline/>
+							<f:TextBox name="ZoneClass" label="Zone Classification" value="#qPM.ZoneClass#" class="span11"/>
 						</td>
 						<td class="horz-div"  valign="top">
 							<f:DatePicker name="StartTime" label="Start Date/Time" required value="#qPM.StartTime#" type="datetime"/>

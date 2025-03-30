@@ -69,9 +69,13 @@
             <td>
               <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbl-pad-4">
               <tr>
-                <td width="16%">FACILITY/INSTALLATION: </td>
-                <td width="67%" class="underline">
-                #replace(valuelist(qAL.Location),',',', ','all')# &mdash; #qP.Asset#
+                <td width="10%" nowrap="nowrap">FACILITY/INSTALLATION: </td>
+                <td width="90%" class="underline">
+                  #replace(valuelist(qAL.Location),',',', ','all')# &mdash; #qP.Asset#
+                </td>
+                <td nowrap="nowrap" style="padding-left:10px">ZONE CLASSIFICATION: </td>
+                <td width="100px" class="underline">
+                  #qP.ZoneClass# 
                 </td>
               </tr>
             </table>

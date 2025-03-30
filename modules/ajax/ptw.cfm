@@ -714,6 +714,7 @@
 	<cfparam name="form.ConfinedSpace" default=""/>
 	<cfparam name="form.GasFree" default=""/>
 	<cfparam name="form.WorkType" default=""/>
+	<cfparam name="form.ZoneClass" default=""/>
 	
 	<!--- check if JHA  from your department first --->
 	<cfset qJ = application.com.Permit.GetJHA(form.JHAId)/>
@@ -734,18 +735,18 @@
 	</cfif>
 	
 	<cfquery result="rt">
-	<cfif form.id eq 0>
-					INSERT INTO
+			<cfif form.id eq 0>
+				INSERT INTO
 			<cfelse>
-					UPDATE 
+				UPDATE 
 			</cfif>
 			ptw_permit SET
-				JHAId=<cfqueryparam cfsqltype="cf_sql_integer" value="#form.JHAId#"/>,
+				JHAId = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.JHAId#"/>,
 				NumberOfWorkers = <cfqueryparam cfsqltype="cf_sql_integer" value="#val(form.NumberOfWorkers)#"/>,
-				Date=<cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(Now(),'yyyy-mmm-dd')#"/>,
-				StartTime=<cfqueryparam cfsqltype="cf_sql_timestamp" value="#DateFormat(form.StartTime,'yyyy/mm/dd')# #TimeFormat(form.StartTime,'HH:MM')#"/>,
-				EndTime=<cfqueryparam cfsqltype="cf_sql_timestamp" value="#DateFormat(form.EndTime,'yyyy/mm/dd')# #TimeFormat(form.EndTime,'HH:MM')#"/>,
-				Contractor=<cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Contractor#"/>,
+				Date = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(Now(),'yyyy-mmm-dd')#"/>,
+				StartTime =<cfqueryparam cfsqltype="cf_sql_timestamp" value="#DateFormat(form.StartTime,'yyyy/mm/dd')# #TimeFormat(form.StartTime,'HH:MM')#"/>,
+				EndTime = <cfqueryparam cfsqltype="cf_sql_timestamp" value="#DateFormat(form.EndTime,'yyyy/mm/dd')# #TimeFormat(form.EndTime,'HH:MM')#"/>,
+				Contractor = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Contractor#"/>,
 				SafetyRequirement1=<cfqueryparam cfsqltype="cf_sql_varchar" value="#form.SafetyRequirement1#"/>,
 				SafetyRequirement2=<cfqueryparam cfsqltype="cf_sql_varchar" value="#form.SafetyRequirement2#"/>,
 				SafetyRequirement3=<cfqueryparam cfsqltype="cf_sql_varchar" value="#form.SafetyRequirement3#"/>,
@@ -754,14 +755,14 @@
 				Certificate =<cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Certificate#"/>,
 				PPE=<cfqueryparam cfsqltype="cf_sql_varchar" value="#form.PPE#"/>,
 				AdditionalPrecaution=<cfqueryparam cfsqltype="cf_sql_varchar" value="#form.AdditionalPrecaution#"/>,
-				Precaution=<cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Precaution#"/>,
-				WorkType=<cfqueryparam cfsqltype="cf_sql_char" value="#form.WorkType#"/>
+				Precaution = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Precaution#"/>,
+				ZoneClass = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.ZoneClass#"/>,
+				WorkType = <cfqueryparam cfsqltype="cf_sql_char" value="#form.WorkType#"/>
 				<cfif form.id eq 0> 
 					,PAApprovedByUserId = <cfqueryparam cfsqltype="cf_sql_integer" value="#request.userInfo.UserId#"/>,
 					PAApprovedDate = <cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#"/>,
 					`Status` = 'Open' 
 				</cfif>
-				
 				<cfif form.id neq 0>
 					WHERE Permitid = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.id#">
 				</cfif> 
