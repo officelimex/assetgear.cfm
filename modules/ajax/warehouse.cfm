@@ -144,7 +144,7 @@
 			<cfcase value="getMR">
 					<cfset start = (url.page * url.perpage) - (url.perpage)/>
 
-					<cfquery name="q" cachedwithin="#CreateTime(0,0,0)#">
+					<cfquery name="q">
 							#application.com.Transaction.MR_SQL#
 							<cfif url.t neq "">
 									WHERE Type = <cfqueryparam cfsqltype="cf_sql_varchar" value="#url.t#">

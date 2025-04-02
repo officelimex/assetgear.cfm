@@ -10,7 +10,7 @@
 			FROM work_order wo
 			LEFT JOIN asset a ON wo.AssetId = a.AssetId
 			WHERE  wo.DateOpened = <cfqueryparam value="#today#" cfsqltype="CF_SQL_DATE">
-					AND wo.UnitId IS NOT NULL
+					-- AND wo.UnitId IS NULL
 	</cfquery>
 	<cfdump var="#qTodayWorkOrders#"/>
 	<cfloop query="qTodayWorkOrders">
@@ -21,8 +21,10 @@
 					core_user u
 				INNER JOIN core_login l ON u.UserId = l.UserId
 				WHERE 
-					u.UnitId = <cfqueryparam value="#qTodayWorkOrders.UnitId#" cfsqltype="CF_SQL_INTEGER">
-					AND u.Email IS NOT NULL AND u.Email <> ''
+					<cfif val(qTodayWorkOrders.UnitId)>
+						u.UnitId = <cfqueryparam value="#qTodayWorkOrders.UnitId#" cfsqltype="CF_SQL_INTEGER"> AND
+					</cfif>
+					u.Email IS NOT NULL AND u.Email <> ''
 			</cfquery>
 
 			<cfset emailSubject = "New Work Order Opened Today - WO##" & qTodayWorkOrders.WorkOrderId>
