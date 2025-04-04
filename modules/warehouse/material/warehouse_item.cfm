@@ -17,7 +17,7 @@
 <g:Grid renderTo="#wrhou#_warehouse_item#url.ob#" url="modules/ajax/warehouse.cfm?cmd=getWarehouseItem&ob=#url.ob#" commandWidth="70px" class="table-hover table-condensed">
 	<g:Columns>
 		<g:Column id="ItemId" caption="##" sortable  />
-		<g:Column id="Code" searchable field="whi.Code" sortable/>
+		<g:Column id="Code" caption="ICN" searchable field="whi.Code" sortable/>
 		<g:Column id="Description" searchable field="whi.Description" sortable />
 		<g:Column id="VPN" searchable />
 		<g:Column id="QOH" sortable/>
@@ -27,7 +27,7 @@
 		<g:Column id="UnitPrice" caption="Unit Price" />
 		<g:Column id="Location" searchable field="sl.Code" caption="Shelf Location"/>
 		<g:Column id="Obsolete" hide/>
-		<g:Column id="AssetCategoryid" hide />
+		<g:Column id="AssetCategoryId" hide />
 		<g:Column id="UMId" hide />
 		<g:Column id="ShelfLocationId" hide />
 		<g:Column id="DepartmentId" hide />

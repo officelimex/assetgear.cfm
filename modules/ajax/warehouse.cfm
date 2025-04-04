@@ -182,7 +182,7 @@
 		<cfcase value="getPO">
 			<cfset start = (url.page * url.perpage) - (url.perpage)/>
 
-			<cfquery name="q" cachedWithin="#CreateTime(0,0,0)#">
+			<cfquery name="q">
 					#application.com.Transaction.PO_SQL#
 					WHERE 1 = 1
 					<cfif structKeyExists(url,'keyword')>
@@ -203,7 +203,7 @@
 					"rows":[
 					<cfloop query="q">
 						[
-							#q.POId#, #q.MRId#, #serializeJSON(q.Note)#, #serializeJSON(q.Ref)#, "#DateFormat(q.Date,'dd-mmm-yyyy')#", "#q.Status#"
+							#q.POId#, #serializeJSON(q.Ref)#, #q.MRId#, #serializeJSON(q.Note)#, "#DateFormat(q.Date,'dd-mmm-yyyy')#", "#q.Status#"
 						]
 						<cfif q.recordcount neq q.currentrow>,</cfif>
 					</cfloop>

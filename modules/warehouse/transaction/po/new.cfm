@@ -29,7 +29,7 @@
           <et:Header title="Item Description" size="7" type="text" disabled/>
           <et:Header title="Qty Req" size="1" type="int" disabled/>
           <et:Header title="Qty Ordered" size="1" type="int"/>
-          <et:Header title="Unit Price" size="2" type="float"/>
+          <et:Header title="Total Price" size="2" type="float"/>
           <et:Header title="" size="1"/>
         </et:Headers>
       </et:Table>    

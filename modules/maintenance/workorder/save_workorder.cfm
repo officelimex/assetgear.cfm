@@ -325,7 +325,7 @@
 						onSuccess="win_save_wo_window.close()"/>
 					<cfset nobutton = false/>
 				</cfif>
-				<cfif request.IsSUP and qWO.Status2 NEQ "Approved">
+				<cfif (request.IsSUP || request.IsMGR) && qWO.Status2 NEQ "Approved">
       		<f:Button value="Save Only" class="btn-primary" IsSave onSuccess="win_save_wo_window.close()"/>
       		<f:Button 
 						value="Approve" 

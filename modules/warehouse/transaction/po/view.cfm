@@ -37,8 +37,7 @@
 						<th>Description</th>
 						<th width="1">Quantity</th> 
 						<th width="1">Received</th> 
-						<th nowrap="nowrap" width="65">Unit price</th>
-						<th width="1">Subtotal</th>
+						<th nowrap="nowrap" width="65">Cost</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -51,14 +50,13 @@
 							<td>#qI.Quantity#</td>
 							<td>#qI.RQuantity# #qI.UM#</td>
 							<td style="text-align:right;">#numberformat(qI.Unitprice,'9,999.99')#</td>
-							<td style="text-align:right;">
-							<cfset lsum = qI.Unitprice*qI.Quantity/>
-							<cfset tsum = tsum + lsum/>
-							#numberformat(lsum,'9,999.99')#</td> 
+							
+							<cfset tsum = qI.Unitprice + tsum/>
+							#numberformat(tsum,'9,999.99')#
 						</tr>
 					</cfloop>
 					<tr>
-						<td colspan="6"></td>
+						<td colspan="5"></td>
 						<td style="text-align:right;">#numberformat(tsum,'9,999.99')#</td>
 					</tr>
 				</tbody>

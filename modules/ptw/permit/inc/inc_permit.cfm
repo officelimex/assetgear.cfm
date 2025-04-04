@@ -91,7 +91,7 @@
             </div>            
         </div>
         <div class="span3">
-            <strong>Personal Requirements:</strong><br/>
+            <strong>Personnel Requirements:</strong><br/>
             <cfloop list="#request.ppe#" index="it"> 
 							<cfset chk = getCheck(qP.PPE,it)/>
 							<div class="cimg#chk#"><img src="assets/img/ptw_checkbox_#chk#.png" width="12px" height="12px"> #it#</div> 

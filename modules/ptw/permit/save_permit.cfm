@@ -59,7 +59,7 @@
               	<f:CheckBox name="SafetyRequirement5" ListValue="#request.required_docs#" selected="#qPM.SafetyRequirement5#" /> 
               </td>
 							<td rowspan="2" valign="top">
-								<f:CheckBox name="PPE" selected="#qPM.PPE#" label="PERSONAL REQUIREMENTS" showLabel ListValue="#request.ppe#"/>
+								<f:CheckBox name="PPE" selected="#qPM.PPE#" label="PERSONNEL REQUIREMENTS" showLabel ListValue="#request.ppe#"/>
 							</td>
             </tr>
         		<tr>

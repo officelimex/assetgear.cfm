@@ -17,8 +17,8 @@
         <n:Nav renderTo="#wrhou#">
         	<n:NavItem title="New Item" url="modules/warehouse/material/save_warehouse_item.cfm" id="save_warehouse_item"/>
             <n:navItem type="divider">
-            <n:NavItem title="All Warehouse Items" isactive url="modules/warehouse/material/warehouse_item.cfm" id="warehouse_item"/>
-            <n:NavItem title="Obsolate Warehouse Items" url="modules/warehouse/material/warehouse_item.cfm?ob=yes" id="warehouse_itemyes"/>
+            <n:NavItem title="All Warehouse Items" isActive url="modules/warehouse/material/warehouse_item.cfm" id="warehouse_item"/>
+            <n:NavItem title="Obsolete Warehouse Items" url="modules/warehouse/material/warehouse_item.cfm?ob=yes" id="warehouse_itemyes"/>
             <n:navItem type="divider">
             <n:NavItem title="Shelf Location" url="modules/warehouse/material/shelf_location.cfm" id="shelf_location"/>
             <n:NavItem title="Count Due list" url="modules/warehouse/material/count_due.cfm" id="count_due"/>

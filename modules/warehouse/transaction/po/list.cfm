@@ -5,9 +5,9 @@
   <g:Grid renderTo="#poId#_all_po" url="modules/ajax/warehouse.cfm?cmd=getPO" commandWidth="75px" class="table-hover table-condensed"  firstSortOrder="DESC">
     <g:Columns>
       <g:Column id="POId" caption="##" sortable searchable/>
+      <g:Column id="Ref" caption="PO Number" searchable />
       <g:Column id="MRId" caption="MR ##" searchable/>
       <g:Column id="Note" caption="Note" searchable />
-      <g:Column id="Ref" caption="Ref" searchable />
       <g:Column id="Date"/>      
       <g:Column id="Status"/>      
     </g:Columns>

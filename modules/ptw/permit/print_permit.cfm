@@ -189,7 +189,7 @@
     <td valign="top">
       <table width="100%" border="0" cellspacing="0" cellpadding="0">
       <tr>
-        <td height="18" colspan="2">PERSONAL REQUIREMENTS:</td>
+        <td height="18" colspan="2">PERSONNEL REQUIREMENTS:</td>
       </tr>
       <cfloop list="#request.ppe#" index="it">
         <tr>
