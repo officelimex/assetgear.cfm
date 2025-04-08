@@ -105,7 +105,7 @@
 						Obsolete = "Yes" AND Status <> "Deleted"
 						</cfif>
 
-						<cfif structkeyexists(url,'keyword')>
+						<cfif structKeyExists(url,'keyword')>
 							AND (#url.Field# LIKE "%#url.keyword#%")
 						</cfif>
 						ORDER BY #url.sort# #url.sortOrder#
@@ -128,11 +128,11 @@
 					{"total": #qT.c#,
 							"page": #url.page#,
 							"rows":[<cfloop query="q">
-							[#q.Itemid#,#serializeJSON(q.Code)#,#serializeJSON(q.Description)#,#serializeJSON(q.VPN)#, "#q.QOH#","#q.QOR#","#q.QOO#","#q.MinimumInStore#", "<cfif q.Currency eq 'NGN'>&##8358;<cfelseif q.Currency eq 'USD'>$</cfif> #NumberFormat(q.Unitprice,'9,999.99')#",
+							[#q.Itemid#,#serializeJSON(q.Code)#,#serializeJSON(q.Description)#,#serializeJSON(q.VPN)#, "#q.QOH#","#q.QOR#","#q.QOO#","#q.MinimumInStore#", <!--- "<cfif q.Currency eq 'NGN'>&##8358;<cfelseif q.Currency eq 'USD'>$</cfif> #NumberFormat(q.Unitprice,'9,999.99')#", --->
 								"#q.Location#",
 									<cfswitch expression="#q.Obsolete#">
 										<cfcase value="Yes">#serializeJSON('<span class="label">Yes</span>')#</cfcase>
-											<cfdefaultcase>#serializeJSON('<span class="label label-success">' & q.Obsolete & '</span>')#</cfdefaultcase>
+										<cfdefaultcase>#serializeJSON('<span class="label label-success">' & q.Obsolete & '</span>')#</cfdefaultcase>
 									</cfswitch>,
 										"#q.assetcategoryid#","#q.UMId#","#q.ShelfLocationId#","#q.DepartmentIds#",#serializeJSON(q.Maker)#]
 								<cfif q.recordcount neq q.currentrow>,</cfif>

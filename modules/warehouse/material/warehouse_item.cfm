@@ -24,7 +24,7 @@
 		<g:Column id="QOR" sortable/>
 		<g:Column id="QOO" sortable/>
 		<g:Column id="MinimumInStore" caption="Order Lv"/>
-		<g:Column id="UnitPrice" caption="Unit Price" />
+		<!--- <g:Column id="UnitPrice" caption="Unit Price" /> --->
 		<g:Column id="Location" searchable field="sl.Code" caption="Shelf Location"/>
 		<g:Column id="Obsolete" hide/>
 		<g:Column id="AssetCategoryId" hide />
@@ -46,7 +46,7 @@
 		</g:Window>
 	</g:Event>
 	<g:Event command="viewItem">
-		<g:Window title="'View Warehouse Item'" width="900px" height="350px" url="'modules/warehouse/material/view_warehouse_item.cfm'">
+		<g:Window title="'View Warehouse Item'" url="'modules/warehouse/material/view_warehouse_item.cfm'">
 		</g:Window>
 	</g:Event>
 	<g:Event command="adjustItem">

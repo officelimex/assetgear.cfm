@@ -1,9 +1,3 @@
-<!---
-	Author: Arowolo Abiodun
-	Created: 2011/09/30
-	Modified: 2011/09/30
-	-> edit a page
---->
 <cfparam default="0" name="url.id"/>
 <cfset whsId = "__material_c_warehouse_item" & url.id/>
 
@@ -22,11 +16,11 @@
 <!--- Getting Data From Whs_item--->
 <cfquery name="qWI">
 	SELECT * FROM whs_item
-    WHERE ItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.id#"/> AND 
-		 Obsolete = "No" AND Status <> "Deleted"
+    WHERE ItemId = #val(url.id)# AND 
+	Obsolete = "No" AND Status <> "Deleted"
 </cfquery>
 
-<cfquery name="qSL" cachedwithin="#CreateTime(5,0,0)#">
+<cfquery name="qSL" cachedWithin="#CreateTime(5,0,0)#">
 	SELECT * FROM shelf_location
     WHERE ShelfLocationId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qWI.ShelfLocationId#">
     ORDER BY CAST(SUBSTRING(code, 2) AS UNSIGNED)
@@ -54,10 +48,10 @@
 	SELECT *
     FROM custom_field
     WHERE `Table` = "whs_item"
-    AND PK = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.id#">
+    AND PK = #val(url.id)#
 </cfquery>
 
-<cfquery name="qTran_" cachedwithin="#CreateTime(1,0,0)#">
+<cfquery name="qTran_" cachedWithin="#CreateTime(1,0,0)#">
     (SELECT
         isi.IssueId TransactionId, "Issued" Type, isi.ItemId, isi.Quantity,
         isu.DateIssued Date, isu.Remark Note,
@@ -65,21 +59,21 @@
     FROM whs_issue_item isi
     INNER JOIN whs_issue isu ON isu.IssueId = isi.IssueId
     INNER JOIN core_user u ON u.UserId = isu.IssuedToUserId
-    WHERE isi.ItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.id#"/>)
+    WHERE isi.ItemId = #val(url.id)#)
         UNION ALL
     (SELECT
-        mri.MaterialReceivedId TransactionId, "Received" Type, mri.ItemId, mri.Quantity,
-        mrv.Date, mr.Note Note,
+        po.Ref TransactionId, "Received" Type, poi.ItemId, poi.RQuantity RQuantity,
+        po.Date, mr.Note Note,
         CONCAT(u.Surname," ",u.OtherNames) User
-    FROM whs_material_received_item mri
-    INNER JOIN whs_material_received mrv ON mrv.MaterialReceivedId = mri.MaterialReceivedId
-    LEFT JOIN whs_mr mr ON mr.MRId = mrv.MRId
-    INNER JOIN core_user u ON u.UserId = mrv.ReceivedByUserId
-    WHERE mri.ItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.id#"/>)
+    FROM whs_po_item poi
+    INNER JOIN whs_po po    ON po.POId  = poi.POId
+    LEFT  JOIN whs_mr mr    ON mr.MRId  = po.MRId
+    INNER JOIN core_user u  ON u.UserId = po.ReceivedByUserId
+    WHERE poi.ItemId = #val(url.id)#)
     LIMIT 100
 </cfquery>
 
-<cfquery name="qTran" Dbtype="query">
+<cfquery name="qTran" dbType="query">
     SELECT * FROM qTran_
     ORDER BY Date DESC
 </cfquery>
