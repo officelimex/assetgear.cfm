@@ -2,6 +2,8 @@
 <cfparam name="request.letterhead.logosize" default="100" type="numeric"/>
 <cfparam name="request.letterhead.titlesize" default="13" type="numeric"/>
 <cfparam name="request.letterhead.date" default=""/>
+<cfparam name="request.letterhead.qrcode" default="#request.letterhead.id#"/>
+<cfparam name="request.letterhead.top" default="0"/>
 
 <cfoutput>
 	<tr>
@@ -27,15 +29,21 @@
 							<span style="font-size:#request.letterhead.titlesize+1#px;">#request.letterhead.id#</span>
 						</div>
 					</td>
-					<cfscript>
-						f = new assetgear.com.awaf.util.file();
-						base64String = f.createQRCode('https://officelime.com/?!=#request.letterhead.id#', 59);
-					</cfscript>
-					<td width="10px"></td>
-					<td width="10px">
-    				<img src="data:image/png;base64,#base64String#">
-					</td>
+					<cfif request.letterhead.qrcode neq "">
+						<cfscript>
+							f = new assetgear.com.awaf.util.file();
+							base64String = f.createQRCode('https://officelime.com/?!=#request.letterhead.id#', 59);
+						</cfscript>
+						<td width="10px"></td>
+						<td width="10px">
+							<img src="data:image/png;base64,#base64String#">
+						</td>
+					</cfif>
 				</tr>
+				<cfif request.letterhead.top neq "0"></cfif>
+					<tr>
+						<td colspan="4" style="font-size:#request.letterhead.top#px">&nbsp;</td>
+					</tr>
 				<cfif !request.letterhead.noline>
 					<tr>
 						<td colspan="2" style="font-size:3px"><div style="border-top:##f0f2f8 1px solid; margin-top:1px;">&nbsp;</div></td>
