@@ -37,7 +37,7 @@
       <tr>
         <th>S/N</th>
         <th>Item Description</th>
-        <th>Current</th>
+        <th>QOH</th>
         <th>New Qty</th>
         <th>Shelf Location</th>
       </tr>

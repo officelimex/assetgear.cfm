@@ -3,7 +3,7 @@
 <html>
 <head>
 <style>
-body{background: ##FFF;} body,table{ font:11px Arial;} th{ text-align:left;background:##eee;border-bottom:2px ##333 solid;padding-left:1px; padding-bottom:2px; padding-top:3px;}
+body{background: ##FFF;} body,table{ font:10px Arial;} th{ text-align:left;background:##eee;border-bottom:2px ##333 solid;padding-left:1px; padding-bottom:2px; padding-top:3px;}
 td{ border-bottom:1px solid ##CCC; padding:1px; } table.cover td{ border-bottom:1px solid ##CCC; padding:4px 50px; } th,td{ padding-left:2px;  }
 .header{text-decoration:underline;text-align:center;font-weight:bold;font-size:13px;padding-bottom:10px;display:block;text-transform:uppercase;}
 td.noline	{ border-style: none; border:none;} h2 div{font-size:14px; text-align:center; display:block;} .ftr{padding:2px; margin-right:10px;}
@@ -28,7 +28,8 @@ td.noline	{ border-style: none; border:none;} h2 div{font-size:14px; text-align:
 <cfdocumentitem type="header">
 <cfset request.letterhead.title="WHAREHOUSE REPORT"/>
 <cfset request.letterhead.Id=""/>
-<cfset request.letterhead.date = "Period Ended: #dateformat(form.Date_,'mmmm, yyyy')#"/>
+<cfset request.letterhead.top = "25"/>
+<!--- <cfset request.letterhead.date = "Period Ended: #dateformat(form.Date_,'mmmm, yyyy')#"/> --->
 <cfinclude template="../../../include/letter_head.cfm"/>
 </cfdocumentitem>
 
@@ -45,6 +46,9 @@ td.noline	{ border-style: none; border:none;} h2 div{font-size:14px; text-align:
 
 <cfdocumentitem type="pagebreak"/>
 <cfinclude template="includes/issues-s.cfm"/>
+
+<cfdocumentitem type="pagebreak"/>
+<cfinclude template="includes/issues-d.cfm"/>
 
 <cfdocumentitem type="pagebreak"/>
 <cfinclude template="includes/receipt.cfm"/>
