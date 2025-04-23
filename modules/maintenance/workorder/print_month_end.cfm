@@ -16,7 +16,7 @@
       AND DateOpened <= <cfqueryparam cfsqltype="cf_sql_date" value="#endd#"/>
   </cfquery>
   <cfset dept = qWO.Department/>
-  <cfset pm_count = open_pm_count = close_pm_count = close_m_count = cr_pm_o_count = mi_pm_o_count = ma_pm_o_count = 0/>
+  <cfset pm_count = open_pm_count = close_pm_count = close_m_count = cr_pm_o_count = mi_pm_o_count = ma_pm_o_count = 1/>
   <cfset pm_woid = m_woid = ""/>
   <cfloop query="qWO">
   

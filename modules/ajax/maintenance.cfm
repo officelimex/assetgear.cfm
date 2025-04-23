@@ -716,13 +716,14 @@
 		<cfset url.cid = replace(url.cid,"_"," ","all")/>
 		<cfquery name="q" cachedwithin="#CreateTime(0,0,0)#">
 			#application.com.WorkOrder.WORK_ORDER_SQL#
+			WHERE 1 = 1 
 			<cfswitch expression="#url.filter#">
 				<cfcase value="d">
 					<cfif url.cid neq "" >
 						<cfif request.isFS>
-							WHERE wo.DepartmentId IS NOT NULL
+							AND  wo.DepartmentId IS NOT NULL
 						<cfelse>
-							WHERE wo.DepartmentId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.cid#">
+							AND wo.DepartmentId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.cid#">
 						</cfif>
 						<cfif url.jid != "">
 							AND WorkClassId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.jid#"/>
@@ -744,7 +745,7 @@
 						</cfif>
 					<cfelse>
 						<cfif structkeyexists(url,'keyword')>
-							WHERE #url.Field# LIKE "%#url.keyword#%"
+							AND #url.Field# LIKE "%#url.keyword#%"
 							<cfif request.userinfo.email neq "thankgod.innocent@#application.domain#">
 								AND DateOpened <= <cfqueryparam cfsqltype="cf_sql_date" value="#now()#"/>
 							</cfif>
@@ -752,7 +753,7 @@
 					</cfif>
 				</cfcase>
 				<cfcase value="status">
-					WHERE wo.DepartmentId = #request.userinfo.departmentid#
+					AND wo.DepartmentId = #request.userinfo.departmentid#
 					<cfif url.cid != "">
 						AND wo.Status = <cfqueryparam cfsqltype="cf_sql_varchar" value="#url.cid#"/>
 					</cfif>
@@ -768,10 +769,10 @@
 					</cfif>
 				</cfcase>
 				<cfcase value="status2">
-					WHERE wo.Status2 = <cfqueryparam cfsqltype="cf_sql_varchar" value="#url.status2#"/>
+					AND wo.Status2 = <cfqueryparam cfsqltype="cf_sql_varchar" value="#url.status2#"/>
 				</cfcase>
 				<cfcase value="unit"> 
-					WHERE wo.UnitId = #request.userinfo.unitid#
+					AND wo.UnitId = #request.userinfo.unitid#
 					<cfif structkeyexists(url,'keyword')>
 						AND #url.Field# LIKE "%#url.keyword#%"
 					</cfif>
@@ -779,7 +780,7 @@
 
 				<cfdefaultcase>
 					<cfif url.cid neq "" >
-						WHERE wo.WorkClassId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.cid#">
+						AND wo.WorkClassId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.cid#">
 						<cfif request.userinfo.email neq "thankgod.innocent@#application.domain#">
 							AND DateOpened <= <cfqueryparam cfsqltype="cf_sql_date" value="#now()#"/>
 						</cfif>
@@ -788,7 +789,7 @@
 						</cfif>
 					<cfelse>
 						<cfif structkeyexists(url,'keyword')>
-							WHERE #url.Field# LIKE "%#url.keyword#%"
+							AND #url.Field# LIKE "%#url.keyword#%"
 							<cfif request.userinfo.email neq "thankgod.innocent@#application.domain#">
 								AND DateOpened <= <cfqueryparam cfsqltype="cf_sql_date" value="#now()#"/>
 							</cfif>
@@ -802,13 +803,14 @@
 
         <cfquery name="qT">
             #application.com.WorkOrder.WORK_ORDER_COUNT_SQL#
+						WHERE 1=1 
             <cfswitch expression="#url.filter#">
                 <cfcase value="d">
                     <cfif url.cid neq "" >
 											<cfif request.userinfo.role eq "FS">
-												WHERE wo.DepartmentId IS NOT NULL
+												AND wo.DepartmentId IS NOT NULL
 											<cfelse>
-												WHERE wo.DepartmentId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.cid#">
+												AND wo.DepartmentId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.cid#">
 											</cfif>
 											<cfif url.jid neq "">
 												AND WorkClassId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.jid#"/>
@@ -827,19 +829,19 @@
 											</cfif>
                     <cfelse>
                         <cfif structkeyexists(url,'keyword')>
-                            WHERE  #url.Field# LIKE "%#url.keyword#%"
+                            AND  #url.Field# LIKE "%#url.keyword#%"
                             AND DateOpened <= <cfqueryparam cfsqltype="cf_sql_date" value="#now()#"/>
                         </cfif>
                     </cfif>
 								</cfcase>
 				<cfcase value="unit"> 
-					WHERE wo.UnitId = #request.userinfo.unitid#
+					AND wo.UnitId = #request.userinfo.unitid#
 					<cfif structkeyexists(url,'keyword')>
 						AND #url.Field# LIKE "%#url.keyword#%"
 					</cfif>
 				</cfcase>
 				<cfcase value="status">
-					WHERE wo.DepartmentId = #request.userinfo.departmentid#
+					AND wo.DepartmentId = #request.userinfo.departmentid#
 						AND wo.Status = <cfqueryparam cfsqltype="cf_sql_varchar" value="#url.cid#"/>
 					<cfif request.userinfo.unitid neq "">
 						AND wo.UnitId = #request.userinfo.unitid#
@@ -853,18 +855,18 @@
 					</cfif>
 				</cfcase>
 				<cfcase value="status2">
-					WHERE wo.Status = <cfqueryparam cfsqltype="cf_sql_varchar" value="#url.status2#"/>
+					AND wo.Status = <cfqueryparam cfsqltype="cf_sql_varchar" value="#url.status2#"/>
 				</cfcase>
 				<cfdefaultcase>
 						<cfif url.cid neq "">
-		WHERE wo.WorkClassId = #url.cid#
+		AND wo.WorkClassId = #url.cid#
 								AND DateOpened <= <cfqueryparam cfsqltype="cf_sql_date" value="#now()#"/>
 								<cfif structkeyexists(url,'keyword')>
 										AND #url.Field# LIKE "%#url.keyword#%"
 								</cfif>
 						<cfelse>
 								<cfif structkeyexists(url,'keyword')>
-										WHERE  #url.Field# LIKE "%#url.keyword#%"
+										AND  #url.Field# LIKE "%#url.keyword#%"
 										AND DateOpened <= <cfqueryparam cfsqltype="cf_sql_date" value="#now()#"/>
 								</cfif>
 						</cfif>

@@ -128,7 +128,7 @@
 					{"total": #qT.c#,
 							"page": #url.page#,
 							"rows":[<cfloop query="q">
-							[#q.Itemid#,#serializeJSON(q.Code)#,#serializeJSON(q.Description)#,#serializeJSON(q.VPN)#, "#q.QOH#","#q.QOR#","#q.QOO#","#q.MinimumInStore#", <!--- "<cfif q.Currency eq 'NGN'>&##8358;<cfelseif q.Currency eq 'USD'>$</cfif> #NumberFormat(q.Unitprice,'9,999.99')#", --->
+							[#q.Itemid#,#serializeJSON(q.Code)#,#serializeJSON(q.Description)#,#serializeJSON(q.VPN)#, "#q.QOH#","#q.QOR#","#q.QOO#","#q.MinimumInStore#", "<cfif q.Currency eq 'NGN'>&##8358;<cfelseif q.Currency eq 'USD'>$</cfif> #NumberFormat(q.Unitprice,'9,999.99')#", 
 								"#q.Location#",
 									<cfswitch expression="#q.Obsolete#">
 										<cfcase value="Yes">#serializeJSON('<span class="label">Yes</span>')#</cfcase>
