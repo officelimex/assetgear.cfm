@@ -566,7 +566,7 @@ var aButton = new Class({
 });
 
 /*
-add class to aGrid for twitter bootsrap table
+add class to aGrid for twitter bootstrap table
  */
 var aGrid = new Class({
 	Extends: aComponent,
@@ -771,6 +771,7 @@ var aGrid = new Class({
 				//TODO: disable the search button
 				//this.searchButton.disabled=true;
 				//this.footerLeft.set('html', 'Wait');
+				this.el.addClass("ag-loading");
 			}.bind(this),
 			onSuccess: function (resp) {
 				if (resp == null) {
@@ -781,12 +782,10 @@ var aGrid = new Class({
 			}.bind(this),
 			onComplete: function () {
 				//this.searchButton.removeClass('disabled');
+				this.el.removeClass("ag-loading");
 			}.bind(this),
 			onFailure: function (e) {
 				showError(e);
-				//var d=e.responseText.clean();
-				//var re = new RegExp("<\s*h1[^>]*>(.*?)<\s*/\s*h1>", "gmi");
-				//this.footerLeft.set('html', 'Error on request:\r\r' + re.exec(d)[1]);
 			}.bind(this),
 		}).send(
 			"page=" +
@@ -829,7 +828,7 @@ var aGrid = new Class({
 				}
 				fmt = this.options.headers[i]["template"];
 
-				// hide coloum
+				// hide column
 				if (this.options.headers[i]["hide"] == true) {
 					// do nothing
 				} else {

@@ -125,3 +125,27 @@ table:has(tbody:empty)::before {
 	background-size: 80px;
 	content: "No record at the moment, Refresh!";
 }
+
+.ag-loading table:has(tbody:empty)::before {
+	content: "";
+}
+
+.ag-loading {
+	position: relative;
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+.ag-loading::after {
+	content: "Loading...";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 1.2rem;
+	color: #333;
+	background: rgba(255, 255, 255, 0.8);
+	padding: 10px 20px;
+	border-radius: 8px;
+	z-index: 10;
+}

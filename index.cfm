@@ -18,7 +18,7 @@
 <script type="text/javascript" src="assets/awaf/mootools/mm-1.4.0.1.js"></script>
 <script type="text/javascript" src="assets/awaf/UI/Meio.Autocomplete.js"></script>
 <script type="text/javascript" src="assets/awaf/UI/ckeditor/ckeditor.js?v=1.0.0"></script>
-<script type="text/javascript" src="assets/awaf/UI/awaf-0.1.0.0.js?v=1.0.0"></script>
+<script type="text/javascript" src="assets/awaf/UI/awaf-0.1.0.0.js?v=1.0.1"></script>
 
 <script type="text/javascript" src="assets/awaf/UI/canvasjs.min.js"></script> 
 <script type="text/javascript" src="assets/awaf/UI/qrcode.min.js"></script>
@@ -27,7 +27,7 @@
 <script type="text/javascript" src="assets/awaf/UI/datepicker/dp.js"></script> 
 <link href="assets/awaf/UI/datepicker/css/datepicker_vista.css" rel="stylesheet" type="text/css" media="screen" />
 
-<link href="assets/awaf/UI/css/aGrid.css?v=0.1" rel="stylesheet" type="text/css" media="screen" />
+<link href="assets/awaf/UI/css/aGrid.css?v=0.2" rel="stylesheet" type="text/css" media="screen" />
 <link href="assets/awaf/UI/css/aWindow.css" rel="stylesheet" type="text/css" media="screen" />
 <link href="assets/awaf/UI/css/bootstrap.min.2.2.1.css" rel="stylesheet" type="text/css" media="screen" />
 <link href="assets/awaf/UI/css/Style.css?v=0.2.3.21" rel="stylesheet" type="text/css" media="screen" />
@@ -115,7 +115,7 @@
 <!--- <div class="xapp_logo"></div> --->
 <!--- pligin ---> 
 <div id="_user_session">
-<img class="pic" src="http://www.gravatar.com/avatar/#lcase(Hash(lcase(request.userinfo.personalemail)))#?s=41" height="41px" width="41px"/>
+<img class="pic" src="https://www.gravatar.com/avatar/#lcase(Hash(lcase(request.userinfo.personalemail)))#?s=41" height="41px" width="41px"/>
 <w:Window Caption="#request.userinfo.user#" title="My Profile" url="modules/profile/profile.cfm"  Width="700px" >
 	<w:Button IsSave/>
 </w:Window>
