@@ -18,7 +18,7 @@
         <td width="50%" valign="top"> 
           <f:Label name="PO ##" value="#qPO.POId#"/>
           <f:Label name="Reference" value="#qPO.Ref#"/>
-          <f:TextBox name="DeliveryInfo" label="Waybill/Invoice No"/>  
+          <f:TextBox name="DeliveryInfo" label="Waybill/Packing List"/>  
           <input type="hidden" name="mrid" value="#qPO.MRId#"/>
         </td>
         <td class="horz-div" valign="top"> 
@@ -33,7 +33,7 @@
               <et:Header title="Description" size="7" type="text" disabled />
               <et:Header title="Ordered Qty" size="1" type="int" disabled/>
               <et:Header title="Received Qty" size="1" type="int" />
-              <et:Header title="Waybill/Inv No" size="2" type="text" required="false"/>
+              <et:Header title="Waybill/Packing List" size="2" type="text" required="false"/>
               <et:Header title="" size="1"/>
             </et:Headers>
             <et:Content Query="#qI#" Columns="ItemDescription,Quantity,RQuantity,Ref" type="text,int,int,text" PKField="POItemId"/>
