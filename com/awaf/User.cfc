@@ -534,8 +534,8 @@
     <cffunction name="getRole" access="public" returntype="struct" hint="get all roles">
 
 			<cfreturn {
-				Code  : "UR,SUP,SV,MGR,MS,IT,WH,WH_SV,WH_SUP",
-				Title : "User,Superintendent,Supervisor,Manager,Maintenance Mgr,IT,Warehouse User,Warehouse Supervisor,Warehouse Superintendent"
+				Code  : "UR,SUP,SV,MGR,MS,IT,PLR,WH,WH_SV,WH_SUP",
+				Title : "User,Superintendent,Supervisor,Manager,Maintenance Mgr,IT,Maintenance & Reliablility,Warehouse User,Warehouse Supervisor,Warehouse Superintendent"
 			}/>
 
 		</cffunction>

@@ -71,6 +71,7 @@ component {
 		}
 
 		param name="request.IsHost" default="false" type="boolean";
+		param name="request.IsPlanner" default="false" type="boolean";
 		param name="request.IsWarehouseMan" default="false" type="boolean";
 		param name="request.IsMS" default="false" type="boolean";
 		param name="request.IsMGR" default="false" type="boolean";
@@ -92,28 +93,32 @@ component {
 					request.IsIT = true;
 					request.IsWarehouseMan = true;
 					request.IsMGR = true;
-					break;
+					request.IsPlanner = true;
+				break;
+				case "PLR":
+					request.IsPlanner = true;
+				break;
 				case "SUP":
 					request.IsSup = true;
-					break;
+				break;
 				case "IT":
 					request.IsIT = true;
-					break;
+				break;
 				case "SV":
 					request.IsSV = true;
-					break;
+				break;
 				case "MS":
 				case "MGR":
 					request.IsMGR = true;
-					break;
+				break;
 				case "WH":
 				case "WH_SV":
 				case "WH_SUP":
 					request.IsWarehouseMan = true;
-					break;
+				break;
 				case "UR":
 					request.IsUser = true;
-					break;
+				break;
 			}
 
 			if (request.userInfo.role EQ "WH_SUP") {

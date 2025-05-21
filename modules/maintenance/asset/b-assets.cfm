@@ -72,7 +72,7 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
       
       <cfset hasEditPermission = false>
-      <cfif request.IsHost OR request.IsMS>
+      <cfif request.IsHost OR request.IsMS OR request.IsPlanner>
         <cfset hasEditPermission = true>
       </cfif>
       
