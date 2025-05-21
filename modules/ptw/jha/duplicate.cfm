@@ -31,27 +31,32 @@
         	<td></td>
         </tr>
         <tr>
-        	<td colspan="2">
-                <et:Table allowInput height="240px" id="JHAList">
-                    <et:Headers>
-                        <et:Header title="Job Sequence" size="2" type="text"/>
-                        <et:Header title="Hazard" size="2" type="text" />
-                        <et:Header title="Target" size="1" type="text" hint="P,E,A,R"/>
-                        <et:Header title="Risk" size="1" type="text" hint="L,M,H"/>
-                        <et:Header title="Consequences" size="1" type="text"/>
-                        <et:Header title="Control Measure" size="2" type="text"/>
-                        <et:Header title="RecoveryPlan" size="2" type="text"/>
-                        <!---<et:Header title="Responsible Party" size="1" type="text"/>--->                   
-                        <et:Header title="" size="1"/>
-                    </et:Headers>
-                    <et:Content Query="#qJ#" Columns="JobSequence,Hazard,Target,Risk,Consequences,ControlMeasure,RecoveryPlan" type="text,text,text,text,text,text,text" /> 
-                </et:Table>            	
-            </td>
+					<td colspan="2">
+						<et:Table allowInput height="240px" id="JHAList">
+							<et:Headers>
+								<et:Header title="Job Sequence" size="2" type="text"/>
+								<et:Header title="Hazard" size="1" type="text"/>
+								<et:Header title="Who may be Harmed" size="1" type="text" />
+								<et:Header title="Severity" size="1" type="text"/>
+								<et:Header title="Likelihood" size="1" type="text"/>
+								<et:Header title="Risk Rating" size="1" type="text"/>
+								<et:Header title="Control Measures" size="2" type="text"/>
+								<et:Header title="Recovery Plan" size="1" type="text"/>
+								<et:Header title="Action Parties" size="1" type="text"/>                   
+								<et:Header title="" size="1"/>
+							</et:Headers>
+							<et:Content 
+								Query="#qJ#" 
+								Columns="JobSequence,Hazard,Whom,Severity,Likelihood,Risk,ControlMeasure,RecoveryPlan,ActionParties" 
+								type="text,text,text,text,text,text,text,text,text" 
+								PKField=""/> 
+						</et:Table>            	
+					</td>
         </tr>
         <tr>
           <td colspan="2">
-        <div class="alert alert-info">Attach third party JHA.</div>
-        <u:UploadFile id="Attachments" table="ptw_jha" />
+        		<div class="alert alert-info">Attach third party JHA.</div>
+        		<u:UploadFile id="Attachments" table="ptw_jha" />
           </td>
         </tr>
     	<tr>

@@ -159,26 +159,26 @@
         
         <cftransaction action="begin">
             <cfquery result="rt">
-                <cfif jha.id eq 0>
-									INSERT INTO
-                <cfelse>
-									UPDATE 
-                </cfif>
-									ptw_jha SET
-									<cfif jha.id eq 0>
-										Date = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(Now(),'yyyy-mmm-dd')#"/>,
-										PreparedByUserId = <cfqueryparam cfsqltype="cf_sql_integer" value="#jha.PreparedByUserId#"/>,
-										WorkOrderId = <cfqueryparam cfsqltype="cf_sql_integer" value="#jha.WorkOrderId#"/>,
-									</cfif>
-									EquipmentToUse = <cfqueryparam cfsqltype="cf_sql_varchar" value="#jha.EquipmentToUse#"/>     
-                <cfif jha.id neq 0>
-									WHERE JHAId = <cfqueryparam cfsqltype="cf_sql_integer" value="#jha.id#">
-                </cfif> 
+							<cfif jha.id eq 0>
+								INSERT INTO
+							<cfelse>
+								UPDATE 
+							</cfif>
+								ptw_jha SET
+								<cfif jha.id eq 0>
+									Date = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(Now(),'yyyy-mmm-dd')#"/>,
+									PreparedByUserId = <cfqueryparam cfsqltype="cf_sql_integer" value="#jha.PreparedByUserId#"/>,
+									WorkOrderId = <cfqueryparam cfsqltype="cf_sql_integer" value="#jha.WorkOrderId#"/>,
+								</cfif>
+								EquipmentToUse = <cfqueryparam cfsqltype="cf_sql_varchar" value="#jha.EquipmentToUse#"/>     
+							<cfif jha.id neq 0>
+								WHERE JHAId = <cfqueryparam cfsqltype="cf_sql_integer" value="#jha.id#">
+							</cfif> 
             </cfquery>
             
             <cfset _id = jha.Id/>
             <cfif jha.id eq 0>
-                <cfset _id = rt.GENERATED_KEY/>
+            	<cfset _id = rt.GENERATED_KEY/>
             </cfif>
             
             <cfset f = CreateObject("component","assetgear.com.awaf.util.file").init()/>
@@ -196,7 +196,8 @@
 							"ptw_jha_list",
 							"JobSequence,Hazard,Whom,Severity,Likelihood,Risk,ControlMeasure,RecoveryPlan,ActionParties",
 							"text0,text1,text2,text3,text4,text5,text6,text7,text8",
-							"JHAListId","JHAId", _id)/>	
+							"JHAListId","JHAId", _id)
+						/>	
             
        </cftransaction>
         

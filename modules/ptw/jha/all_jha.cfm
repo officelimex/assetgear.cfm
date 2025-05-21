@@ -16,51 +16,50 @@
 	<cfset comW = "80"/>
 </cfif>
 <g:Grid renderTo="#JSId#_all_jha" url="modules/ajax/ptw.cfm?cmd=getJHAByUsers" commandWidth="#comW#px" class="table-hover" firstsortOrder="DESC">
-    <g:Columns>
+	<g:Columns>
 		<g:Column id="JHAId" caption="##" field="j.JHAId" sortable searchable /> 
-        <g:Column id="WorkDescription" caption="Job Description" field="wo.Description" searchable />
-        <g:Column id="Equipment" caption="EquipmentToUse" />
-        <g:Column id="Date" nowrap/>
-        <g:Column id="PreparedBy" caption="Prepared by" nowrap/>
-        <g:Column id="ReviewedBy" hide/>
-        <g:Column id="StatusDescription" caption="Status"/>
-        <g:Column id="Status" hide/>
-        <g:Column id="DepartmentId" hide/>
+		<g:Column id="WorkDescription" caption="Job Description" field="wo.Description" searchable />
+		<g:Column id="Equipment" caption="Equipment to use" />
+		<g:Column id="Date" nowrap/>
+		<g:Column id="PreparedBy" caption="Prepared by" nowrap/>
+		<g:Column id="ReviewedBy" hide/>
+		<g:Column id="StatusDescription" caption="Status"/>
+		<g:Column id="Status" hide/>
+		<g:Column id="DepartmentId" hide/>
 	</g:Columns>
-    <g:Commands>
-    		<cfif !request.IsHSE>
-        	<g:Command id="duplicateJHA" icon="tags" help="Duplicate JHA"/>
-        </cfif>
-        <g:Command id="editJHA" icon="pencil" help="Edit JHA" condition="(row[7]=='Draft' || row[7]=='Open') && row[8]==#request.userinfo.departmentid#" />
-        <g:Command id="viewJHA" icon="file" help="View JHA" condition="row[7]!='Close'"/>
-    	<g:Command id="PrintJHA" icon="print" help="Print JHA"/> 
-    </g:Commands>
+	<g:Commands>
 		<cfif !request.IsHSE>
-			<g:Event command="duplicateJHA">
-				<g:Window title="'Duplicate JHA ## '+d[0]" width="1050px" height="430px" url="'modules/ptw/jha/duplicate.cfm?cid=#url.cid#'" id="">                
-					<g:Button IsSave value="Duplicate" />                
-				</g:Window>
-			</g:Event>
+			<g:Command id="duplicateJHA" icon="tags" help="Duplicate JHA"/>
 		</cfif>
+		<g:Command id="editJHA" icon="pencil" help="Edit JHA" condition="(row[7]=='Draft' || row[7]=='Open') && row[8]==#request.userinfo.departmentid#" />
+		<g:Command id="viewJHA" icon="file" help="View JHA" condition="row[7]!='Close'"/>
+		<g:Command id="PrintJHA" icon="print" help="Print JHA"/> 
+	</g:Commands>
+	<cfif !request.IsHSE>
+		<g:Event command="duplicateJHA">
+			<g:Window title="'Duplicate JHA ## '+d[0]" url="'modules/ptw/jha/duplicate.cfm?cid=#url.cid#'" id="">                
+				<g:Button IsSave value="Duplicate" />                
+			</g:Window>
+		</g:Event>
+	</cfif>
     
 	<g:Event command="viewJHA">
-    	<g:Window title="'JHA ## '+d[0]" width="1050px" height="430px" url="'modules/ptw/jha/view_jha.cfm?cid=#url.cid#'" id="view_jha"/>  
-    </g:Event>
+		<g:Window title="'JHA ## '+d[0]" url="'modules/ptw/jha/view_jha.cfm?cid=#url.cid#'" id="view_jha"/>  
+	</g:Event>
     
 	<g:Event command="editJHA">
-    	<g:Window title="'JHA ## '+d[0]" width="1050px" height="430px" url="'modules/ptw/jha/save_jha.cfm?cid=#url.cid#'" id="">
-        	<cfif request.IsHSE>
-            	<g:Button value="Reject" icon="icon-off icon-white" executeURL="'modules/ajax/ptw.cfm?cmd=RejectJHA'"/>
-              <g:Button value="Approve" executeURL="'modules/ajax/ptw.cfm?cmd=ApproveJHA'" class="btn-success"/>
-          <cfelse>
-            	<g:Button IsSave />
-          </cfif> 
-        </g:Window>
-    </g:Event>     
+		<g:Window title="'JHA ## '+d[0]" url="'modules/ptw/jha/save_jha.cfm?cid=#url.cid#'" id="">
+			<cfif request.IsHSE>
+				<g:Button value="Reject" icon="icon-off icon-white" executeURL="'modules/ajax/ptw.cfm?cmd=RejectJHA'"/>
+				<g:Button value="Approve" executeURL="'modules/ajax/ptw.cfm?cmd=ApproveJHA'" class="btn-success"/>
+			<cfelse>
+				<g:Button IsSave />
+			</cfif> 
+		</g:Window>
+	</g:Event>     
 	<g:Event command="PrintJHA">
-    	<g:Window title="'JHA ## ' + d[1]" IsNewWindow  url="'modules/ptw/jha/print_jha.cfm?cid=#url.cid#'" />
-    </g:Event>  
-<!---<cfdump var="#request.grid.columns.1#">--->
+		<g:Window title="'JHA ## ' + d[1]" IsNewWindow  url="'modules/ptw/jha/print_jha.cfm?cid=#url.cid#'" />
+	</g:Event>  
 </g:Grid> 
  
 </cfoutput>
