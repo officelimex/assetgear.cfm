@@ -40,8 +40,8 @@
 					},
 					size : {
 						width: Math.min(window.innerWidth * 0.9, parseInt('#Attributes.width#') || 1300) + 'px',
-						height: Math.min(window.innerHeight * 0.75, parseInt('#Attributes.height#') || 600) + 'px'
-				},
+						height: Math.min(window.innerHeight * 0.67, parseInt('#Attributes.height#') || 600) + 'px'
+					},
 					url :         
 				<cfif  Attributes.IdFromGrid eq "">
 					#Attributes.URL#

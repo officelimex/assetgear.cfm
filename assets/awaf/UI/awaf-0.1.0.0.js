@@ -1516,11 +1516,7 @@ var aWindow = new Class({
 		}
 		if (this.options.position.y == null) {
 			var h = parseInt(this.options.size.height);
-			this.options.position.y = 100; //h/2;
-			//if(h<=200)	{
-			//	this.options.position.y = (h/2)+180;
-			//}
-			//this.options.position.y = (bsize.y/2)-(parseInt(this.options.size.height)/2);
+			this.options.position.y = 65;
 		}
 
 		this.windowFrame.setPosition(this.options.position);
