@@ -14,6 +14,7 @@
 	<cfparam name="Attributes.IsSave" type="boolean" default="false"/> 
 	<cfparam name="Attributes.prompt" type="string" default=""/> 
 	<cfparam name="Attributes.condition" default="1"/> 
+	<cfparam name="Attributes.warning" default="" type="string"/> 
 	<!--- end ----> 
 	<cfparam name="Attributes.executeURL" type="string" default=""/> <!--- execuite command on a url --->
 	<cfassociate basetag="cf_Window" />  
@@ -38,6 +39,11 @@
 		},
 		events:{
 				click:function(e)	{
+					<cfif len(trim(Attributes.warning))>
+						if (!confirm('#Attributes.warning#')) {
+							return;
+						}
+					</cfif>
 					<cfif Attributes.prompt != "">
 						pmt = prompt("#Attributes.prompt#", "");
 						if(pmt=="")	{
