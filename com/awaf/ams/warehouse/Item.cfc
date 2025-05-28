@@ -105,62 +105,63 @@
 			<cfset assetIds_d = h.GetTempDataToDelete(form.AssetIds)/>
 			<cfset assetIds_d = valuelist(assetIds_d.Int0)/>
 			<cfset assetIds_ = valuelist(assetIds_.Int0)/>
+			<cfparam name="form.Obsolete" default="No"/>
 
 			<cftransaction action="begin">
-                <cfquery result="rt">
-                    <cfif form.id eq 0>
-                        INSERT INTO
-                    <cfelse>
-                        UPDATE
-                    </cfif>
-                        whs_item SET
-                        Code = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Code#">,
-                        Description = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Description#">,
-                        VPN = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.VPN#">,
-                        UMid = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.UMid#">,
-                        AssetCategoryId = <cfqueryparam cfsqltype="cf_sql_integer" value="#val(form.AssetCategoryId)#">,
-                        ShelfLocationId = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.ShelfLocationId#">,
-                        Reference = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Reference#">,
-                        DepartmentIds = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.DepartmentIds#">,
-                        MinimumInStore = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.MinimumInStore#">,
-                        DateAdded = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(now(),'yyyy-mmm-dd')#">,
-                        UnitPrice = <cfqueryparam cfsqltype="cf_sql_float" value="#form.unitprice#">,
-                        Currency = <cfqueryparam cfsqltype="cf_sql_char" maxlength="3" value="#form.Currency#">,
-                        `Obsolete` = <cfqueryparam cfsqltype="cf_sql_char" maxlength="3" value="#form.Obsolete#">,
-                        MaximumInStore = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.MaximumInStore#">,
-                        AssetIds = <cfqueryparam cfsqltype="cf_sql_varchar" value="#assetIds_#"/>
-                    <cfif form.id neq 0>
-                    	WHERE ItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.id#">
-                    </cfif>
-                </cfquery>
-                <cfif form.id eq 0>
-                  <cfset form.id = rt.GENERATED_KEY/>
-                </cfif>
-                <!--- update each asset (items id) for each asset in assetIds_ --->
-                <cfset updateItemIdsInAsset(form.id,assetIds_,assetIds_d)/>
+				<cfquery result="rt">
+						<cfif form.id eq 0>
+								INSERT INTO
+						<cfelse>
+								UPDATE
+						</cfif>
+								whs_item SET
+								Code = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Code#">,
+								Description = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Description#">,
+								VPN = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.VPN#">,
+								UMid = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.UMid#">,
+								AssetCategoryId = <cfqueryparam cfsqltype="cf_sql_integer" value="#val(form.AssetCategoryId)#">,
+								ShelfLocationId = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.ShelfLocationId#">,
+								Reference = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Reference#">,
+								DepartmentIds = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.DepartmentIds#">,
+								MinimumInStore = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.MinimumInStore#">,
+								DateAdded = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(now(),'yyyy-mmm-dd')#">,
+								UnitPrice = <cfqueryparam cfsqltype="cf_sql_float" value="#form.unitprice#">,
+								Currency = <cfqueryparam cfsqltype="cf_sql_char" maxlength="3" value="#form.Currency#">,
+								`Obsolete` = <cfqueryparam cfsqltype="cf_sql_char" maxlength="3" value="#form.Obsolete#">,
+								MaximumInStore = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.MaximumInStore#">,
+								AssetIds = <cfqueryparam cfsqltype="cf_sql_varchar" value="#assetIds_#"/>
+						<cfif form.id neq 0>
+							WHERE ItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.id#">
+						</cfif>
+				</cfquery>
+				<cfif form.id eq 0>
+					<cfset form.id = rt.GENERATED_KEY/>
+				</cfif>
+				<!--- update each asset (items id) for each asset in assetIds_ --->
+				<cfset updateItemIdsInAsset(form.id,assetIds_,assetIds_d)/>
 
-                <!--- update custom fields --->
-                <cfset h.UpdateCustomFields('whs_item')/>
+				<!--- update custom fields --->
+				<cfset h.UpdateCustomFields('whs_item')/>
 
-                <cfset f = CreateObject("component","assetgear.com.awaf.util.file").init()/>
-                <!--- upload attachments --->
-                <cfset s_path = form.AttachmentsSource & "/" & form.Attachments />
-     						<cfset d_path = form.AttachmentsDestination & "/whs_item/" & form.id & "/" />
-                <cfset f.Move('whs_item',form.id,'a',s_path,d_path)/>
-                <!--- upload photos --->
-                <cfset s_path = form.PhotosSource & "/" & form.Photos />
-     						<cfset d_path = form.PhotosDestination & "/whs_item/" & form.id & "/" />
-                <cfset f.Move('whs_item',form.id,'p',s_path,d_path)/>
+				<cfset f = CreateObject("component","assetgear.com.awaf.util.file").init()/>
+				<!--- upload attachments --->
+				<cfset s_path = form.AttachmentsSource & "/" & form.Attachments />
+				<cfset d_path = form.AttachmentsDestination & "/whs_item/" & form.id & "/" />
+				<cfset f.Move('whs_item',form.id,'a',s_path,d_path)/>
+				<!--- upload photos --->
+				<cfset s_path = form.PhotosSource & "/" & form.Photos />
+				<cfset d_path = form.PhotosDestination & "/whs_item/" & form.id & "/" />
+				<cfset f.Move('whs_item',form.id,'p',s_path,d_path)/>
 
-							<cfif form.Code == "" && val(form.id)>
-								<cfquery>	
-									UPDATE whs_item SET Code = #form.id# WHERE ItemId = #val(form.id)#
-								</cfquery>
-							</cfif>
-            </cftransaction>
+			<cfif form.Code == "" && val(form.id)>
+				<cfquery>	
+					UPDATE whs_item SET Code = #form.id# WHERE ItemId = #val(form.id)#
+				</cfquery>
+			</cfif>
+			</cftransaction>
 						
 
-        <cfreturn form.id/>
+			<cfreturn form.id/>
 	</cffunction>
 
     <cffunction access="private" name="updateItemIdsInAsset" hint="save the item ids in the asset table" returntype="void">

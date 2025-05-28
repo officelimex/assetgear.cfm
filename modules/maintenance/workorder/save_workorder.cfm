@@ -32,15 +32,14 @@
 	SELECT UserId,concat(Surname, " ", OtherNames) as Names, Email
     FROM core_user
 	WHERE Approved = "Yes" AND UserStatus = "Active"
-    ORDER BY Names
+  ORDER BY Names
 </cfquery>
 <cfquery name="qCun" cachedwithin="#CreateTime(5,0,0)#">
 	SELECT * FROM core_unit
     ORDER BY Name
 </cfquery>
 <cfquery name="qCD" cachedwithin="#CreateTime(5,0,0)#">
-	SELECT * FROM core_department
-    ORDER BY Name
+	SELECT * FROM core_department ORDER BY Name
 </cfquery>
 
 <cfset qUM = application.com.Item.GetAllUM()/>
@@ -55,8 +54,8 @@
 	WHERE l.WorkOrderId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.id#"/> AND Approved="Yes"
 </cfquery>
 <cfquery name="qCon">
-    SELECT * FROM contract c
-    WHERE c.WorkOrderId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.id#"/>
+	SELECT * FROM contract c
+	WHERE c.WorkOrderId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.id#"/>
 </cfquery>
 <cfif url.id eq 0>
 <br/>
@@ -316,6 +315,7 @@
 				/>
       	<f:Button value="Save & Send to Warehouse" class="btn-primary" IsSave onSuccess="win_save_wo_window.close()"/>
 			<cfelse>
+
 				<cfif request.IsSV AND qWO.Status2 NEQ "Approved">
       		<f:Button value="Save Only" class="btn-primary" IsSave onSuccess="win_save_wo_window.close()"/>
       		<f:Button 
@@ -326,7 +326,7 @@
 					<cfset nobutton = false/>
 				</cfif>
 				<cfif (request.IsSUP || request.IsMGR) && qWO.Status2 NEQ "Approved">
-      		<f:Button value="Save Only" class="btn-primary" IsSave onSuccess="win_save_wo_window.close()"/>
+      		<!--- <f:Button value="Save Only" class="btn-primary" IsSave onSuccess="win_save_wo_window.close()"/> --->
       		<f:Button 
 						value="Approve" 
 						actionURL="modules/ajax/maintenance.cfm?cmd=ApproveAndSendToWarehouse"
@@ -337,6 +337,14 @@
 				<cfif nobutton>
 					<f:Button value="Save" class="btn-primary"  IsSave onSuccess="win_save_wo_window.close()"/>
 				</cfif>
+			</cfif>
+			<cfif request.IsSV && qWO.DepartmentId == application.department.admin && qWO.Status2 NEQ "Approved"> 
+			<!--- <cfif request.IsSUP && qWO.Status2 NEQ "Approved">  --->
+				<f:Button 
+					value="Save & Send to Superintendent/Manager" 
+					actionURL="modules/ajax/maintenance.cfm?cmd=sendToSuperintendent"
+					class="btn-success" IsSave 
+					onSuccess="win_save_wo_window.close()"/>
 			</cfif>
     </f:ButtonGroup>
 

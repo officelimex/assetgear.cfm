@@ -27,10 +27,11 @@
 
 <cfquery name="qAl">
 	SELECT l.`Name` 
-    FROM asset_location a 
-    INNER JOIN location l on a.LocationId=l.LocationId 
-    WHERE AssetLocationId 
-    IN (#qWO.AssetLocationIds#)
+	FROM asset_location a 
+	INNER JOIN location l on a.LocationId = l.LocationId 
+	WHERE a.AssetLocationId IN (
+		<cfqueryparam value="#qWO.AssetLocationIds#" cfsqltype="cf_sql_integer" list="true">
+	)
 </cfquery>
 
 <cfset qSU = application.com.User.GetUser(val(qWO.SupervisedByUserId))/> 
@@ -93,10 +94,16 @@
               <tr>
                 <td>#qOI.Currentrow#</td>
                 <td>#qOI.Code#</td>
-                <td>#qOI.Item#</td>
+                <td>
+                  <cfif val(qOI.ItemId)>
+                    #qOI.Item#
+                  <cfelse>
+                    #qOI.Description#
+                  </cfif>
+                </td>
                 <td>#qOI.Quantity# #qOI.UM#</td>
-                <td>#qOI.Maker#</td>
-                <td>#qOI.VPN#</td>
+                <td>#qOI.Maker# </td>
+                <td>#qOI.VPN# </td>
               </tr>
             </cfloop>
           </table>
@@ -146,9 +153,9 @@
       <nt:Item id="#Id4#"/>
     </nt:Content>
   </nt:NavTab>
-    
+  
   <f:ButtonGroup>
-    <cfif qWO.WorkClassId == 12 AND request.IsMGR AND qWO.Status NEQ "Approved">
+    <cfif qWO.WorkClassId EQ 12 AND qWO.Status NEQ "Approved" AND (request.IsMGR OR (request.IsWarehouseAdmin AND qWO.DepartmentId EQ 8))>
       <f:Button IsSave 
         value="Reject Request" 
         class="btn-danger" 

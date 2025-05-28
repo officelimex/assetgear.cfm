@@ -189,14 +189,15 @@
     <td valign="top">
       <table width="100%" border="0" cellspacing="0" cellpadding="0">
       <tr>
-        <td height="18" colspan="2">PERSONNEL REQUIREMENTS:</td>
+        <td height="18" colspan="2" nowrap="nowrap">PERSONNEL REQUIREMENTS:</td>
       </tr>
       <cfloop list="#request.ppe#" index="it">
         <tr>
           <td width="15" align="center" valign="middle">
-          <cfset chk = getCheck(qP.PPE,it)/>
-          <img src="#application.site.url#assets/img/ptw_checkbox_#chk#.png" width="9" height="9"></td>
-          <td height="13" valign="middle" nowrap="nowrap">#it#</td>
+            <cfset chk = getCheck(qP.PPE,it)/>
+            <img src="#application.site.url#assets/img/ptw_checkbox_#chk#.png" width="9" height="9">
+          </td>
+          <td height="13" valign="middle" nowrap="nowrap">&nbsp;#it#</td>
         </tr>
       </cfloop>
     </table>
@@ -324,36 +325,58 @@
         </td>
         <td valign="top" >
           <div style="padding-top:3px;padding-bottom:4px">VALIDITY & RENEWAL OF PERMIT: Maximum renewal is 7 days</div>
+          <cfquery name="qRev">
+            SELECT 
+              r.*,
+              CONCAT(u.Surname,' ',u.OtherNames) AS Name
+            FROM ptw_permit_revalidated r
+            INNER JOIN core_user u ON u.UserId = r.ValidatedByUserId
+            WHERE r.PermitId = <cfqueryparam value="#qP.PermitId#" cfsqltype="cf_sql_integer">
+            ORDER BY r.Date ASC 
+          </cfquery>
           <table class="tbl" border="0" cellspacing="0" cellpadding="0" width="100%">
             <tr>
+              <td class="left" width="1px">Name</td>
+              <cfloop query="qRev">
+                <td>#qRev.Name#</td>
+              </cfloop>
+              <cfloop from="1" to="#7-qRev.recordCount#" index="iii">
+                <td>&nbsp;</td>
+              </cfloop>
+            </tr>
+            <tr>
               <td class="left" width="1px">Date</td>
-              <td width="14%">&nbsp;</td>
-              <td width="14%">&nbsp;</td>
-              <td width="14%">&nbsp;</td>
-              <td width="14%">&nbsp;</td>
-              <td width="14%">&nbsp;</td>
-              <td width="14%">&nbsp;</td>
-              <td width="14%">&nbsp;</td>
+              <cfloop query="qRev">
+                <td>#dateformat(qRev.Date,'dd/mm/yy')#</td>
+              </cfloop>
+              <cfloop from="1" to="#7-qRev.recordCount#" index="iii">
+                <td>&nbsp;</td>
+              </cfloop>
             </tr>
             <tr>
               <td class="left">Time</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
+              <cfloop query="qRev">
+                <td>#timeFormat(qRev.Date,'hh:mm tt')#</td>
+              </cfloop> 
+              <cfloop from="1" to="#7-qRev.recordCount#" index="iii">
+                <td>&nbsp;</td>
+              </cfloop>
             </tr>
             <tr>
-              <td class="left bottom">Sign</td>
-              <td class="bottom">&nbsp;</td>
-              <td class="bottom">&nbsp;</td>
-              <td class="bottom">&nbsp;</td>
-              <td class="bottom">&nbsp;</td>
-              <td class="bottom">&nbsp;</td>
-              <td class="bottom">&nbsp;</td>
-              <td class="bottom">&nbsp;</td>
+              <td class="left bottom">Sign</td> 
+              <cfloop query="qRev">
+                <td class="bottom">
+                  <cfset fl = application.com.File.GetSignaturePath(qRev.ValidatedByUserId)/>
+                  <cfif len(fl)>
+                    <cfhttp url="#fl#" method="get" result="imageData" />
+                    <cfset base64Image = ToBase64(imageData.FileContent) />
+                    &nbsp;<img src="data:image/png;base64,#base64Image#" height="25px"/>
+                  </cfif>
+                </td>
+              </cfloop>
+              <cfloop from="1" to="#7-qRev.recordCount#" index="iii">
+                <td>&nbsp;</td>
+              </cfloop>
             </tr>
           </table>
           <div style="padding-top:5px;padding-bottom:3px">This PTW is Valid for 7 Consecutive days for the specified work</div>
@@ -403,36 +426,54 @@
           <div style="padding-top:3px;padding-bottom:3px">HANDBACK OF WORK</div>
           <table>
             <cfset safelyList="The Job is completed and worksite cleared,The job is suspended/not completed"/>
+            <cfset i=0/>
             <cfloop list="#safelyList#" index="it">
-            <tr>
-              <td width="15" align="center" valign="top">
-              <cfset chk = getCheck(qP.SafetyRequirement2,it)/>
-              <img src="#application.site.url#assets/img/ptw_checkbox_#chk#.png" width="9px" height="9px"></td>
-              <td><div style="padding-top:2px;">#it#</div></td>
-            </tr>
+              <cfset i++/>
+              <tr>
+                <td width="15" align="center" valign="top">
+                <cfset chk = 0/>
+                <cfif i == 1 & qP.Completed == "Yes">
+                  <cfset chk = 1/>
+                </cfif>
+                <cfif i == 2 & qP.Completed == "No">
+                  <cfset chk = 1/>
+                </cfif>
+                <img src="#application.site.url#assets/img/ptw_checkbox_#chk#.png" width="9px" height="9px"></td>
+                <td><div style="padding-top:2px;">#it#</div></td>
+              </tr>
             </cfloop>
             <tr>
               <td colspan="2">
                 <table style="padding-bottom:5px;">
                   <tr>
                     <td nowrap="nowrap">If not, state reasons</td>
-                    <td>&nbsp;<div class="underline"></div></td>
+                    <td class="underline">&nbsp;#qP.PAComment#</td>
                   </tr>
                 </table>
                 <table style="padding-bottom:5px;">
                   <tr>
                     <td nowrap="nowrap">NAME:</td>
-                    <td>&nbsp;<div class="underline"></div></td>
+                    <td class="underline" width="20%" nowrap="nowrap">&nbsp;#qP.PAC#</td>
                     <td nowrap="nowrap">&nbsp;&nbsp;DEPT:</td>
-                    <td>&nbsp;<div class="underline"></div></td>
+                    <td class="underline">&nbsp;#ucase(qP.PADepartment)#</td>
                   </tr>
                 </table>
+                <div style="font-size:3px;">&nbsp;</div>
                 <table>
                   <tr>
                     <td nowrap="nowrap">SIGNATURE:</td>
-                    <td>&nbsp;<div class="underline"></div></td>
-                    <td nowrap="nowrap">&nbsp;&nbsp;DATE:</td>
-                    <td>&nbsp;<div class="underline"></div></td>
+                    <td class="underline" width="100px">&nbsp;
+                      <cfset fl = application.com.File.GetSignaturePath(qP.PACloseByUserId)/>
+                      <cfif len(fl)>
+                        <cfhttp url="#fl#" method="get" result="imageData" />
+                        <cfset base64Image = ToBase64(imageData.FileContent) />
+                        <div style="position: relative;">
+                          <img style="left:0px;bottom:-1px;position: absolute;z-index: 1000;" src="data:image/png;base64,#base64Image#" height="20px"/> 
+                        </div>
+                      </cfif>
+                    </td>
+                    <td nowrap="nowrap">&nbsp;DATE:</td>
+                    <td nowrap="nowrap"  width="20%" class="underline">&nbsp;#dateformat(qP.PACloseDate,'dd/mm/yy')# #timeformat(qP.PACloseDate,'hh:mm tt')#</td>
                   </tr>
                 </table>
               </td>
@@ -454,20 +495,23 @@
               <td nowrap="nowrap">&nbsp;#qP.SVCDepartment#<div class="underline"></div></td>
             </tr>
           </table>
+          <div style="font-size:3px;">&nbsp;</div>
           <table>
             <tr>
-              <td nowrap="nowrap">
-                SIGNATURE:
+              <td nowrap="nowrap">SIGNATURE:
+              </td>
+              <td class="underline" width="100px"> &nbsp;
                 <cfset fl = application.com.File.GetSignaturePath(qP.SVCloseByUserId)/>
                 <cfif len(fl)>
                   <cfhttp url="#fl#" method="get" result="imageData" />
                   <cfset base64Image = ToBase64(imageData.FileContent) />
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="data:image/png;base64,#base64Image#" height="25px"/>
+                  <div style="position: relative;">
+                    <img style="left:0px;bottom:-1px;position: absolute;z-index: 1000;" src="data:image/png;base64,#base64Image#" height="20px"/> 
+                  </div>
                 </cfif>
               </td>
-              <td>&nbsp;<div class="underline"></div></td>
               <td nowrap="nowrap">&nbsp;&nbsp;DATE</td>
-              <td nowrap="nowrap">&nbsp;#DateTimeFormat(qP.SVCloseDate,'dd-mmm-yyyy hh:mm tt')#<div class="underline"></div></td>
+              <td nowrap="nowrap">&nbsp;#DateTimeFormat(qP.SVCloseDate,'dd/mm/yyyy hh:mm tt')#<div class="underline"></div></td>
             </tr>
           </table>
         </td>

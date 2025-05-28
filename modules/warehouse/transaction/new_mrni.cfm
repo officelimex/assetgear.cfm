@@ -16,13 +16,14 @@
   WHERE mri.MRId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.Id#">
 </cfquery> 
 
-<cfquery name="qID">
-	Select * From whs_item
-</cfquery>
-
 <cfquery name="qD">
 	SELECT * FROM core_department ORDER BY Name 
 </cfquery> 
+
+<cfquery name="qU">
+	SELECT * FROM core_unit ORDER BY Name 
+</cfquery> 
+
 <cfset qUM = application.com.Item.GetAllUM()/>
 <cfset qItem = application.com.Item.GetItems()/>
 
@@ -42,6 +43,7 @@
     <td class="horz-div" valign="top"> 
       <f:Select name="Currency" required ListValue="NGN,USD" ListDisplay="Naira,Dollars" class="span4"/>        
       <f:Select name="DepartmentId" label="Department" required ListValue="#ValueList(qD.DepartmentId)#" ListDisplay="#Valuelist(qD.Name)#" />
+      <f:Select name="UnitId" label="Unit" ListValue="#ValueList(qU.UnitId)#" ListDisplay="#Valuelist(qU.Name)#" />
       <f:TextBox name="WorkOrderId" label="Work Order ##" class="span5"/>
     </td>
   </tr> 

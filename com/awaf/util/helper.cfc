@@ -56,8 +56,8 @@
 		<cfargument name="fld_des" hint="field to insert into (destination)" required="true" type="string"/>
 		<cfargument name="fld_src" hint="field to insert from (source)" required="true" type="string"/>
 		<cfargument name="pk_field" hint="primary key field" required="true" type="string"/>
-		<cfargument name="fk_field" hint="foringe key field" required="true" type="string"/>
-		<cfargument name="fk_value" hint="foringe key value" required="true" type="numeric" />
+		<cfargument name="fk_field" hint="foreign key field" required="true" type="string"/>
+		<cfargument name="fk_value" hint="foreign key value" required="true" type="numeric" />
 		
 
 		<cfset llen = listlen(arguments.fld_des)/>
@@ -73,19 +73,19 @@
 		<cfloop query="qTemp"> 
 			<cfquery>
 		        <cfswitch expression="#qTemp.Flag#">
-		            <cfcase value="d">
-		                DELETE FROM `#arguments.tbl#` 
-		                WHERE `#arguments.pk_field#` = <cfqueryparam cfsqltype="cf_sql_integer" value="#qTemp.PK#"/>
-		            </cfcase>
-		            <cfcase value="u"> 
-						<cfif qTemp.PK eq "">
-		                INSERT INTO `#arguments.tbl#` SET
-		                    <cfif arguments.fk_field neq "">
-								`#arguments.fk_field#` = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.fk_value#"/>,
-							</cfif>
-						<cfelse>
-						UPDATE `#arguments.tbl#` SET	
-						</cfif>	
+							<cfcase value="d">
+								DELETE FROM `#arguments.tbl#` 
+								WHERE `#arguments.pk_field#` = <cfqueryparam cfsqltype="cf_sql_integer" value="#qTemp.PK#"/>
+							</cfcase>
+							<cfcase value="u"> 
+								<cfif qTemp.PK eq "">
+									INSERT INTO `#arguments.tbl#` SET
+									<cfif arguments.fk_field neq "">
+										`#arguments.fk_field#` = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.fk_value#"/>,
+									</cfif>
+								<cfelse>
+									UPDATE `#arguments.tbl#` SET	
+								</cfif>	
 						
 							<cfset i=0/>
 							<cfloop list="#fld_des#" delimiters="," index="fld_d">

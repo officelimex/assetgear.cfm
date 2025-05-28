@@ -16,6 +16,9 @@
 <cfquery name="qD" cachedWithin="#CreateTime(5,0,0)#">
 	SELECT * FROM core_department ORDER BY Name
 </cfquery>
+<cfquery name="qU" cachedWithin="#CreateTime(5,0,0)#">
+	SELECT * FROM core_unit ORDER BY Name
+</cfquery>
 
 <cfif url.id eq 0>
 	<br/>
@@ -28,6 +31,7 @@
 			<f:DatePicker name="DateIssued" label="Date Issued" required value="#dateformat(qMR.Date,'yyyy/mm/dd')#"/>
 			<f:DatePicker name="DateRequired" label="Date Required" required value="#dateformat(qMR.DateRequired,'yyyy/mm/dd')#"/>
 			<f:Select name="DepartmentId" label="Department" required ListValue="#Valuelist(qD.DepartmentId)#" ListDisplay="#Valuelist(qD.Name)#" Selected="#qMR.DepartmentId#"/>
+			<f:Select name="UnitId" label="Unit" ListValue="#Valuelist(qU.UnitId)#" ListDisplay="#Valuelist(qU.Name)#" Selected="#qMR.UnitId#"/>
     </td>
     <td class="horz-div" valign="top">
 			<f:Select name="Currency" required ListValue="NGN,USD" ListDisplay="Naira,Dollars" Selected="#qMR.Currency#" class="span4"/>

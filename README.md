@@ -22,15 +22,15 @@ AssetGear is a web application designed for managing assets and maintenance task
 - [ ] Print Work Order should also show attached documents in the exported PDF
 - [ ] Print PTW should include JHA (if no JHA, include the attachment)
 - [ ] Each department has a superintendent that needs to approve a WO
-- [ ] Add and Impement the following roles:
+- [ ] Add and Implement the following roles:
   - [ ] Supervisor
   - [ ] Superintendent
   - [ ] Field Manager
 - [ ] Users should not be able to view or edit WO not in their department
-- [ ] Warehous Manager, Enable notification
-- [ ] Fix warehous issue for sending WO
+- [ ] Warehouse Manager, Enable notification
+- [ ] Fix warehouse issue for sending WO
 - [ ] Add expiration date for warehouse item
-- [ ] Warehouse users should not be able to perform anyother operation - only view - user usr profile
+- [ ] Warehouse users should not be able to perform another operation - only view - user usr profile
 
 - [ ] Service Request
 - [ ] ===============
@@ -40,29 +40,55 @@ AssetGear is a web application designed for managing assets and maintenance task
 
 - [ ] Work Order
 - [ ] ===============
-- [ ] Once approved, dont allow supervisor to add new or edit warehouse material
+- [ ] Once approved, don't allow supervisor to add new or edit warehouse material
+- [ ] Enforce work order to be approved before given issue out of items
 
 - UOM and QOH should show the while issue out
 
--[*] While viewing the Work Order, change the Spareparts to Descriptions -[ ] Add Item Code to everywhere that you have item list -[ ] Add QOO -[ ] Audit trail on who so ever update the inventor -[ ] Pagination should show total number of items -[ ] When new WO is created and it involve materials, it should send a mail to warehouse -[ ] Show wo created WO without printing -[ ] Merging of item as in Code -[ ] Add grcode to workorder -[ ] On the new issue: add item Code to the material list area -[ ] QOH should show while in work order mode -[ ] Assign ItemId to Item Code, and allow Admin Overise the Item Code -[ ] Add money type to Textbox (input box) -[ ] Warehouse items -[ ] Sort by the most recent item -[ ] Remove VPN attached to Item description in warehous item view -[ ] Turn Quantity to integer
+- [*] While viewing the Work Order, change the Spare-parts to Descriptions
+- [ ] Add Item Code to everywhere that you have item list -[ ] Add QOO
+- [ ] Audit trail on who so ever update the inventor
+- [ ] Pagination should show total number of items
+- [ ] When new WO is created and it involve materials, it should send a mail to warehouse
+- [ ] Show wo created WO without printing -[ ] Merging of item as in Code
+- [ ] Add grcode to workorder
+- [ ] On the new issue: add item Code to the material list area
+- [ ] QOH should show while in work order mode
+- [ ] Assign ItemId to Item Code, and allow Admin Overise the Item Code
+- [ ] Add money type to Textbox (input box)
+- [ ] Warehouse items
+- [ ] Sort by the most recent item
+- [ ] Remove VPN attached to Item description in warehouse item view
+- [ ] Turn Quantity to integer
+
+- [ ] Awaiting Invoice Receipt
+- [ ] Unpriced Issue
+- [ ] Receive only
+- [ ] Invoice already posted
 
 ## Bug
 
 - [ ] Search not working use 15626 as a case study
 - [ ] System can not issue out partial item on WorkOrder
 - [ ] Make the material requisition items all caps
-- [ ] Dont make the remark field required field
+- [ ] Don't make the remark field required field
 - [ ] OEM should not be required
-- [ ] Dont make price required
+- [ ] Don't make price required
 - [ ] Date issued should be the current date
 - [ ] Add date opened
 
 - [ ] Ability to show more info for editable table text
-- [ ]
+- [ ] Add uint to MR
+- [ ] Make availability partial removeal of items while issuing out
+- [ ] VPN and ICN should show on the work order
 
 - Pully hub - remove qor
 - Brush:Electric Motor
 - Rag: Mini
+
+## New Feature
+
+- [ ] when lpg and operations approves it should also copy their sup
 
 ## Update
 
@@ -154,3 +180,12 @@ This project is licensed under the MIT License.
 ## Contact
 
 For any inquiries or support, please contact [support@officelime.com](mailto:support@officelime.com).
+
+=========
+
+david.sanni@pesoenergy.com - 2237
+victor.george@pesoenergy.com-6773
+emmanuel.ofoh@pesoenergy.com-8849
+oghale.adiude@pesoenergy.com-6678
+
+automatically use the wo descrioption, department, and unit while createing an mr

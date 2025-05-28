@@ -15,7 +15,6 @@
 		ORDER BY CAST(SUBSTRING(code, 2) AS UNSIGNED)
 </cfquery>
 
-
 <cfoutput>
 
 <f:Form id="#shlId#frm" action="modules/ajax/settings.cfm?cmd=SaveShelfLocation" EditId="#url.id#">

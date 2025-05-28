@@ -27,7 +27,7 @@
 	</g:Commands>
 
 	<g:Event command="editA">
-    	<g:Window title="'Permit ##'+d[0]" width="1000px" height="400px" url="'modules/ptw/permit/pa/view_permit.cfm?cid=#url.cid#'" id="">        	
+    	<g:Window title="'Permit ##'+d[0]" url="'modules/ptw/permit/pa/view_permit.cfm?cid=#url.cid#'" id="">        	
             <!---<g:Button value="Send to Facility Supervisour" class="btn btn-success" icon="icon-share icon-white" executeURL="'modules/ajax/ptw.cfm?cmd=SendToPS&jhaid='+d[1]"/>
             <g:Button IsSave />---> 
         </g:Window>

@@ -211,7 +211,7 @@
               <td width="15" align="center" valign="middle">
               <cfset chk = getCheck(qP.PPE,it)/>
               <img src="#application.site.url#assets/img/ptw_checkbox_#chk#.png" width="9" height="9"></td>
-              <td height="13" valign="middle" nowrap="nowrap">#it#</td>
+              <td height="13" valign="middle" nowrap="nowrap">&nbsp;#it#</td>
             </tr>
           </cfloop>
         </table></td>

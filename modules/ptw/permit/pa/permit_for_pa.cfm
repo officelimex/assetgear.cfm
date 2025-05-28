@@ -13,6 +13,7 @@
 		<g:Column id="PA" caption="Created by"/>
 		<g:Column id="Date" nowrap/>
 		<g:Column id="EndTime" caption="End Time" nowrap/>
+		<g:Column id="CurrentValidity" caption="Validated For" nowrap/>
 		<g:Column id="StatusDescription" caption="Status" />
 		<g:Column id="Status" hide/>
 	</g:Columns>
@@ -21,16 +22,20 @@
 		<g:Command id="printPermit" icon="print" help="Print Permit"/> 
 	</g:Commands>
 
-<!--- 	<g:Event command="revalidatePermit">
-		<g:Window title="'Permit ##'+d[0]" width="1000px" height="400px" url="'modules/ptw/permit/pa/view_permit.cfm'" id="">  	
-			<g:Button value="Ask for Extension" icon="icon-eye-open icon-white" onClick="AskForExtension();"/> 
-		</g:Window>
-  </g:Event>  --->
+	<!--- 	
+		<g:Event command="revalidatePermit">
+			<g:Window title="'Permit ##'+d[0]" url="'modules/ptw/permit/pa/view_permit.cfm'" id="">  	
+				<g:Button value="Ask for Extension" icon="icon-eye-open icon-white" onClick="AskForExtension();"/> 
+			</g:Window>
+		</g:Event>  
+	--->
     
 	<g:Event command="viewPermit">
-		<g:Window title="'Permit ##'+d[0]" width="1000px" height="400px" url="'modules/ptw/permit/pa/view_permit.cfm'" id="view_permit">  	 
-<!--- 			<g:Button value="Work Suspended/Not Completed" class="btn btn-info" icon="icon-off icon-white" onClick="workNotCompleted();"/>
-			<g:Button value="Work Completed" class="btn btn-success" icon="icon-ok icon-white" onClick="workCompleted();"/> --->
+		<g:Window title="'Permit ##'+d[0]" url="'modules/ptw/permit/pa/view_permit.cfm'" id="view_permit">  	 
+		<!--- 			
+			<g:Button value="Work Suspended/Not Completed" class="btn btn-info" icon="icon-off icon-white" onClick="workNotCompleted();"/>
+			<g:Button value="Work Completed" class="btn btn-success" icon="icon-ok icon-white" onClick="workCompleted();"/> 
+		--->
 		</g:Window>
 	</g:Event>
          

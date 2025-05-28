@@ -15,8 +15,8 @@
 					</td>
 					<td valign="middle" style=""></td>
 					<td align="right" valign="top" style="font-family: Tahoma;" class="noline">
-						<div style="font-size:#request.letterhead.titlesize+2#px;">
-							<span style="font-weight: bold;">OVADE GAS PLANT</span>
+						<div style="font-size:#request.letterhead.titlesize+2#px;font-weight: bold;">
+							<span style="">OVADE GAS PLANT</span>
 							&nbsp;&nbsp;
 							<span style="color:##dddddd;">|</span>
 							&nbsp;&nbsp;
@@ -26,7 +26,7 @@
 							<cfif request.letterhead.date neq "">
 								<span>#request.letterhead.date#</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 							</cfif>
-							<span style="font-size:#request.letterhead.titlesize+1#px;">#request.letterhead.id#</span>
+							<span style="font-size:#request.letterhead.titlesize+1#px;font-weight: bold;">#request.letterhead.id#</span>
 						</div>
 					</td>
 					<cfif request.letterhead.qrcode neq "">

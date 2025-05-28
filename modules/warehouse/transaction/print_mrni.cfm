@@ -71,7 +71,7 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
         </tr>
         <tr>
           <td valign="top" nowrap="nowrap" class="left">Department</td>
-          <td valign="top" nowrap="nowrap" class="right">#qMR.Department#</td>
+          <td valign="top" nowrap="nowrap" class="right">#qMR.Department# <cfif val(qMR.UnitId)> &gt; #qMR.Unit#</cfif></td>
         </tr>
         <tr>
           <td valign="top" nowrap="nowrap" class="left">Date Required</td>

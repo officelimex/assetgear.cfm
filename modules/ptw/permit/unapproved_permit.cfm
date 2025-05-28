@@ -5,7 +5,7 @@
 	<cfimport taglib="../../../assets/awaf/tags/xGrid_1001/" prefix="g" /> 
 
 	<cfset did = request.userInfo.DepartmentId/>
-	<cfif request.IsHSE OR listFind('10,17',request.userInfo.DepartmentId) >
+	<cfif request.IsHSE OR listFind('#application.department.hse#,#application.department.lpg#,#application.department.operations#',request.userInfo.DepartmentId) >
 		<cfset did = 0/>
 	</cfif>
 
@@ -26,11 +26,11 @@
 		</g:Commands>
 
 		<g:Event command="editA">
-			<g:Window title="'Permit ##'+d[0]" width="1000px" height="500px" url="'modules/ptw/permit/save_permit.cfm?cid=#url.cid#'" id="save_permit"/>        	
+			<g:Window title="'Permit ##'+d[0]" url="'modules/ptw/permit/save_permit.cfm?cid=#url.cid#'" id="save_permit"/>        	
 		</g:Event>
 
 		<g:Event command="viewB">
-			<g:Window title="'Permit ##'+d[0]" width="1000px" height="500px" url="'modules/ptw/permit/pa/view_permit.cfm?cid=#url.cid#'" id="view_permit"/>        	
+			<g:Window title="'Permit ##'+d[0]" url="'modules/ptw/permit/pa/view_permit.cfm?cid=#url.cid#'" id="view_permit"/>        	
 		</g:Event>   
 
 		<g:Event command="Print">

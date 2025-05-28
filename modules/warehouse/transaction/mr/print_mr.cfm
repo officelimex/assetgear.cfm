@@ -26,7 +26,7 @@
     /* padding: 8px; */
   }
 
-	.tbl th{font-weight: normal;background-color:#bg#;border-top:#brd_c2# 2px solid;border-right:#brd_c# 1px solid; text-align:left; padding:4px;}
+	.tbl th{font-weight: bold;font-size:9px;background-color:#bg#;border-top:#brd_c2# 2px solid;border-right:#brd_c# 1px solid; text-align:left; padding:4px;}
 	.tbl th.left{border-left:#brd_c# 1px solid;}
 	.tbl>tr>td{
 	padding: 3px 5px;
@@ -49,7 +49,7 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
 <table width="100%">
 <cfdocumentitem type = "header">
 <cfset request.letterhead.title="MATERIAL REQUISITION"/>
-<cfset request.letterhead.Id="M.R. ## #url.id#"/>
+<cfset request.letterhead.Id="MAT ## #url.id#"/>
 <!--- <cfset request.letterhead.date="Date: #dateformat(qMR.Date,'dd/mm/yyyy')#"/> --->
 <cfinclude template="../../../../include/letter_head.cfm"/>
 </cfdocumentitem>
@@ -70,7 +70,7 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
         <tr>
           <td valign="top" nowrap="nowrap" class="left ">Requisition Type</td>
           <td valign="top" nowrap="nowrap" class="right ">
-            <cfif qMR.OrderType eq "i">International<cfelse>Local</cfif>
+            <cfif qMR.Currency EQ "USD">International<cfelse>Local</cfif>
           </td>
         </tr>
         <tr>
@@ -81,10 +81,6 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
       </td>
       <td valign="top" width="30%" align="center">
       <table width="100%" border="0" cellpadding="0" cellspacing="0" class="head_section">
-<!---         <tr>
-          <td width="24%" valign="top" class="left">Currency</td>
-          <td width="76%" valign="top" class="right"><cfif qMR.Currency eq "NGN">Naira (NGN)<cfelse>Dollar (USD)</cfif></td>
-          </tr> --->
 					<cfif qMR.Category neq "r">
 						<tr>
 		          <td valign="top" nowrap="nowrap" class="left">Work Order ##</td>
@@ -108,32 +104,50 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
 </tr>
 <tr>
   <td>
+    <cfset service = false/>
     <cfset qMRI = application.com.Transaction.GetMRItems(url.id)/>
+    <cfloop query="qMRI">
+      <cfif qMRI.ItemId EQ 44143> 
+        <cfset service = true/>
+      </cfif>
+    </cfloop>
+
+    <cfif service>
+      <p><b>SCOPE OF WORK</b></p>
+      <p>#replace(qMR.WorkDetails,chr(13),'<br/>','all')#</p>
+      <br/>
+    </cfif>
+
     <table width="100%" border="0" cellpadding="0" cellspacing="0" class="tbl">
       <tr>
         <th class="left" width="1px">S/N</th>
-        <th class="left" width="1px">ICN</th>
-        <th class="center" width="99%">ITEM DESCRIPTION</th>
-        <th class="center" width="1px">VPN</th>
         <th class="center" width="1px">QTY</th>
         <th class="center" width="1px">UOM</th>
-        <th class="a-right" width="1px">Unit Price</th>
-        <th class="a-right" width="1px">Subtotal<br/> <cfif qMR.Currency eq "NGN">(NGN)<cfelse>(USD)</cfif> </th>
+        <th class="center" width="99%">DESCRIPTION (ICN, VPN)</th>
+        <th class="center" width="1px">QOH</th>
+        <th class="center" width="1px">QOO</th>
+        <th class="center" width="1px">QOR</th>
+        <th class="a-right" width="1px">Unit Cost</th>
+        <th class="a-right" width="1px">Total<br/> <cfif qMR.Currency eq "NGN">(NGN)<cfelse>(USD)</cfif> </th>
         </tr>
         <cfset gs = 0/>
       <cfloop query="qMRI">
         <tr <cfif qMRI.Currentrow eq qMRI.Recordcount> class="bottom" </cfif>>
           <td valign="top" class="left">#qMRI.Currentrow#</td>
-          <td valign="top">#qMRI.Code#</td>
+          <td valign="top" align="right">#qMRI.Quantity#</td>
+          <td valign="top" >#qMRI.UM#</td>
           <td valign="top">
-            #replace(qMRI.Description,chr(13),'<br/>','all')#
-<!---             <cfif qMRI.Maker NEQ "">
-              <div class="um t4">OEM: #qMRI.Maker#</div>
+            <cfif qMRI.ItemVPN neq "">VPN: <b>#qMRI.ItemVPN#</b><br/></cfif>
+            [#qMRI.Code#] #replace(qMRI.Description,chr(13),'<br/>','all')#
+            <!--- <cfif qMRI.Remark neq "">
+              <br/>#qMRI.Remark#
             </cfif> --->
           </td>
-          <td valign="top" class="um">#qMRI.ItemVPN#&nbsp;</td>
-          <td align="center" valign="top" >#qMRI.Quantity#</td>
-          <td valign="top" >#qMRI.UM#</td>
+          <td align="center" valign="top" >#val(qMRI.QOH)#</td>
+          <td align="center" valign="top" >#val(qMRI.QOO)#</td>
+          <td align="center" valign="top" >
+            <cfif service>0<cfelse>#val(qMRI.QOR)#</cfif>
+          </td>
           <td align="right" valign="top">#Numberformat(qMRI.UnitPrice,'9,999.99')#</td>
           <td align="right" valign="top">
             <cfset qu = val(qMRI.Quantity)*val(qMRI.UnitPrice)/>
@@ -142,7 +156,7 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
           </tr>
         </cfloop>
       <tr  class="bottom">
-        <td colspan="7" valign="top" class="no-bottom">&nbsp;</td>
+        <td colspan="8" valign="top" class="no-bottom">&nbsp;</td>
         <td align="right" class="cbg" valign="top">#numberformat(gs,'9,999.99')#</td>
         </tr>
 
@@ -184,24 +198,19 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
           <td>#qMr.WOCreatedBy#</td>
         </tr>
         <tr>
-          <td align="right">Role: </td>
-          <td nowrap="nowrap">
-            <cfif len(qMR.WOUnit)>
-              #qMR.WOUnit#
-            <cfelse>
-              #qMR.WODepartment#
-            </cfif> Superintendent</td>
+          <td align="right">Title: </td>
+          <td nowrap="nowrap">#qMR.WOCreatorPosition#</td>
         </tr>
         <tr>
           <td valign="bottom" align="right">Signature: </td>
-          <td height="30px">
+          <td height="27px">
             <div style="top:62px;position: absolute; z-index: 300; ">...................................</div>
             <cfset fl = util.GetSignaturePath(qMR.WOCreatedByUserId)/>
             <cfif len(fl)>
               <cfhttp url="#fl#" method="get" result="imageData" />
               <cfset base64Image = ToBase64(imageData.Filecontent) />
               <div style="position: relative;">
-                <img style="left:13px;bottom:-17px;position: absolute;z-index: 1;" src="data:image/png;base64,#base64Image#" height="30"/> 
+                <img style="left:5px;bottom:-20px;position: absolute;z-index: 1;" src="data:image/png;base64,#base64Image#" height="30"/> 
               </div>
             </cfif>
           </td>
@@ -215,25 +224,26 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
       </table>
     </td>
     <td width="33%" align="center" style="font:8px Tahoma;padding-bottom:5px;padding-top:5px;border-top: 1px solid #brd_c2#;border-right: 1px solid #brd_c#;border-left: 1px solid #brd_c#;">
+      <cfif qMR.FSUserId NEQ qMR.CreatedByUserId>
       <table>
         <tr>
           <td align="right" class="left">Checked by: </td>
           <td class="right">#qMr.CreatedBy#</td>
         </tr>
         <tr>
-          <td align="right">Role: </td>
-          <td>Warehouse Superintendent</td>
+          <td align="right">Title: </td>
+          <td>#qMR.CreatorPosition#</td>
         </tr>
         <tr>
           <td valign="bottom" align="right">Signature: </td>
-          <td height="30px">
+          <td height="27px">
             <div style="top:62px;position: absolute; z-index: 300; ">...................................</div>
             <cfset fl = util.GetSignaturePath(qMR.CreatedByUserId)/>
             <cfif len(fl)>
               <cfhttp url="#fl#" method="get" result="imageData" />
               <cfset base64Image = ToBase64(imageData.FileContent) />
               <div style="position: relative;">
-                <img style="left:13px;bottom:-17px;position: absolute;z-index: 1;" src="data:image/png;base64,#base64Image#" height="30"/> 
+                <img style="left:10px;bottom:-20px;position: absolute;z-index: 1;" src="data:image/png;base64,#base64Image#" height="30"/> 
               </div>
             </cfif>
           </td>
@@ -245,6 +255,7 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
           </td>
         </tr>
       </table>
+      </cfif>
     </td>
     <td width="33%" align="center" style="font:8px Tahoma;padding-bottom:5px;padding-top:5px;border-top: 1px solid #brd_c2#;">
       <table>
@@ -253,19 +264,19 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
           <td>#qMr.ManagerName#</td>
         </tr>
         <tr>
-          <td align="right">Role: </td>
-          <td>#qMR.WODepartment# Manager</td>
+          <td align="right">Title: </td>
+          <td>#qMr.ManagerPosition#</td>
         </tr>
         <tr>
           <td valign="bottom" align="right">Signature: </td>
-          <td height="30px">
+          <td height="27px">
             <div style="top:62px;position: absolute; z-index: 300; ">...................................</div>
             <cfset fl = util.GetSignaturePath(qMR.FSUserId)/>
             <cfif len(fl)>
               <cfhttp url="#fl#" method="get" result="imageData" />
               <cfset base64Image = ToBase64(imageData.FileContent) />
               <div style="position: relative;">
-                <img style="left:13px;bottom:-17px;position: absolute;z-index: 1;" src="data:image/png;base64,#base64Image#" height="30"/> 
+                <img style="left:0px;bottom:-20px;position: absolute;z-index: 1;" src="data:image/png;base64,#base64Image#" height="30"/> 
               </div>
             </cfif>
           </td>
@@ -284,7 +295,7 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
 <table width="100%" border="0" style="font:8px Tahoma; border-top:1px solid #brd_c#; padding-left:15px;">
 <tr>
   <td nowrap="nowrap"> </td>
-  <td align="right">Page #cfdocument.currentpagenumber# of #cfdocument.totalpagecount#</td>
+  <td align="right">Page #cfdocument.currentPagenumber# of #cfdocument.totalpagecount#</td>
 </tr>
 </table>
 </td>

@@ -54,14 +54,12 @@
 		<table width="100%" border="0">
 			<tr>
 				<td width="50%" valign="top">
-					<!---<f:TextBox name="Name" required value="#qWI.Name#"/>--->
 					<input type="hidden" name="MRId" value="0"/>
-					<!---<f:TextBox name="MRId" label="MR ##" value="#qWI.MRId#" class="span5" />--->
-					<f:TextBox name="WorkOrderId" label="Work Order ##" value="#qWI.WorkOrderId#" class="span5" Disabled="#!editable#"/>
+					<f:TextBox name="WorkOrderId" help="Approved Work Order only" label="Work Order ##" value="#qWI.WorkOrderId#" class="span5" Disabled="#!editable#"/>
 					<f:TextBox name="Ref" label="Reference" value="#qWI.Ref#"/>
 					<f:Select name="DepartmentId" label="Department" required ListValue="#Valuelist(qD.DepartmentId)#" ListDisplay="#Valuelist(qD.Name)#" Selected="#qWI.DepartmentId#"/>
 				</td>
-				<td class="horz-div" valign="top">
+				<td  valign="top">
 					<f:DatePicker name="DateIssued" help="the date you issued out the items" label="Date Issued" required value="#dateformat(qWI.DateIssued,'yyyy/mm/dd')#"/>
 					<f:TextBox name="Remark" label="Remark" value="#qWI.Remark#"/>
 					<f:Select name="IssuedToUserId" label="Received by" autoselect required delimiters="`" ListValue="#Valuelist(qCU.UserId,'`')#" ListDisplay="#Valuelist(qCU.UserName,'`')#" Selected="#qWI.IssuedToUserId#"/>

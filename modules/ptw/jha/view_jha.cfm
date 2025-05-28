@@ -88,9 +88,7 @@
 				
 			</cfif>
 			<!--- supervisor --->
-			<cfif 
-				(request.userInfo.DepartmentId EQ 10 || request.userInfo.DepartmentId EQ 17) AND 
-				qJS.Status EQ "Sent to Supervisor" AND 
+			<cfif	qJS.Status EQ "Sent to Supervisor" AND 
 				request.IsSv>
 
 				<f:Button IsSave 

@@ -1,4 +1,9 @@
 <cfoutput>
+
+	<cfset hse_email = application.com.User.GetEmailsInRoleAndDept("SV,SUP,MGR", application.department.hse)/> <!--- hse department --->
+	<cfset opr_email = application.com.User.GetEmailsInRoleAndDept("SV,SUP", application.department.operations)/> <!--- operations department --->
+	<cfset lpg_email = application.com.User.GetEmailsInRoleAndDept("SV,SUP", application.department.lpg)/> <!--- operations department --->
+
     <cfswitch expression="#url.cmd#">    
     	
         <!---getPermit--->
@@ -124,7 +129,7 @@
             {"total": #qT.c#,
                 "page": #url.page#,
                 "rows":[<cfloop query="q">
-       			 [#q.PermitId#,#q.JHAId#,#serializeJSON(q.WorkOrderId & ': ' & q.Work)#,#serializeJSON(q.PA)#,"#DateFormat(q.Date,'dd-mmm-yyyy')#","#DateFormat(q.EndTime,'dd-mmm-yyyy')#",
+       			 		[#q.PermitId#,#q.JHAId#,#serializeJSON(q.WorkOrderId & ': ' & q.Work)#,#serializeJSON(q.PA)#,"#DateFormat(q.Date,'dd-mmm-yyyy')#","#DateFormat(q.EndTime,'dd-mmm-yyyy')#","#DateFormat(q.CurrentValidity,'dd-mmm-yyyy')#",
                   #serializeJSON('<span class="label label-success">#q.Status#</span>')#,
                  "#q.Status#"]
                   <cfif q.recordcount neq q.currentrow>,</cfif>
@@ -183,8 +188,8 @@
                 #application.com.Permit.PERMIT_COUNT_SQL#
                 WHERE (FSApprovedByUserId <> 0 OR FSApprovedByUserId IS NOT NULL)
                     AND (SVApprovedByUserId = 0 OR SVApprovedByUserId IS NULL)
-				<cfif structkeyexists(url,'keyword')>
-                    AND (#url.Field# LIKE "%#url.keyword#%")
+								<cfif structkeyexists(url,'keyword')>
+									AND (#url.Field# LIKE "%#url.keyword#%")
                 </cfif>
             </cfquery>
             
@@ -411,7 +416,7 @@
 						<cfmail 
 							from="AssetGear <do-not-reply@assetgear.net>" 
 							to="#qJ.PreparedByEmail#"
-							cc="#request.userinfo.email#" 
+							cc="#request.userinfo.email#,#hse_email#" 
 							subject="JHA ###form.id# Needs review" type="html">
 							Hello
 							<p>
@@ -459,7 +464,6 @@
 				</cfcase>
 
 				<cfcase value="sendJHAToHSE">
-					<cfset to_email = application.com.User.GetEmailsInRoleAndDept("SV,SUP", 3)/> <!--- hse department --->
 					<cfquery>
 						UPDATE ptw_jha SET 
 							ReviewedDate = <cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#"/>,
@@ -471,7 +475,7 @@
 					<cfif application.live EQ application.mode>
 						<cfmail 
 							from="AssetGear <do-not-reply@assetgear.net>" 
-							to="#to_email#"
+							to="#hse_email#"
 							cc="#request.userinfo.email#,#qJ.PreparedByEmail#" 
 							subject="JHA ###form.id# Needs approval" type="html">
 							Hello
@@ -481,7 +485,7 @@
 							Thank you
 						</cfmail>
 					</cfif>
-					Your Permit was sent to the HSE
+					Your JHA was sent to the HSE
 				</cfcase>
 
 				<cfcase value="HSEApproveJHA">
@@ -532,7 +536,7 @@
 							Thank you
 						</cfmail>
 					</cfif>
-					Your Permit was sent to Supervisour
+					Your Permit was sent to Supervisor
 				</cfcase>
 				
 				<cfcase value="SendPermitToFacilityManager">
@@ -554,7 +558,7 @@
 							subject="Permit ###form.id# Needs approval" type="html">
 							Hello
 							<p>
-								Permit ###form.id# for #qP.Work# on #qP.Asset# was sent to you for approval.
+								Permit ###form.id# for "#qP.Work#" on #qP.Asset# was sent to you for approval.
 							</p>
 							Thank you
 						</cfmail>
@@ -572,15 +576,15 @@
 						WHERE PermitId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.id#"/>
 					</cfquery>
 					<cfif application.live EQ application.mode>
-					<cfset hse_email = application.com.User.GetEmailsInRoleAndDept("SV,SUP", 3)/> <!--- hse department --->
+						<cfset base_email = application.com.User.GetEmailsInRoleAndDept("SUP", request.userinfo.departmentId)/> 
 						<cfmail 
 							from="AssetGear <do-not-reply@assetgear.net>" 
 							to="#qP.PAEmail#"
-							cc="#hse_email#"
+							cc="#hse_email#,#base_email#"
 							subject="Permit ###url.id# Approved" type="html">
 							Hello
 							<p>
-								Permit ###url.id# for #qP.Work# on #qP.Asset# has been approved.
+								Permit ###url.id# for "#qP.Work#" on #qP.Asset# has been approved.
 							</p>
 							Thank you
 						</cfmail>
@@ -599,6 +603,7 @@
 					<cfquery>
 						UPDATE `ptw_permit` SET
 							`Status` = "#_ststus#",
+							Completed = <cfqueryparam cfsqltype="cf_sql_char" value="#url.completed#"/>,
 							PACloseByUserId = #request.userinfo.userId#,
 							PACloseDate = <cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#"/>
 						WHERE PermitId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.id#"/>
@@ -608,15 +613,65 @@
 						<cfmail 
 							from="AssetGear <do-not-reply@assetgear.net>" 
 							to="#qP.SVEmail#"
+							cc="#hse_email#,#opr_email#"
 							subject="Permit ###url.id# Closed" type="html">
 							Hello
 							<p>
-								Permit ###url.id# has been closed by #request.userinfo.name#.
+								Permit ###url.id# for "#qP.Work#" has been closed by #request.userinfo.surname# #request.userinfo.otherNames#.
 							</p>
-							Thank you
+							Kindly login to AssetGear to verify and close out the Permit
+							<p>Thank you</p>
 						</cfmail>
 					</cfif>
-					Permit ###url.id# updated 
+					Permit ###url.id# has been sent to your supervisor 
+				</cfcase>
+
+				<cfcase value="RevalidatePermit">
+					<cfset qP = application.com.Permit.GetPermit(url.id)/>
+					<!--- check if you can revalidate permit --->
+ 					<cfif now() GT qP.EndTime>
+						<cfthrow message="You cannot revalidate a permit that has already expired" type="PermitError">
+					</cfif>
+					<cfquery name="qPreV">
+						SELECT `Date` FROM ptw_permit_revalidated WHERE PermitId = #val(url.id)# ORDER BY Date DESC LIMIT 1
+					</cfquery>
+					
+					<cfif dateFormat(qPreV.Date, "yyyy-mm-dd") EQ dateFormat(now(), "yyyy-mm-dd")>
+						<cfthrow message="Permit has already been revalidated for today" type="PermitError">
+					</cfif>
+					<cfset application.com.Helper.logComment(url.id, form.pmt, "permit") />
+					<cftransaction>
+						<cfquery>
+							INSERT INTO ptw_permit_revalidated SET 
+								PermitId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.id#"/>,
+								ValidatedByUserId = <cfqueryparam cfsqltype="cf_sql_integer" value="#request.userinfo.userId#"/>,
+								`Date` = <cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#"/>,
+								StartTime = "09:00",
+								EndTime = "17:00",
+								Comment = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.pmt#"/>
+						</cfquery>
+						<cfquery>
+							UPDATE `ptw_permit` SET
+								Revalidate = 'y',
+								CurrentValidity = <cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#"/>
+							WHERE PermitId = <cfqueryparam cfsqltype="cf_sql_integer" value="#url.id#"/>
+						</cfquery>
+  					<cfif application.live EQ application.mode>
+							<cfmail 
+								from="AssetGear <do-not-reply@assetgear.net>"
+								to="#qP.PAEmail#"
+								cc="#hse_email#,#opr_email#"
+								subject="Permit ###url.id# Revalidated" type="html">
+								Hello
+								<p>
+									Permit ###url.id# for "#qP.Work#" has been revalidated by #request.userinfo.surname# #request.userinfo.otherNames# for another 24hrs.
+								</p>
+								Thank you
+							</cfmail>
+						</cfif>
+					</cftransaction>
+					Permit ###url.id# was successfully revalidated
+					
 				</cfcase>
 
 				<cfcase value="SVClosePermit">
@@ -636,19 +691,19 @@
 					</cfquery>
 					<cfset application.com.Helper.logComment(url.id, form.pmt, "permit") />
 					<cfif application.live EQ application.mode>
-					<cfset hse_email = application.com.User.GetEmailsInRoleAndDept("SV,SUP", 3)/> <!--- hse department --->
 						<cfmail 
 							from="AssetGear <do-not-reply@assetgear.net>" 
 							to="#qP.PAEmail#"
+							cc="#hse_email#"
 							subject="Permit ###url.id# Closed" type="html">
 							Hello
 							<p>
-								Permit ###url.id# has been closed by #request.userinfo.name#.
+								Permit ###url.id# for "#qP.Work#" has been closed by #request.userinfo.surname# #request.userinfo.otherNames#.
 							</p>
 							Thank you
 						</cfmail>
 					</cfif>
-					Permit ###url.id# updated 
+					Permit ###url.id# Closed 
 				</cfcase>
         <!--- send back to PA from PS/hse --->
         <cfcase value="SendBackToPA">
@@ -660,8 +715,6 @@
 					<cfset qP = application.com.Permit.GetPermit(url.id)/>
 					<cfset application.com.Notice.SendBackMail("Review: Permit ##" & url.id, qp.PAApprovedByUserId, form.msg)/>
         </cfcase> 
-        
-
         
         <cfcase value="AsForPermitEstension">
 					<cfquery>
@@ -687,8 +740,8 @@
 	<cfif application.live EQ application.mode>
 		<cfmail 
 			from="AssetGear <do-not-reply@assetgear.net>" 
-			to="#to_email#"
-			cc="#request.userinfo.email#" 
+			to="#to_email#" 
+			cc="#request.userinfo.email#,#hse_email#" 
 			bcc="adexfe@live.com"
 			subject="JHA ###form.id# Needs approval" type="html">
 			Hello
@@ -718,18 +771,18 @@
 	
 	<!--- check if JHA  from your department first --->
 	<cfset qJ = application.com.Permit.GetJHA(form.JHAId)/>
-	<cfif qJ.DepartmentId neq request.userinfo.departmentId>
-		<cfthrow message="Sorry! you dont have permission to create Permit with JHA #form.JHAId#">
-	</cfif>
+<!--- 	<cfif qJ.DepartmentId neq request.userinfo.departmentId>
+		<cfthrow message="Sorry! you don't have permission to create Permit with JHA #form.JHAId#">
+	</cfif> --->
 	
 	<!--- check if user has other permit opened --->
 	<cfif form.id eq 0>
 		<cfquery name="qCheck">
 			SELECT PermitId FROM ptw_permit 
 			WHERE PAApprovedByUserId = #val(request.userinfo.userid)#
-				AND Status <> "Close"
+				AND Status <> "Closed"
 		</cfquery>
-		<cfif qCheck.recordcount gt 3>
+		<cfif qCheck.recordcount gt 5>
 			<cfthrow message="Sorry! You already have 3 opened Permits. To create a permit close Permits ## #valuelist(qCheck.PermitId)#">
 		</cfif>
 	</cfif>

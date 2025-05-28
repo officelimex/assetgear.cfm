@@ -83,7 +83,7 @@
 		    SELECT
 					woi.*,
 					i.Status,i.Obsolete,i.Status as ItemStatus,i.Code,
-					CONVERT(CONCAT("[",i.VPN,"] ",i.Description,"~",i.ItemId) USING utf8) ItemDescription, 
+					CONVERT(CONCAT("[",i.Code,"] ",i.Description, " [",i.VPN,"] " ,"~",i.ItemId) USING utf8) ItemDescription, 
 					i.Description Item, i.VPN, i.Maker,
 					um.Code UM
 		    FROM
@@ -448,7 +448,7 @@
 
 			<cfif qpts.recordcount AND wo.Status EQ "Open">
 				<cfset sentTo = "sup"/>
-				<cfif wo.WorkClassId EQ 12 AND request.IsSup>
+				<cfif wo.WorkClassId EQ 12>
 					<cfset sentTo = "warehouse"/>
 				</cfif>
 
@@ -542,11 +542,16 @@
 		<cfargument name="id" type="numeric" required="true"/>
 	
 		<cfset qW = getWO(arguments.id)/>
-		<cfset qU = getUser(val(qW.DepartmentId), qW.UnitId, "SUP")/>
+		<cfset qU = getUser(val(qW.DepartmentId), qW.UnitId, "SUP")/> 
+		<cfset mgr_email = application.com.User.GetEmailsInRoleAndDept("MGR", application.department.admin)/>
 	
 		<cftransaction>
-	
-			<cfif qU.Recordcount>
+			<cfset nemail = qU.columnData("Email").toList()/>
+			<cfif nemail eq "">
+				<cfset nemail = mgr_email/>
+			</cfif>
+			
+			<cfif nemail neq "">
 				<cfquery>
 					UPDATE work_order SET 
 						<cfif request.IsSV>
@@ -558,9 +563,10 @@
 				</cfquery>
 	
 				<cfif application.mode EQ application.LIVE>
+
 					<cfset application.com.Notice.SendEmail(
-						to			: qU.columnData("Email").toList(),
-						cc  		: qW.cb_Email,
+						to			: nemail,
+						cc  		: "#qW.cb_Email#",
 						subject	: "Work Order ###qW.WorkOrderId#",
 						msg 		: "
 							Hello, 

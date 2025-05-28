@@ -32,6 +32,19 @@ component  {
 
         return message;
       }
+		
+		remote string function closeMR(required numeric id)	{
+
+			queryExecute(
+					"UPDATE whs_mr SET Status = ?, ClosedByUserId = ?, ClosedDate = ? WHERE MRId = ?",
+					["Closed", request.userinfo.userId, dateTimeFormat(now(), "yyyy-mm-dd HH:MM"), arguments.id]
+			);
+
+			queryExecute('UPDATE whs_mr_item SET `Status`="Closed" WHERE MRId=#arguments.id#')
+
+			return "MR #arguments.id# now Closed";
+		}
+
     remote string function declineMR(required numeric id) {
 
         // check item in issue

@@ -18,7 +18,7 @@
 <script type="text/javascript" src="assets/awaf/mootools/mm-1.4.0.1.js"></script>
 <script type="text/javascript" src="assets/awaf/UI/Meio.Autocomplete.js"></script>
 <script type="text/javascript" src="assets/awaf/UI/ckeditor/ckeditor.js?v=1.0.0"></script>
-<script type="text/javascript" src="assets/awaf/UI/awaf-0.1.0.0.js?v=1.0.1"></script>
+<script type="text/javascript" src="assets/awaf/UI/awaf-0.1.0.0.js?v=1.0.n"></script>
 
 <script type="text/javascript" src="assets/awaf/UI/canvasjs.min.js"></script> 
 <script type="text/javascript" src="assets/awaf/UI/qrcode.min.js"></script>

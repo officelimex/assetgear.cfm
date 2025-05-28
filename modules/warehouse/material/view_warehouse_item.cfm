@@ -52,24 +52,29 @@
 </cfquery>
 
 <cfquery name="qTran_" cachedWithin="#CreateTime(1,0,0)#">
-    (SELECT
-        isi.IssueId TransactionId, "Issued" Type, isi.ItemId, isi.Quantity,
-        isu.DateIssued Date, isu.Remark Note,
-        CONCAT(u.Surname," ",u.OtherNames) User
-    FROM whs_issue_item isi
-    INNER JOIN whs_issue isu ON isu.IssueId = isi.IssueId
-    INNER JOIN core_user u ON u.UserId = isu.IssuedToUserId
-    WHERE isi.ItemId = #val(url.id)#)
-        UNION ALL
-    (SELECT
-        po.Ref TransactionId, "Received" Type, poi.ItemId, poi.RQuantity RQuantity,
-        po.Date, mr.Note Note,
-        CONCAT(u.Surname," ",u.OtherNames) User
-    FROM whs_po_item poi
-    INNER JOIN whs_po po    ON po.POId  = poi.POId
-    LEFT  JOIN whs_mr mr    ON mr.MRId  = po.MRId
-    INNER JOIN core_user u  ON u.UserId = po.ReceivedByUserId
-    WHERE poi.ItemId = #val(url.id)#)
+    (
+        SELECT
+            isi.IssueId TransactionId, "Issued" Type, isi.ItemId, isi.Quantity,
+            isu.DateIssued Date, isu.Remark Note, CONCAT("WO:",isu.WorkOrderId) Ref,  
+            CONCAT(u.Surname," ",u.OtherNames) User
+        FROM whs_issue_item isi
+        INNER JOIN whs_issue isu ON isu.IssueId = isi.IssueId
+        INNER JOIN core_user u ON u.UserId = isu.IssuedToUserId
+        WHERE isi.ItemId = #val(url.id)#
+    )
+    UNION ALL
+    (
+        SELECT
+            ph.POItemHistoryId TransactionId, "Received" Type, poi.ItemId, ph.Quantity RQuantity,
+            ph.Date, mr.Note Note, CONCAT("MR:",mr.MRId,"/",  po.Ref) Ref,
+            CONCAT(u.Surname," ",u.OtherNames) User
+        FROM whs_po_item_history ph
+        LEFT JOIN whs_po_item poi      ON ph.POItemId  = poi.POItemId
+        INNER JOIN whs_po po            ON po.POId      = poi.POId
+        LEFT  JOIN whs_mr mr            ON mr.MRId      = po.MRId
+        INNER JOIN core_user u          ON u.UserId     = ph.ReceivedByUserId
+        WHERE poi.ItemId = #val(url.id)#
+    )
     LIMIT 100
 </cfquery>
 
@@ -137,6 +142,7 @@
     <table class="table table-striped table-condensed table-hover"><thead><tr>
         <th>Tran. ##</th>
         <th>Type</th>
+        <th>WO/MR/PO</th>
         <th>User</th>
         <th>Remarks</th>
         <th>Date</th>
@@ -146,8 +152,9 @@
       <cfloop query="qTran">
       <tr><td>#qTran.TransactionId#</td>
         <td>#qTran.Type#</td>
+        <td>#qTran.Ref#</td>
         <td>#qTran.User#</td>
-        <td>&nbsp;#qTran.Note#</td>
+        <td>&nbsp;#ucase(qTran.Note)#</td>
         <td>#dateformat(qTran.Date,'dd-mmm-yyyy')#</td>
         <td>#qTran.Quantity#</td>
       </tr>

@@ -22,11 +22,11 @@
 	<cfset page="view_workorder" />
 </cfif>
 
-<cfif qWS.WorkClassId EQ 12 AND listFindNoCase("Sent to Warehouse,Sent to Manager,Rejected by Manager", qWS.Status2) >
+<cfif qWS.WorkClassId EQ 12 OR listFindNoCase("Sent to Manager,Rejected by Manager", qWS.Status2) >
 	<cfset page = "ms_view_wo"/>
 </cfif>
 
-<cfif qWS.Status EQ "Open" AND qWS.DepartmentId EQ request.userinfo.departmentId AND qWS.WorkClassId NEQ 12>
+<cfif qWS.Status EQ "Open" AND qWS.DepartmentId EQ request.userinfo.departmentId AND qWS.Status2 EQ "">
 	<cfset page = "save_workorder"/>
 </cfif>
 

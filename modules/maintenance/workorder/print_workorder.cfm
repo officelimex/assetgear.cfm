@@ -193,8 +193,8 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
         </td>
         <td valign="top" align="right">#qOO.Quantity#</td>
         <td valign="top">#qOO.UOM#&nbsp;</td>
-        <td valign="top">#qOO.OEM#</td>
-        <td valign="top" class="small">#qOO.Others#</td>
+        <td valign="top">#qOO.OEM#&nbsp;</td>
+        <td valign="top" class="small">#qOO.Others#&nbsp;</td>
       </tr>
       </cfloop>
 

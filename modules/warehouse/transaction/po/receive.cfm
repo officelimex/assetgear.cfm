@@ -10,7 +10,6 @@
 <cfset qI = application.com.Transaction.GetPOItems(url.id) />
 <cfset qPO = application.com.Transaction.GetPO(url.id) />
 
-
 <f:Form id="#poId#frm" action="modules/ajax/warehouse.cfm?cmd=ReceiveOrder" EditId="#url.id#"> 
   <div>
     <table width="100%" border="0">
@@ -30,14 +29,22 @@
         <td colspan="2"> 
           <et:Table allowInput="false" allowUpdate id="POItemId">
             <et:Headers>
-              <et:Header title="Description" size="7" type="text" disabled />
-              <et:Header title="Ordered Qty" size="1" type="int" disabled/>
-              <et:Header title="Received Qty" size="1" type="int" />
+              <!--- TODO: add ICN ---->
+              <et:Header title="Description" size="6" type="text" disabled />
+              <et:Header title="Qty Ordered" size="1" type="int" disabled/>
+              <et:Header title="Previously Recv. Qty" size="1" type="int" disabled/>
+              <et:Header title="Receiving Qty" size="1" type="int" />
               <et:Header title="Waybill/Packing List" size="2" type="text" required="false"/>
               <et:Header title="" size="1"/>
             </et:Headers>
-            <et:Content Query="#qI#" Columns="ItemDescription,Quantity,RQuantity,Ref" type="text,int,int,text" PKField="POItemId"/>
+            <et:Content Query="#qI#" Columns="ItemDescription,Quantity,PQuantity,RQuantity,Ref" type="text,int,int,int,text" PKField="POItemId"/>
           </et:Table>
+          <!--- load the unit price auto from inventory --->
+          <!--- also pick price from MR --->
+          <!--- add QOH ---->
+          <!---  on received --- show the transaction number --->
+          <!--- status should be closed and not closed --->
+          <!--- when item is updated, the list of warehouse item should be refreshed---->
         </td>
       </tr>
     </table>

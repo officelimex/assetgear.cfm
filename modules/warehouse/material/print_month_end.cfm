@@ -26,7 +26,7 @@ td.noline	{ border-style: none; border:none;} h2 div{font-size:14px; text-align:
 <tr>
 <td class="noline">
 <cfdocumentitem type="header">
-<cfset request.letterhead.title="WHAREHOUSE REPORT"/>
+<cfset request.letterhead.title="WAREHOUSE REPORT"/>
 <cfset request.letterhead.Id=""/>
 <cfset request.letterhead.top = "25"/>
 <!--- <cfset request.letterhead.date = "Period Ended: #dateformat(form.Date_,'mmmm, yyyy')#"/> --->
@@ -45,18 +45,21 @@ td.noline	{ border-style: none; border:none;} h2 div{font-size:14px; text-align:
 <cfinclude template="include/swr-t.cfm"/>--->
 
 <cfdocumentitem type="pagebreak"/>
+<cfinclude template="includes/receipt.cfm"/>
+
+<cfdocumentitem type="pagebreak"/>
 <cfinclude template="includes/issues-s.cfm"/>
 
 <cfdocumentitem type="pagebreak"/>
 <cfinclude template="includes/issues-d.cfm"/>
 
 <cfdocumentitem type="pagebreak"/>
-<cfinclude template="includes/receipt.cfm"/>
+<cfinclude template="includes/ordered.cfm"/>
 
 <!---cfdocumentitem type="pagebreak"/>
 <cfinclude template="include/await-i.cfm"/>--->
 <cfquery name = "qWhsValue" >
-    SELECT Currency,SUM(UnitPrice*QOH) AS Amount FROM `whs_item` GROUP BY Currency;
+  SELECT Currency,SUM(UnitPrice*QOH) AS Amount FROM `whs_item` GROUP BY Currency;
 </cfquery>
 
 <h3 align="center">Warehouse Value</h3>
@@ -64,11 +67,11 @@ td.noline	{ border-style: none; border:none;} h2 div{font-size:14px; text-align:
 <table width="450px">
   <tr>
     <cfloop query = "qWhsValue" >
-        <cfif currency neq "">
-          <th>
-            #Currency#
-          </th>
-        </cfif>
+      <cfif currency neq "">
+        <th>
+          #Currency#
+        </th>
+      </cfif>
     </cfloop>
   </tr>
   <tr>
@@ -82,10 +85,10 @@ td.noline	{ border-style: none; border:none;} h2 div{font-size:14px; text-align:
   </tr>
 </table>
 <cfdocumentitem type="footer" >
-    <div style="border-top:##ccc solid 2px; padding:5px; ">
+  <div style="border-top:##ccc solid 2px; padding:5px; ">
     <div style="font:11px Arial;float:left;">Warehouse Report</div>
     <div style="font:11px Arial;float:right; clear:left;">#cfdocument.currentpagenumber# of #cfdocument.totalpagecount#</div>
-    </div>
+  </div>
 </cfdocumentitem>
 </td></tr></table>
 </cfdocument>

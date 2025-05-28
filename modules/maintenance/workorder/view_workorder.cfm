@@ -30,15 +30,15 @@
 
 <cfquery name="qAl">
 	SELECT l.`Name` 
-    FROM asset_location a 
-    INNER JOIN location l on a.LocationId=l.LocationId 
-    WHERE AssetLocationId 
-    IN (#qWO.AssetLocationIds#)
+	FROM asset_location a 
+	INNER JOIN location l on a.LocationId = l.LocationId 
+	WHERE a.AssetLocationId IN (
+		<cfqueryparam value="#qWO.AssetLocationIds#" cfsqltype="cf_sql_integer" list="true">
+	)
 </cfquery>
 
 <cfset qSU = application.com.User.GetUser(val(qWO.SupervisedByUserId))/> 
 <cfset qCU = application.com.User.GetUser(val(qWO.ClosedByUserId))/>
-  
  
 <cfset qL = application.com.WorkOrder.GetLabourers(qWO.WorkOrderId)/>
 <cfif url.id eq 0>
@@ -46,7 +46,7 @@
 </cfif>
 <cfset AssetLocation =""/>
 <cfloop query="qAl">
-	<cfset AssetLocation = AssetLocation & "#qAl.Name#, "/>
+  <cfset AssetLocation = AssetLocation & "#qAl.Name#, "/>
 </cfloop>
 
 <f:Form id="#woId#frm" action="modules/ajax/maintenance.cfm?cmd=SaveWorkOrder" EditId="#url.id#"> 
@@ -62,9 +62,9 @@
               <f:Label name="Asset Location" value="#AssetLocation# "/> 
             </td>
             <td class="horz-div" valign="top"> 
-                <f:Label name="Service Request ##" label="Service Request ##" value="#qWO.ServiceRequestId#" />
-                <f:Label name="Work Class" value="#qWO.JobClass#" />
-                <f:Label name="Date Opened" value="#dateformat(qWO.DateOpened,'dd/mmm/yyyy')#"/>
+              <f:Label name="Service Request ##" label="Service Request ##" value="#qWO.ServiceRequestId#" />
+              <f:Label name="Work Class" value="#qWO.JobClass#" />
+              <f:Label name="Date Opened" value="#dateformat(qWO.DateOpened,'dd/mmm/yyyy')#"/>
             </td>
           </tr> 
           <tr>
@@ -84,7 +84,9 @@
             <td valign="top" style="padding-left:10px;">
               <table class="table"><thead>
                 <tr>
+                  <th>ICN</th>
                   <th>Spare parts</th>
+                  <th>Part Num.</th>
                   <th>Purpose</th>
                   <th>Quantity</th>
                   <th>Status</th>
@@ -92,7 +94,9 @@
                 </thead>
                 <cfloop query="qOI">
                   <tr>
+                    <td>#qOI.Code#</td>
                     <td>#qOI.Item#</td>
+                    <td>#qOI.VPN#</td>
                     <td>#qOI.Purpose#</td>
                     <td>#qOI.Quantity#</td>
                     <td>#qOI.Status#</td>
@@ -147,8 +151,6 @@
           <tr>
             <td colspan="2" valign="top"><f:Label name="Work Done" value="#qWO.WorkDone#" /></td>
           </tr> 
-          
-          
         </table>
     
     </div> 

@@ -53,7 +53,7 @@
         </div>
     </div>
     <div class="row-fluid">
-    	<div class="span12 divx">&mdash; Safety Precautions to be taking at wotk place &mdash;</div>
+    	<div class="span12 divx">&mdash; Safety Precautions to be taking at work place &mdash;</div>
     </div>
     <div class="row-fluid">
         <div class="span9"> 
@@ -171,7 +171,7 @@
 </div>
 
 <f:Form id="#PmtId#frm" action="modules/ajax/ptw.cfm?cmd=FSApprovePermit&id=#url.id#" EditId="#url.id#">
-	<cfif request.userInfo.DepartmentId EQ 17 AND qP.Status EQ "Sent to Admin">
+	<cfif request.userInfo.DepartmentId EQ application.department.admin AND qP.Status EQ "Sent to Admin">
 		<f:ButtonGroup>
 			<f:Button 
 				value="Approve" 
@@ -182,7 +182,10 @@
 		</f:ButtonGroup>
 	</cfif>
 
-	<cfif request.userInfo.DepartmentId EQ 10 AND qP.Status EQ "Sent to Operations">
+	<cfif (
+			request.userInfo.DepartmentId EQ application.department.operations || request.userInfo.DepartmentId EQ application.department.lpg
+		) AND qP.Status EQ "Sent to Operations">
+
 		<f:ButtonGroup>
 			<f:Button 
 				value="Approve"
@@ -191,12 +194,23 @@
 				subpageId="unapproved_permit" 
 				ReloadURL="modules/ptw/permit/unapproved_permit.cfm"/>
 		</f:ButtonGroup>
+
 	</cfif>
 	<cfif listFindNoCase(qP.Status,"Approved") AND request.userInfo.DepartmentId EQ qP.WODepartmentId>
 			<cfif (request.IsSv OR request.IsSUP) AND !(val(qP.SVCloseByUserId))>	<!--- SV closer ---->
 				<f:ButtonGroup>
 					<f:Button 
+						value="Revalidate"
+						beforeSave="if (!confirm('Are you sure?')) return True"
+						class="btn-info" IsSave
+						prompt="Enter comments"
+						onSuccess="win_view_permit.close()"
+						subpageId="permit_for_pa" 
+						actionURL="modules/ajax/ptw.cfm?cmd=RevalidatePermit&id=#url.id#"
+						ReloadURL="modules/ptw/permit/pa/permit_for_pa.cfm"/>
+					<f:Button 
 						value="Work Completed (SV)"
+						beforeSave="if (!confirm('Are you sure?')) return True"
 						class="btn-success" IsSave 
 						prompt="Enter comments"
 						onSuccess="win_view_permit.close()"
@@ -208,17 +222,26 @@
 			<cfif (qP.PAApprovedByUserId EQ request.userInfo.UserId) && !(val(qP.PACloseByUserId))> <!--- PA closer ---->
 				<f:ButtonGroup>
 					<f:Button 
-						value="Work Completed (PA)"
+						value="Work Completed (PH)"
 						class="btn-success" IsSave 
 						onSuccess="win_view_permit.close()"
 						prompt="Enter comments"
 						subpageId="permit_for_pa" 
-						actionURL="modules/ajax/ptw.cfm?cmd=PAClosePermit&id=#url.id#"
+						actionURL="modules/ajax/ptw.cfm?cmd=PAClosePermit&id=#url.id#&completed=Yes"
+						ReloadURL="modules/ptw/permit/pa/permit_for_pa.cfm"/>
+					
+					<f:Button 
+						value="Work Not Completed/Suspended (PH)"
+						class="btn-danger" IsSave 
+						onSuccess="win_view_permit.close()"
+						prompt="Enter comments"
+						subpageId="permit_for_pa" 
+						actionURL="modules/ajax/ptw.cfm?cmd=PAClosePermit&id=#url.id#&completed=No"
 						ReloadURL="modules/ptw/permit/pa/permit_for_pa.cfm"/>
 				</f:ButtonGroup>					
-		</cfif>
+			</cfif>
 	</cfif>
-
+ 
 </f:Form>
 
 <cffunction name="getCheck" access="private" returntype="string">

@@ -57,7 +57,7 @@
                 <f:CheckBox name="OfficeLocationId" ListValue="#ValueList(officeLoc.OfficeLocationId)#" selected="#qU.OfficeLocationId#" ListDisplay="#ValueList(officeLoc.LocationName)#" inline showlabel label="Office Location" />
             </td>
             <td class="horz-div" valign="top">
-                <f:Select name="DepartmentId" label="Department" required ListDisplay="#Valuelist(qD.Name)#" ListValue="#Valuelist(qD.DepartmentId)#" selected="#qU.DepartmentId#" />                
+              <f:Select name="DepartmentId" label="Department" required ListDisplay="#Valuelist(qD.Name)#" ListValue="#Valuelist(qD.DepartmentId)#" selected="#qU.DepartmentId#" />                
             	<f:Select name="UnitId" label="Unit" ListDisplay="#Valuelist(qUt.Name)#" ListValue="#Valuelist(qUt.UnitId)#" selected="#qU.UnitId#" />
             	<cfif url.id eq 0><f:TextBox name="Email" validate="email" value="#qU.Email#"/></cfif>
                 <f:TextBox name="PersonalEmail" label="Personal e-mail" validate="email" value="#qU.PersonalEmail#" />

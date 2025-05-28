@@ -4,11 +4,10 @@
 
 <cfinclude template="../inc/inc_permit.cfm"/>
 
-
 <cfoutput>
 <script>
 	/**
-	 * Ask for extension of permit by performaing authority
+	 * Ask for extension of permit by performing authority
 	 * @return {void}
 	 */
 	function AskForExtension()	{

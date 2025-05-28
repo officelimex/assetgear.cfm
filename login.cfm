@@ -167,9 +167,9 @@
                             
                             <button type="submit" class="btn btn-login">Log in</button>
                             
-                            <div class="text-center mt-4">
+                            <!--- <div class="text-center mt-4">
                                 <p>Don't have an account? <a href="register.cfm" class="text-decoration-none">Register</a></p>
-                            </div>
+                            </div> --->
                         </form>
                         </cfoutput>
                     </div>

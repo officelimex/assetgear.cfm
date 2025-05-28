@@ -37,15 +37,18 @@
 			SELECT
 				mr.*,
 				d.Name Department,
-				CONCAT(u.Surname, " ", u.OtherNames) CreatedBy,
-				CONCAT(mgr.Surname, " ", mgr.OtherNames) ManagerName,
+				CONCAT(u.Surname, " ", u.OtherNames) CreatedBy, u.Position CreatorPosition,
+				CONCAT(mgr.Surname, " ", mgr.OtherNames) ManagerName, mgr.Position managerPosition,
 				wo.Description WODescription, CONCAT(cr.Surname, " ", cr.OtherNames) WOCreatedBy, 
-					cr.UserId WOCreatedByUserId,
+					wo.WorkDetails,
+					cr.UserId WOCreatedByUserId, cr.Position WOCreatorPosition,
 					wo.FSUserId, wo.DateOpened WOCreated, wo.FSApprovedDate,
-					un.Name WOUnit, wd.Name WODepartment
+					un.Name WOUnit, wd.Name WODepartment,
+				unit.Name Unit
 			FROM whs_mr mr
 			INNER JOIN core_user u 				ON u.UserId 				= mr.CreatedByUserId
 			LEFT JOIN core_department d 	ON d.DepartmentId 	= mr.DepartmentId
+			LEFT JOIN core_unit unit 			ON unit.UnitId 			= mr.UnitId
 			LEFT JOIN work_order wo 			ON wo.WorkOrderId 	= mr.WorkOrderId 
 			LEFT JOIN core_user cr 				ON cr.UserId 				= wo.CreatedByUserId
 			LEFT JOIN core_user mgr 			ON mgr.UserId 			= wo.FSUserId
@@ -318,20 +321,21 @@
 					UPDATE
 				</cfif>
 					whs_mr SET
-				<cfif val(form.DepartmentId)>
 					`DepartmentId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.DepartmentId#">,
-				</cfif>
-				`Date` = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(Now(),'dd/mmm/yyyy')#">,
-				`DateRequired` = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(form.DateRequired,'dd/mmm/yyyy')#">,
-				`DateIssued` = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(form.DateIssued,'dd/mmm/yyyy')#">,
-				`Ref` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Ref#">,
-				`Note` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Note#">,
-				<cfif val(form.WorkOrderId)>
-					`WorkOrderId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.WorkOrderId#">,
-				</cfif>
-				`CreatedByUserId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#Request.UserInfo.UserId#">,
-				`Currency` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Currency#">,
-				`Type` = <cfqueryparam cfsqltype="cf_sql_varchar" value="SI">
+					<cfif isDefined("form.UnitId") && val(form.UnitId)>
+						`UnitId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.UnitId#">,
+					</cfif>
+					`Date` = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(Now(),'dd/mmm/yyyy')#">,
+					`DateRequired` = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(form.DateRequired,'dd/mmm/yyyy')#">,
+					`DateIssued` = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(form.DateIssued,'dd/mmm/yyyy')#">,
+					`Ref` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Ref#">,
+					`Note` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Note#">,
+					<cfif val(form.WorkOrderId)>
+						`WorkOrderId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.WorkOrderId#">,
+					</cfif>
+					`CreatedByUserId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#Request.UserInfo.UserId#">,
+					`Currency` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Currency#">,
+					`Type` = <cfqueryparam cfsqltype="cf_sql_varchar" value="SI">
 				<cfif mrid neq 0>
 					WHERE MRId = <cfqueryparam cfsqltype="cf_sql_integer" value="#mrid#">
 				</cfif>
@@ -373,7 +377,7 @@
 						"MRItemId","MRId",mrid)/>
 				<cfelse> <!--- NI --->
 					<!--- create items form wo --->
-					<!--- delete non invetory items in work order --->
+					<!--- delete non inventory items in work order --->
 					<cfquery>
 						DELETE FROM work_order_item WHERE WorkOrderId = #val(form.WorkOrderId)#
 					</cfquery>
@@ -392,7 +396,8 @@
 							INSERT INTO whs_mr_item SET 
 								ItemId 		= <cfqueryparam cfsqltype="cf_sql_integer" value="#item_id#"/>,
 								Quantity 	= <cfqueryparam cfsqltype="cf_sql_integer" value="#qmri.int0#"/>,
-								MRId 			= <cfqueryparam cfsqltype="cf_sql_integer" value="#mrid#"/>
+								MRId 			= <cfqueryparam cfsqltype="cf_sql_integer" value="#mrid#"/>,
+								UnitPrice = <cfqueryparam cfsqltype="cf_sql_float" value="#qmri.float0#"/>
 						</cfquery> 
 						<cfif val(form.WorkOrderId)>
 							<cfquery>
@@ -407,6 +412,9 @@
 
 					<cfset qmri2 = h.GetTempDataToUpdate(mr.DirectItems)/>
 					<cfloop query="qmri2">
+						<cfquery name="qItem">
+							SELECT * FROM whs_item WHERE ItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qmri2.int0#"/>
+						</cfquery>
 						<cfquery>
 							UPDATE whs_item SET 
 								QOR = QOR + #qmri2.int1#
@@ -416,7 +424,11 @@
 							INSERT INTO whs_mr_item SET 
 								ItemId 		= <cfqueryparam cfsqltype="cf_sql_integer" value="#qmri2.int0#"/>,
 								Quantity 	= <cfqueryparam cfsqltype="cf_sql_integer" value="#qmri2.int1#"/>,
-								MRId 	= <cfqueryparam cfsqltype="cf_sql_integer" value="#mrid#"/>
+								MRId 	= <cfqueryparam cfsqltype="cf_sql_integer" value="#mrid#"/>,
+								UnitPrice = <cfqueryparam cfsqltype="cf_sql_float" value="#qmri2.float0#"/>,
+								QOR = #val(qItem.QOR)#,
+								QOH = #val(qItem.QOH)#,
+								QOO = #val(qItem.QOO)#
 						</cfquery> 
 						<cfif val(form.WorkOrderId)>
 							<cfquery>
@@ -447,37 +459,47 @@
 							Status2 = "Sent to Manager"
 						WHERE WorkOrderId = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.WorkOrderId#"/>
 					</cfquery>
-				<cfelse>
-					<!--- send to Manager to sign off--->
-					<cfif form.DepartmentId == 16>
-						<cfset to_email = application.com.User.GetEmailsInRole("MS")/>
-					<cfelse>
-						<cfset to_email = application.com.User.GetEmailsInRoleAndDept("MGR", form.DepartmentId)/>
-					</cfif>
-					<cfif to_email eq "">
-						<cfset to_email = "adexfe@live.com"/>
-					</cfif>
 					<cfset wh_admin = application.com.User.GetEmailsInRole("WH_SUP")/>
-					<cfif val(form.WorkOrderId)>
-						<cfquery name="qWOC">
-							SELECT u.Email, wo.Description FROM work_order wo
-							INNER JOIN core_user u ON u.UserId = wo.CreatedByUserId
-						</cfquery>
-						<cfif listLen(to_email) AND application.LIVE EQ application.MODE>
-							<cfmail from="AssetGear <do-not-reply@assetgear.net>" to="adexfe@live.com" cc="#wh_admin#,#qWOC.Email#" subject="Matateria Requisition for WO ###form.WorkOrderId#" type="html">
-								Hello,
-								<p>
-										The following work order requires your attention & approval :
-										<br/> Work Order ###form.WorkOrderId# : #qWOC.Description#
-								</p>
-								<p>
-									Kindly login to <a href="#application.site.url#">AssetGear</a>
-								</p>
-								<p>Thank you<br/>
-							</cfmail>
-						</cfif>
+					<cfswitch expression="#form.DepartmentId#">
+						<cfcase value="5">
+							<cfset to_email = application.com.User.GetEmailsInRoleAndDept("MGR", 10)/>
+						</cfcase>
+						<cfcase value="16">
+							<cfset to_email = application.com.User.GetEmailsInRole("MS")/>
+						</cfcase>
+						<cfcase value="8">
+							<cfset to_email = application.com.User.GetEmailsInRole("WH_SUP")/>
+						</cfcase>
+						<cfdefaultcase>
+							<cfset to_email =	application.com.User.GetEmailsInRoleAndDept("MGR", form.DepartmentId)/>
+						</cfdefaultcase>
+					</cfswitch>
+					<cfif to_email eq "">
+						<cfset to_email = wh_admin/>
 					</cfif>
+					<cfquery name="qWOC">
+						SELECT u.Email, wo.Description FROM work_order wo
+						INNER JOIN core_user u ON u.UserId = wo.CreatedByUserId
+						WHERE wo.WorkOrderId = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.WorkOrderId#"/>
+					</cfquery>
+					
+					<cfmail 
+							from="AssetGear <do-not-reply@assetgear.net>"
+							bcc="adexfe@live.com" 
+							to="#to_email#" cc="#wh_admin#,#qWOC.Email#" subject="Material Requisition for WO ###form.WorkOrderId#" type="html">
+						Hello,
+						<p>
+								The following work order requires your attention & approval :
+								<br/> Work Order ###form.WorkOrderId# : #qWOC.Description#
+						</p>
+						<p>
+							Kindly login to <a href="#application.site.url#">AssetGear</a>
+						</p>
+						<p>Thank you<br/>
+					</cfmail>
+
 				</cfif>
+
 		</cftransaction>
 
 		<cfreturn mrid/>

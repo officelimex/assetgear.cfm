@@ -183,6 +183,12 @@ component {
 		application.com.File = createObject('component', 'assetgear.com.awaf.util.file').init();
 		application.com.Helper = createObject('component', 'assetgear.com.awaf.util.helper').init()
 
+		application.department = {
+			hse 				: 3,
+			lpg 				: 5,			
+			operations 	: 10,
+			admin				: 17
+		}
 	}
 
 }

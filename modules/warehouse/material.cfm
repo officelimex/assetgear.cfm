@@ -19,10 +19,11 @@
             <n:navItem type="divider">
             <n:NavItem title="All Warehouse Items" isActive url="modules/warehouse/material/warehouse_item.cfm" id="warehouse_item"/>
             <n:NavItem title="Obsolete Warehouse Items" url="modules/warehouse/material/warehouse_item.cfm?ob=yes" id="warehouse_itemyes"/>
-            <n:navItem type="divider">
+            <n:NavItem type="header" title="Settings"/>
             <n:NavItem title="Shelf Location" url="modules/warehouse/material/shelf_location.cfm" id="shelf_location"/>
             <n:NavItem title="Count Due list" url="modules/warehouse/material/count_due.cfm" id="count_due"/>
-            <n:navItem type="divider">
+            <n:NavItem type="header" title="Tools"/>
+            <n:NavItem title="ICN Merger" url="modules/warehouse/material/item_merge.cfm" id="item_merge"/>
             <n:NavItem type="header" title="Reports"/>
             <n:NavItem type="new window" title="Month End Report" url="modules/warehouse/material/print_month_end.cfm"/>
             <!--- <n:NavItem title="Bin Location" url="modules/settings/warehouse/shelf_location.cfm" id="shelf_location"/> --->
@@ -31,8 +32,8 @@
     </div>
     <div class="span10" style="float:right">
     	<div id="#wrhou#_grid">
-        	<div class="sub_page warehouse_item" id="#wrhou#_warehouse_item"></div>
-        </div>
+        <div class="sub_page warehouse_item" id="#wrhou#_warehouse_item"></div>
+      </div>
     </div>
 
   </div>
