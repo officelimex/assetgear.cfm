@@ -214,28 +214,29 @@
 				WHERE MRId = #val(qW.MRId)#
 			</cfquery>
 			
-			<cfset ws_email = userObj.GetEmailsInRole("WH_SUP")/>
-			<cfset sessionCookies = "CFID=#COOKIE.CFID#; CFTOKEN=#COOKIE.CFTOKEN#">
-			<cfhttp url="#application.site.url#modules/warehouse/transaction/mr/print_mr.cfm?id=#qW.MRId#" method="get" result="pdfResponse">
-				<cfhttpparam type="header" name="Cookie" value="#sessionCookies#">
-			</cfhttp>
+			<cfif val(qW.MRId)>
+				<cfset ws_email = userObj.GetEmailsInRole("WH_SUP")/>
+				<cfset sessionCookies = "CFID=#COOKIE.CFID#; CFTOKEN=#COOKIE.CFTOKEN#">
+				<cfhttp url="#application.site.url#modules/warehouse/transaction/mr/print_mr.cfm?id=#qW.MRId#" method="get" result="pdfResponse">
+					<cfhttpparam type="header" name="Cookie" value="#sessionCookies#">
+				</cfhttp>
 
-			<cfmail from="AssetGear <do-not-reply@assetgear.net>" 
-				to="#qW.cb_Email#" 
-				bcc="adexfe@live.com"
-				cc="#ws_email#,chineme.okonkwo@#application.domain#,victor.george@#application.domain#,segun.adalemo@#application.domain#"
-				subject="MAT ###qW.MRId# Approved" type="html">
-					Hello, 
-					<p>
-						MR ###qW.MRId# : #qW.Description# has been approved by the Manager.
-					</p> 
-					<p>
-						kindly find attached Material Request #qW.MRId#
-					</p>
-					Thank you
-				<cfmailparam file="MAT#qW.MRId#.pdf" type="application/pdf" disposition="attachment" content="#pdfResponse.FileContent#" />
-			</cfmail>
-
+				<cfmail from="AssetGear <do-not-reply@assetgear.net>" 
+					to="#qW.cb_Email#" 
+					bcc="adexfe@live.com"
+					cc="#ws_email#,chineme.okonkwo@#application.domain#,victor.george@#application.domain#,segun.adalemo@#application.domain#"
+					subject="MAT ###qW.MRId# Approved" type="html">
+						Hello, 
+						<p>
+							MR ###qW.MRId# : #qW.Description# has been approved by the Manager.
+						</p> 
+						<p>
+							kindly find attached Material Request #qW.MRId#
+						</p>
+						Thank you
+					<cfmailparam file="MAT#qW.MRId#.pdf" type="application/pdf" disposition="attachment" content="#pdfResponse.FileContent#" />
+				</cfmail>
+			</cfif>
 			MR has been Approved
 	</cfcase>
 	<!--- FSApprove --->
