@@ -771,6 +771,12 @@
 	
 	<!--- check if JHA  from your department first --->
 	<cfset qJ = application.com.Permit.GetJHA(form.JHAId)/>
+	<cfif !qJ.recordcount>
+		<cfthrow message="JHA #form.JHAId# does not exist">
+	</cfif>
+	<cfif qJ.Status neq "Approved">
+		<cfthrow message="Sorry! JHA #form.JHAId# is not approved yet">
+	</cfif>
 <!--- 	<cfif qJ.DepartmentId neq request.userinfo.departmentId>
 		<cfthrow message="Sorry! you don't have permission to create Permit with JHA #form.JHAId#">
 	</cfif> --->

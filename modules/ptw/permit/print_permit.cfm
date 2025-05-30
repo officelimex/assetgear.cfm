@@ -5,6 +5,11 @@
 <cfset qAL = application.com.Asset.GetAssetLocationInWorkOrder(qP.AssetLocationIds)/>
 <cfset qL = application.com.WorkOrder.GetLabourers(qP.WorkOrderId)/>
 
+<cfif !listFindNoCase("Approved,Closed", qP.Status)>
+  <h1 style="font:32px Tahoma;color:red;text-align:center;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100%">Permit ## #url.id# Not Approved Yet</h1>
+  <cfabort/>
+</cfif> 
+
 <cfdocument pagetype="a4" format="pdf" margintop="0" marginbottom="0" marginleft="0.1" marginright="0.1" backgroundvisible="yes">
 <html>
 <head>
@@ -47,6 +52,7 @@
 <title></title>
 </head>
 <body>
+
 <table width="100%">
 <cfdocumentitem type = "header">
 <cfset request.letterhead.title="PERMIT TO WORK"/>
