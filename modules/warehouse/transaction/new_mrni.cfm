@@ -34,8 +34,12 @@
 <div>
 <table width="100%" border="0">
   <tr>
+    <td colspan="2">
+      <f:TextBox name="Note" class="span12"/>
+    </td>
+  </tr>
+  <tr>
     <td width="50%" valign="top"> 
-      <f:TextBox name="Note" class="span10"/>
 			<f:TextBox name="Ref" label="Ref info" class="span10"/>
       <f:DatePicker name="DateIssued" label="Date Issued" required class="span8"/>
       <f:DatePicker name="DateRequired" label="Date Required" required class="span8"/>
@@ -44,7 +48,14 @@
       <f:Select name="Currency" required ListValue="NGN,USD" ListDisplay="Naira,Dollars" class="span4"/>        
       <f:Select name="DepartmentId" label="Department" required ListValue="#ValueList(qD.DepartmentId)#" ListDisplay="#Valuelist(qD.Name)#" />
       <f:Select name="UnitId" label="Unit" ListValue="#ValueList(qU.UnitId)#" ListDisplay="#Valuelist(qU.Name)#" />
-      <f:TextBox name="WorkOrderId" label="Work Order ##" class="span5"/>
+      <div class="control-group">
+        <label for="__transaction_c_all_mrni0frmWorkOrderId" class="control-label">Work Order	</label>
+        <div class="controls">
+          <input type="text" class="span4" id="__transaction_c_all_mrni0frmWorkOrderId" name="WorkOrderId">
+         <!---  <f:TextBox name="WorkOrderId" label="Work Order ##" class="span4"/> --->
+          <button class="btn" type="button" onclick="lookupWorkOrder()"><i class="icon-search"></i></button>
+        </div>
+      </div>
     </td>
   </tr> 
   <tr>
@@ -93,3 +104,40 @@
 </f:Form>
 
 </cfoutput>
+
+<script>
+function lookupWorkOrder() {
+    const workOrderId = document.querySelector('[name="WorkOrderId"]').value.trim();
+    
+    if (!workOrderId) {
+        alert('Please enter a Work Order ID');
+        return;
+    }
+
+    const request = new Request.JSON({
+        url: 'modules/ajax/warehouse.cfm',
+        method: 'get',
+        data: {
+            cmd: 'lookupWorkOrder',
+            id: workOrderId
+        },
+        onSuccess: response => {
+            if (response?.success) {
+                const fields = {
+                    'Note': response.data.note || '',
+                    'DepartmentId': response.data.unit_id || '',
+                    'UnitId': response.data.unit_id || ''
+                };
+
+                Object.entries(fields).forEach(([field, value]) => {
+                    const element = document.getElementById(`__transaction_c_all_mrni0frm${field}`);
+                    if (element) element.value = value;
+                });
+            } else {
+                alert('Work Order not found.');
+            }
+        },
+        onFailure: () => alert('Failed to lookup Work Order.')
+    }).send();
+}
+</script>

@@ -417,6 +417,25 @@
 
 			</cfcase>
 
+<cfcase value="lookupWorkOrder">
+    <cfquery name="q">
+			SELECT 
+				wo.WorkOrderId,  wo.Description, wo.DepartmentId, wo.UnitId
+			FROM work_order wo
+			WHERE wo.WorkOrderId = <cfqueryparam value="#url.id#" cfsqltype="cf_sql_integer">
+    </cfquery>
+
+    <cfoutput>
+		{ 
+			"success": true, "data": { 
+				"note": #serializeJSON(q.Description)#, 
+				"dept_id": "#val(q.DepartmentId)#", 
+				"unit_id": "#val(q.UnitId)#"
+			}
+		}
+    </cfoutput>
+</cfcase>
+
 			<!---SavePO--->
 			<cfcase value="SavePO">
 
