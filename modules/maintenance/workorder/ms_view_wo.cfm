@@ -145,36 +145,46 @@
     
   <nt:NavTab renderTo="#woId#">
     <nt:Tab>
-      <nt:Item title="Request Open Section" isactive/>
+      <nt:Item title="Request Open Section" isActive/>
       <nt:Item title="Supporting Documents"/>
     </nt:Tab>
     <nt:Content>
-      <nt:Item id="#Id1#" isactive/>
+      <nt:Item id="#Id1#" isActive/>
       <nt:Item id="#Id4#"/>
     </nt:Content>
   </nt:NavTab>
   
   <f:ButtonGroup>
     <cfif qWO.WorkClassId EQ 12 AND qWO.Status NEQ "Approved" AND (request.IsMGR OR (request.IsWarehouseAdmin AND qWO.DepartmentId EQ 8))>
-      <f:Button IsSave 
-        value="Reject Request" 
-        class="btn-danger" 
-        actionURL="modules/ajax/maintenance.cfm?cmd=RejectReq"
-        onSuccess="win_save_wo_window.close()"
-        icon="icon-thumbs-down icon-white"
-      />
-      <f:Button IsSave 
-        value="Request Review" 
-        class="btn-info" 
-        actionURL="modules/ajax/maintenance.cfm?cmd=RequestReview"
-        onSuccess="win_save_wo_window.close()"
-      />
-      <f:Button IsSave
-        value="Approve Request" 
-        class="btn-success" 
-        actionURL="modules/ajax/maintenance.cfm?cmd=MGRApprove" 
-        icon="icon-thumbs-up icon-white"
-        onSuccess="win_save_wo_window.close()"/>
+      <cfset _show = true>
+      <cfif qWO.DepartmentId NEQ request.userInfo.DepartmentId>
+        <cfset _show = false>
+        <cfif listFindNoCase("#application.department.operations#,#application.department.lpg#", qWO.DepartmentId) && request.userInfo.departmentId EQ application.department.operations>
+          <cfset _show = true>
+        </cfif>
+      </cfif>
+      
+      <cfif _show>
+        <f:Button IsSave 
+          value="Reject Request" 
+          class="btn-danger" 
+          actionURL="modules/ajax/maintenance.cfm?cmd=RejectReq"
+          onSuccess="win_save_wo_window.close()"
+          icon="icon-thumbs-down icon-white"
+        />
+        <f:Button IsSave 
+          value="Request Review" 
+          class="btn-info" 
+          actionURL="modules/ajax/maintenance.cfm?cmd=RequestReview"
+          onSuccess="win_save_wo_window.close()"
+        />
+        <f:Button IsSave
+          value="Approve Request" 
+          class="btn-success" 
+          actionURL="modules/ajax/maintenance.cfm?cmd=MGRApprove" 
+          icon="icon-thumbs-up icon-white"
+          onSuccess="win_save_wo_window.close()"/>
+      </cfif>
     </cfif>
   </f:ButtonGroup>
 <!--- <g:Button value="Approve" executeURL="'modules/ajax/maintenance.cfm?cmd=MSApprove'" class="btn-success"/>

@@ -200,6 +200,16 @@
 
 	<cfcase value="MGRApprove">
 
+		<cfif qW.DepartmentId != request.userinfo.DepartmentId>
+			<!--- Only Operations Manager can approve WOs from Ops or LPG --->
+			<cfif NOT (
+				listFindNoCase("#application.department.operations#,#application.department.lpg#", qW.DepartmentId) AND
+				request.userinfo.DepartmentId == application.department.operations
+			)>
+				<cfthrow message="You are not authorized to approve this WO"/>
+			</cfif>
+		</cfif>
+
 		<cfset qW = getWO(form.id)/>
 			<cfquery>
 				UPDATE work_order SET 

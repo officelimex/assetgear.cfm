@@ -10,7 +10,7 @@
  
 <g:Grid renderTo="#mrId#_all_mrni" url="modules/ajax/warehouse.cfm?cmd=getMR&t=NI" commandWidth="70px" class="table-hover table-condensed"  firstsortOrder="DESC">
 	<g:Columns>
-		<g:Column id="MRId" caption="MR ##" field="m.MRId" sortable searchable/>
+		<g:Column id="MRId" caption="MR ##" field="MRId" sortable searchable/>
         <g:Column id="WorkOrder" caption=" W.O. ##" />
         <g:Column id="Note" searchable field="m.Note"/>
         <g:Column id="DateReturned" caption="Date Returned"/>
