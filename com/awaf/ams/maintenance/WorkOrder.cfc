@@ -74,7 +74,7 @@
  			-- INNER JOIN `core_department` d ON d.DepartmentId = wo.DepartmentId
  			INNER JOIN `asset` a ON a.AssetId = wo.AssetId
  			-- LEFT JOIN `asset_category` ac ON ac.AssetCategoryId = a.AssetCategoryId
- 			-- INNER JOIN `job_class` jc ON jc.JobClassId = wo.WorkClassId
+ 			INNER JOIN `job_class` jc ON jc.JobClassId = wo.WorkClassId
  			-- users
  			-- LEFT JOIN core_user cu ON cu.UserId = wo.ClosedByUserId
  			-- LEFT JOIN core_user su ON su.UserId = wo.SupervisedByUserId

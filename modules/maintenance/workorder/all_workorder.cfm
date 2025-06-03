@@ -16,12 +16,12 @@
     <g:Column id="Description" caption="W.O description" field="wo.Description" template="row[2] + ' <strong>ON</strong> ' + row[3]" searchable />
     <g:Column id="Asset" field="a.Description" searchable hide/>
     <cfif url.filter eq "d">
-      <g:Column id="WorkClass" caption="Work class"/>
+      <g:Column id="WorkClass" caption="Work class" field="jc.Class" searchable/>
     <cfelse>
       <cfif url.cid eq "">
-        <g:Column id="WorkClass" caption="Work class"/>
+        <g:Column id="WorkClass" caption="Work class" field="jc.Class" searchable/>
       <cfelse>
-        <g:Column id="WorkClass" caption="Work class" hide/>
+        <g:Column id="WorkClass" caption="Work class" field="jc.Class" hide searchable/>
       </cfif>
     </cfif>
     
