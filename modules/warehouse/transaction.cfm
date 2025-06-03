@@ -37,7 +37,8 @@
 			<n:NavItem title="Material Received" url="modules/warehouse/transaction/received/m_received.cfm" id="material_received"/>
 			
 			<n:NavItem type="header" title="Purchase Order"/>
-			<n:NavItem title="New PO" url="modules/warehouse/transaction/po/new.cfm" id="new_po"/>
+			<n:NavItem title="New PO (Direct)" url="modules/warehouse/transaction/po/new_d.cfm" id="new_po_d"/>
+			<n:NavItem title="New PO From MR" url="modules/warehouse/transaction/po/new.cfm" id="new_po"/>
 			<n:NavItem title="Purchase Orders" url="modules/warehouse/transaction/po/list.cfm" id="all_po"/>
 
 			<!--- <n:navItem type="divider"> --->

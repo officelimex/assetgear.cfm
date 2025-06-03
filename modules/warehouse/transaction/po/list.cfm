@@ -6,7 +6,7 @@
     <g:Columns>
       <g:Column id="POId" caption="##" sortable searchable/>
       <g:Column id="Ref" caption="PO Number" searchable nowrap/>
-      <g:Column id="MRId" caption="MR ##" searchable/>
+      <g:Column id="MRId" caption="MR ##" field="mr.MRId" searchable/>
       <g:Column id="Note" caption="Note" searchable />
       <g:Column id="Date" nowrap/>      
       <g:Column id="Status"/>      

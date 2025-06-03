@@ -17,7 +17,7 @@
 			<f:RadioBox name="Currency" inline showLabel label="Currency" required ListValue="NGN,USD" ListDisplay="Naira,US Dollar" />
     </td>
     <td class="horz-div" valign="top"> 
-      <f:TextBox name="MRId" label="MR ##" class="span5"/>
+      <f:TextBox name="MRId" label="MR ##" required class="span5"/>
     </td>
   </tr> 
   <tr>
@@ -43,7 +43,7 @@
 </div>
 
 <f:ButtonGroup>
-  <f:Button value="Create PO" class="btn-primary" IsSave subpageId="new_po" ReloadURL="modules/warehouse/transaction/po/new.cfm"/>
+  <f:Button value="Create New PO" class="btn-primary" IsSave subpageId="new_po" ReloadURL="modules/warehouse/transaction/po/new.cfm"/>
 </f:ButtonGroup>
 
 </f:Form>

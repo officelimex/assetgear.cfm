@@ -2,37 +2,27 @@
 
 	<cffunction name="Init" access="public" returntype="Item">
 
-<!--- 		<cfset this.WAREHOUSE_ITEM_SQL = '
-			SELECT
-				whi.*, CONCAT("[",whi.Code,"] ",whi.Description," [",whi.VPN,"]") ItemDescription,
-				sl.Code Location,
-				um.Title UM
-            FROM whs_item whi
-			INNER JOIN um ON whi.UMId = um.UMId
-			INNER JOIN shelf_location sl ON whi.ShelfLocationId = sl.ShelfLocationId
-		'/> --->
-		<cfset this.WAREHOUSE_ITEM_SQL = '
-			SELECT 
-				whi.*, 
-				CONCAT("[", whi.Code, "] ", whi.Description, " [", whi.VPN, "]") AS ItemDescriptionWithVPN,
-				CONCAT("[", whi.Code, "] ", whi.Description, " [", whi.VPN, "] [QTY: ", whi.QOH, "]") AS ItemDescriptionWithVPNAndQOH,
-				CONCAT("[", whi.Code, "] ", whi.Description, " [QTY : ", whi.QOH, "]") AS ItemDescriptionWithQOH,
-				CONCAT("[",whi.Code,"] ", whi.Description) ItemDescription, 
-				sl.Code AS Location,
-				um.Title AS UM
-			FROM whs_item AS whi
-			INNER JOIN um ON whi.UMId = um.UMId
-			LEFT JOIN shelf_location AS sl ON whi.ShelfLocationId = sl.ShelfLocationId
-		'/>
-<!--- 			; --->
+			<cfset this.WAREHOUSE_ITEM_SQL = '
+				SELECT 
+					whi.*, 
+					CONCAT("[", whi.Code, "] ", whi.Description, " [", whi.VPN, "]") AS ItemDescriptionWithVPN,
+					CONCAT("[", whi.Code, "] ", whi.Description, " [", whi.VPN, "] [QTY: ", whi.QOH, "]") AS ItemDescriptionWithVPNAndQOH,
+					CONCAT("[", whi.Code, "] ", whi.Description, " [QTY : ", whi.QOH, "]") AS ItemDescriptionWithQOH,
+					CONCAT("[",whi.Code,"] ", whi.Description) ItemDescription, 
+					sl.Code AS Location,
+					um.Title AS UM
+				FROM whs_item AS whi
+				LEFT JOIN um ON whi.UMId = um.UMId
+				LEFT JOIN shelf_location AS sl ON whi.ShelfLocationId = sl.ShelfLocationId
+			'/>
 
-		<cfset this.WAREHOUSE_ITEM_COUNT_SQL = '
-			SELECT count(whi.ItemId) c
-            FROM whs_item whi
-			INNER JOIN um ON whi.UMId = um.UMId
-			INNER JOIN shelf_location sl ON whi.ShelfLocationId = sl.ShelfLocationId
-		'/>
-        <cfreturn this/>
+			<cfset this.WAREHOUSE_ITEM_COUNT_SQL = '
+				SELECT count(whi.ItemId) c
+							FROM whs_item whi
+				LEFT JOIN um ON whi.UMId = um.UMId
+				LEFT JOIN shelf_location sl ON whi.ShelfLocationId = sl.ShelfLocationId
+			'/>
+			<cfreturn this/>
     </cffunction>
 
     <cffunction name="GetItem" access="public" returntype="query" hint="get al item in the warehouse">

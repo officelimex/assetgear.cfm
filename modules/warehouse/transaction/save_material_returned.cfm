@@ -24,9 +24,6 @@
     where wr.ReturnId =  <cfqueryparam cfsqltype="cf_sql_integer" value="#url.Id#">
 </cfquery> 
 
-<!--- <cfquery name="qID">
-	SELECT * FROM whs_item
-</cfquery>  --->
 <cfset qID = application.com.Item.GetItems()/> 
 
 <cfquery name="qCU">
@@ -72,6 +69,12 @@
 			</td>
 		</tr>
 	</table>
+
+	<cfif url.newpage eq "true">
+		<f:ButtonGroup>
+			<f:Button value="Return Item(s)" class="btn-primary" IsSave/>
+		</f:ButtonGroup>
+  </cfif>
 
 </f:Form>
 

@@ -73,10 +73,10 @@
 					//--- Update the total price --->
 					query {
 						echo('
-						UPDATE whs_material_received SET
-							NGNTotal = #val(ngnt)#,
-							USDTotal = #val(usdt)#
-						WHERE MaterialReceivedId = #val(_id)#
+							UPDATE whs_material_received SET
+								NGNTotal = #val(ngnt)#,
+								USDTotal = #val(usdt)#
+							WHERE MaterialReceivedId = #val(_id)#
 						');
 					}
 					//--- close MR --->
@@ -213,7 +213,7 @@
 					"rows":[
 					<cfloop query="q">
 						[
-							#q.POId#, #serializeJSON(q.Ref)#, #q.MRId#, #serializeJSON(q.Note)#, "#DateFormat(q.Date,'dd-mmm-yyyy')#", 
+							#q.POId#, #serializeJSON(q.Ref)#, #serializeJSON(q.MRId)#, #serializeJSON(q.Note)#, "#DateFormat(q.Date,'dd-mmm-yyyy')#", 
 							<cfswitch expression="#q.Status#">
 								<cfcase value="open">
 									#serializeJSON('<span class="label label-info">' & q.Status & '</span>')#
@@ -417,30 +417,36 @@
 
 			</cfcase>
 
-<cfcase value="lookupWorkOrder">
-    <cfquery name="q">
-			SELECT 
-				wo.WorkOrderId,  wo.Description, wo.DepartmentId, wo.UnitId
-			FROM work_order wo
-			WHERE wo.WorkOrderId = <cfqueryparam value="#url.id#" cfsqltype="cf_sql_integer">
-    </cfquery>
+			<cfcase value="lookupWorkOrder">
+					<cfquery name="q">
+						SELECT 
+							wo.WorkOrderId,  wo.Description, wo.DepartmentId, wo.UnitId
+						FROM work_order wo
+						WHERE wo.WorkOrderId = <cfqueryparam value="#url.id#" cfsqltype="cf_sql_integer">
+					</cfquery>
 
-    <cfoutput>
-		{ 
-			"success": true, "data": { 
-				"note": #serializeJSON(q.Description)#, 
-				"dept_id": "#val(q.DepartmentId)#", 
-				"unit_id": "#val(q.UnitId)#"
-			}
-		}
-    </cfoutput>
-</cfcase>
+					<cfoutput>
+					{ 
+						"success": true, "data": { 
+							"note": #serializeJSON(q.Description)#, 
+							"dept_id": "#val(q.DepartmentId)#", 
+							"unit_id": "#val(q.UnitId)#"
+						}
+					}
+					</cfoutput>
+			</cfcase>
 
-			<!---SavePO--->
 			<cfcase value="SavePO">
 
 				<cfset poid = application.com.Transaction.SavePO(form)/>
 				PO #poid# was updated...
+
+			</cfcase>
+
+			<cfcase value="SaveDirectPO">
+
+				<cfset poid = application.com.Transaction.SaveDirectPO(form)/>
+				PO #poid# generated and item received...
 
 			</cfcase>
 

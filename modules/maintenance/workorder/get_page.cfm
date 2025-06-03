@@ -30,4 +30,8 @@
 	<cfset page = "save_workorder"/>
 </cfif>
 
+<cfif (request.isSup || request.IsMGR) AND (qWS.DepartmentId EQ request.userinfo.departmentId) AND (qWS.Status2 EQ "Sent to Superintendent")>
+	<cfset page = "save_workorder"/>
+</cfif>
+
 <cfinclude template="#page#.cfm" />

@@ -11,14 +11,14 @@
 			FROM whs_po po
 			INNER JOIN core_user u 	ON u.UserId = po.CreatedByUserId
 			LEFT  JOIN core_user r 	ON r.UserId = po.ReceivedByUserId
-			INNER JOIN whs_mr mr 		ON mr.MRId 	= po.MRId 
+			LEFT JOIN whs_mr mr 		ON mr.MRId 	= po.MRId 
 		'/>
 
 		<cfset this.PO_COUNT_SQL = '
 			SELECT COUNT(po.POId) C
 			FROM whs_po po
 			INNER JOIN core_user u 	ON u.UserId = po.CreatedByUserId
-			INNER JOIN whs_mr mr 		ON mr.MRId 	= po.MRId 
+			LEFT JOIN whs_mr mr 		ON mr.MRId 	= po.MRId 
 		'/>
 
 		<cfset this.PO_ITEM_SQL = '
@@ -574,6 +574,82 @@
 					Status = "Ordered"
 				WHERE MRId = <cfqueryparam cfsqltype="cf_sql_integer" value="#po.MRId#"/>
 			</cfquery>
+		</cftransaction>
+
+		<cfreturn poid/>
+	</cffunction>
+
+	<cffunction name="SaveDirectPO" returntype="numeric" access="public" hint="Save purchase order">
+		<cfargument name="po_" hint="po data in struct form" type="struct" required="true"/>
+
+		<cfset po = arguments.po_/>
+		<cfparam name="po.Currency" default="NGN"/>
+
+		<cftransaction action="begin">
+			<cfquery result="rt">
+				INSERT INTO whs_po SET
+					`Date` = <cfqueryparam cfsqltype="cf_sql_date" value="#DateFormat(Now(),'dd/mmm/yyyy')#">,
+					`CreatedByUserId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#request.UserInfo.UserId#">,
+					`Ref` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#po.Ref#">,
+					`DeliveryInfo` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#po.DeliveryInfo#">,
+					`Currency` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#po.Currency#">,
+					`Status` = "Close"
+			</cfquery>
+
+			<cfset poId = rt.GENERATED_KEY/>
+
+			<!--- upload attachments --->
+			<cfparam name="po.Attachments" default=""/>
+			<cfif po.Attachments neq "">
+				<cfset s_path = po.AttachmentsSource & "/" & po.Attachments />
+				<cfset d_path = form.AttachmentsDestination & "/whs_po/" & poId & "/" />
+				<cfset application.com.File.Move('whs_po', poId,'a', s_path,d_path)/>
+			</cfif>
+			<!--- 
+				int0 - item id 
+				int1 - qty 
+				float0 - unit price
+				text0 - waybill
+			--->
+			<cfset qpo_items = application.com.Helper.GetTempDataToUpdate(po.Items)/>
+			<cfloop query="qpo_items">
+				<!--- update item --->
+				<cfquery>
+					UPDATE whs_item SET
+						QOH = QOH + #qpo_items.int1#,
+						UnitPrice = #qpo_items.float0#
+					WHERE ItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qpo_items.int0#"/>
+				</cfquery>
+
+				<cfset indRef = qpo_items.text0/>
+				<cfif po.DeliveryInfo NEQ "" AND indRef EQ "">
+					<cfset indRef = po.DeliveryInfo/>
+				</cfif>
+
+				<!---- save into po_items --->
+				<cfquery result="rt">
+					INSERT INTO whs_po_item SET
+						POId = <cfqueryparam cfsqltype="cf_sql_integer" value="#poid#"/>,
+						ItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qpo_items.int0#"/>,
+						Quantity = <cfqueryparam cfsqltype="cf_sql_integer" value="#qpo_items.int1#"/>,
+						PQuantity = <cfqueryparam cfsqltype="cf_sql_integer" value="#qpo_items.int1#"/>,
+						UnitPrice = <cfqueryparam cfsqltype="cf_sql_float" value="#qpo_items.float0#"/>,
+						Ref = <cfqueryparam cfsqltype="cf_sql_varchar" value="#indRef#"/>	
+				</cfquery>
+				<cfset poItemId = rt.GENERATED_KEY/>
+
+				<!--- save into po_item_history --->
+				<cfquery>
+					INSERT INTO whs_po_item_history SET
+						POItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#poItemId#"/>,
+						ReceivedByUserId = <cfqueryparam cfsqltype="cf_sql_integer" value="#request.UserInfo.UserId#"/>,
+						`Date` = <cfqueryparam cfsqltype="cf_sql_date" value="#po.Date#"/>, 
+						Quantity = <cfqueryparam cfsqltype="cf_sql_integer" value="#qpo_items.int1#"/>,
+						UnitPrice = <cfqueryparam cfsqltype="cf_sql_float" value="#qpo_items.float0#"/>,	
+						Ref = <cfqueryparam cfsqltype="cf_sql_varchar" value="#indRef#"/>	
+				</cfquery>
+			</cfloop>
+
 		</cftransaction>
 
 		<cfreturn poid/>

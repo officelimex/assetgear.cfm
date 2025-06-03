@@ -30,8 +30,7 @@
 </cfquery>
 
 <cfquery name="qID">
-	SELECT *
-    FROM whs_item
+	SELECT * FROM whs_item
 </cfquery>
 
 <cfset qD = application.com.User.GetDepartments()/>
