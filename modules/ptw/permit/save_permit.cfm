@@ -130,34 +130,34 @@
 										icon="icon-share icon-white" 
 										actionURL="modules/ajax/ptw.cfm?cmd=SendPermitToSupervisor"
 										onSuccess="win_save_permit.close()"/>
-									<f:Button 
+<!--- 									<f:Button 
 										IsSave 
 										value="Save Permit Only"
 										class="btn-primary"
 										actionURL="modules/ajax/ptw.cfm?cmd=SavePermit"
-										onSuccess="win_save_permit.close()"/>  
+										onSuccess="win_save_permit.close()"/>  ---> 
 								</cfcase>	
 
 								<cfcase value="Sent to Supervisor">
 									<cfif request.IsSV>
 										<f:Button IsSave 
-											value="Save & Send to Operations" 
+											value="Approve & Send to Operations" 
 											class="btn btn-warning" 
 											icon="icon-share icon-white" 
 											actionURL="modules/ajax/ptw.cfm?cmd=SendPermitToFacilityManager&user=Operations"
 											onSuccess="win_save_permit.close()"/>
 										<f:Button IsSave 
-											value="Save & Send to Admin" 
+											value="Approve & Send to Admin" 
 											class="btn btn-success" 
 											icon="icon-share icon-white" 
 											actionURL="modules/ajax/ptw.cfm?cmd=SendPermitToFacilityManager&user=Admin"
 											onSuccess="win_save_permit.close()"/>
-										<f:Button 
+<!--- 										<f:Button 
 											IsSave 
 											value="Save Permit Only"
 											class="btn-primary"
 											actionURL="modules/ajax/ptw.cfm?cmd=SavePermit"
-											onSuccess="win_save_permit.close()"/>  
+											onSuccess="win_save_permit.close()"/> --->  
 									</cfif>
 								</cfcase>
 

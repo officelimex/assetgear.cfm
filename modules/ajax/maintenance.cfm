@@ -200,6 +200,7 @@
 
 	<cfcase value="MGRApprove">
 
+		<cfset qW = getWO(form.id)/>
 		<cfif qW.DepartmentId != request.userinfo.DepartmentId>
 			<!--- Only Operations Manager can approve WOs from Ops or LPG --->
 			<cfif NOT (
@@ -210,27 +211,25 @@
 			</cfif>
 		</cfif>
 
-		<cfset qW = getWO(form.id)/>
-			<cfquery>
-				UPDATE work_order SET 
-					Status2 = 'Approved',
-					FSApprovedDate = <cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#"/>, 
-					FSUserId = #request.userinfo.userid#
-				WHERE WorkOrderId = #form.id#
-			</cfquery>
-			<cfquery>
-				UPDATE whs_mr SET
-					Status = 'Approved'
-				WHERE MRId = #val(qW.MRId)#
-			</cfquery>
-			
-			<cfif val(qW.MRId)>
-				<cfset ws_email = userObj.GetEmailsInRole("WH_SUP")/>
-				<cfset sessionCookies = "CFID=#COOKIE.CFID#; CFTOKEN=#COOKIE.CFTOKEN#">
-				<cfhttp url="#application.site.url#modules/warehouse/transaction/mr/print_mr.cfm?id=#qW.MRId#" method="get" result="pdfResponse">
-					<cfhttpparam type="header" name="Cookie" value="#sessionCookies#">
-				</cfhttp>
+		<cfquery>
+			UPDATE work_order SET 
+				Status2 = 'Approved',
+				FSApprovedDate = <cfqueryparam cfsqltype="cf_sql_timestamp" value="#now()#"/>, 
+				FSUserId = #request.userinfo.userid#
+			WHERE WorkOrderId = #form.id#
+		</cfquery>
 
+		<cfif val(qW.MRId)>
+
+			<cfset ws_email = userObj.GetEmailsInRole("WH_SUP")/>
+			<cfset sessionCookies = "CFID=#COOKIE.CFID#; CFTOKEN=#COOKIE.CFTOKEN#">
+			<cfhttp url="#application.site.url#modules/warehouse/transaction/mr/print_mr.cfm?id=#qW.MRId#" method="get" result="pdfResponse">
+				<cfhttpparam type="header" name="Cookie" value="#sessionCookies#">
+			</cfhttp>
+			<cfquery name="qCMR">
+				SELECT Status FROM whs_mr WHERE MRId = #val(qW.MRId)#
+			</cfquery>
+			<cfif qCMR.Status NEQ 'Approved'>
 				<cfmail from="AssetGear <do-not-reply@assetgear.net>" 
 					to="#qW.cb_Email#" 
 					bcc="adexfe@live.com"
@@ -247,7 +246,15 @@
 					<cfmailparam file="MAT#qW.MRId#.pdf" type="application/pdf" disposition="attachment" content="#pdfResponse.FileContent#" />
 				</cfmail>
 			</cfif>
-			MR has been Approved
+			<cfquery>
+				UPDATE whs_mr SET
+					Status = 'Approved'
+				WHERE MRId = #val(qW.MRId)#
+			</cfquery>
+		</cfif>
+
+		MR has been Approved
+		
 	</cfcase>
 	<!--- FSApprove --->
 	<cfcase value="WHApprove">
@@ -290,7 +297,7 @@
 			<cfset SaveWorkOrderFirst()/>
 
 			<cfset qW = getWO(form.id)/>
-			<cfset ws_email = userObj.GetEmailsInRole("WH_SV,WH_SUP")/>
+			<cfset ws_email = userObj.GetEmailsInRole("WH_SV")/>
 
 			<cfquery>
 				UPDATE work_order SET 

@@ -211,7 +211,7 @@ border-bottom-right-radius: 5px 10px;*/
 .ma-selected {
 	background-color: #D2F9C8 !important;
 	/*#8BEF6D !important; */
-	background-image: url(../img/ok.png) !important;
+	/* 	background-image: url(../img/ok.png) !important;
 	background-position: 99% center !important;
-	background-repeat: no-repeat !important;
+	background-repeat: no-repeat !important; */
 }

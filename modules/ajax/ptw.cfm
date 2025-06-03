@@ -87,12 +87,12 @@
 								<cfloop query="q">
        			 			[#q.PermitId#,#q.JHAId#,#serializeJSON(q.Work)#, "#DateFormat(q.Date,'dd-mmm-yyyy')#","#DateFormat(q.EndTime,'dd-mmm-yyyy')#",
 									<cfswitch expression="#q.Status#">
-										<cfcase value="Open">#serializeJSON('<span class="label label-info">Send to Supervisor</span>')#</cfcase>
+										<!--- <cfcase value="Open">#serializeJSON('<span class="label label-info">Sent to Supervisor</span>')#</cfcase> --->
 										<cfcase value="Sent to Operations,Sent to Admin">
 											#serializeJSON('<span class="label label-warning">#q.Status#</span>')#
 										</cfcase>
 										<cfcase value="Sent to Supervisor">
-											#serializeJSON('<span class="label label-secondary">#q.Status#</span>')#
+											#serializeJSON('<span class="label label-info">#q.Status#</span>')#
 										</cfcase>
 										<cfdefaultcase>
 											#serializeJSON('<span class="label label-secondary">#q.Status#</span>')#
