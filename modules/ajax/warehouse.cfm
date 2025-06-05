@@ -1007,12 +1007,162 @@
 			</cfcase>
 
 		<!--- correct item in the warehouse --->
-	<cfcase value="CorrectItem">
-		<!--- set other forms parameters --->
-		<cfset form.AdjustedByUserId = request.userinfo.userid/>
-		<cfset application.com.Item.CorrectItem(form)/>
-		Item corrected!
-	</cfcase>
+		<cfcase value="CorrectItem">
+			<!--- set other forms parameters --->
+			<cfset form.AdjustedByUserId = request.userinfo.userid/>
+			<cfset application.com.Item.CorrectItem(form)/>
+			Item corrected!
+		</cfcase>
+		
+		<cfcase value="getICNsForMerge">
+			<cftry>
+				<cfparam name="url.item1" default="">
+				<cfparam name="url.item2" default="">
+		
+				<!--- Validate input --->
+				<cfif trim(url.item1) EQ "" OR trim(url.item2) EQ "">
+					{"error": "Both ICNs must be provided."}
+					<cfexit>
+				</cfif>
+		
+				<cfquery name="qItems" >
+					SELECT 
+						i.ItemId, i.Code, i.Description, i.VPN, i.Reference, i.QOR, i.QOO, i.QOH,
+						i.UnitPrice, i.MinimumInStore, i.MaximumInStore, i.Maker, sl.Code ShelfLocation 
+					FROM whs_item i
+					LEFT JOIN shelf_location sl ON i.ShelfLocationId = sl.ShelfLocationId 
+					WHERE i.Code IN (
+						<cfqueryparam cfsqltype="cf_sql_varchar" value="#url.item1#" />,
+						<cfqueryparam cfsqltype="cf_sql_varchar" value="#url.item2#" />
+					)
+				</cfquery>
+		
+				<!--- Format response --->
+				<cfset result = structNew()>
+				<cfset result["success"] = true/>
+				<cfloop query="qItems">
+					<cfset result["data"][qItems.Code] = {
+						"ItemId": qItems.ItemId,
+						"Code": qItems.Code,
+						"Description": qItems.Description,
+						"ShelfLocation": qItems.ShelfLocation,
+						"VPN": qItems.VPN,
+						"Reference": qItems.Reference,
+						"QOR": qItems.QOR,
+						"QOO": qItems.QOO,
+						"QOH": qItems.QOH,
+						"UnitPrice": qItems.UnitPrice,
+						"MinimumInStore": qItems.MinimumInStore,
+						"MaximumInStore": qItems.MaximumInStore,
+						"Maker": qItems.Maker
+					}>
+				</cfloop>
+		
+				#serializeJSON(result)#
+		
+				<cfcatch type="any">
+					{"error": "An error occurred: #cfcatch.message#"}
+				</cfcatch>
+			</cftry>
+		</cfcase>
+
+		<cfcase value="mergeItems">
+			<cftry>
+			
+				<cfquery name="getItems" >
+					SELECT (
+						SELECT ItemId FROM whs_item WHERE Code = <cfqueryparam value="#form.item1#" cfsqltype="cf_sql_varchar"> LIMIT 0,1
+					) ItemId1,
+					(
+						SELECT ItemId FROM whs_item WHERE Code = <cfqueryparam value="#form.item2#" cfsqltype="cf_sql_varchar"> LIMIT 0,1
+					) ItemId2
+				</cfquery>
+
+				<cfif form.item1 EQ form.Code>
+					<cfset keepId = getItems.ItemId1>
+					<cfset obsoleteId = getItems.ItemId2>
+				<cfelse>
+					<cfset keepId = getItems.ItemId2>
+					<cfset obsoleteId = getItems.ItemId1>
+				</cfif>
+			
+				<cftransaction>
+					<cfset tables = [
+						"whs_po_item",
+						"whs_issue_item", 
+						"whs_return_item",
+						"work_order_item",
+						"whs_mr_item",
+						"count_due_item"
+					]>
+
+					<cfloop array="#tables#" index="tableName">
+						<cfquery>
+							UPDATE #tableName#
+							SET itemId = <cfqueryparam value="#keepId#" cfsqltype="cf_sql_integer">
+							WHERE itemId = <cfqueryparam value="#obsoleteId#" cfsqltype="cf_sql_integer">
+						</cfquery>
+					</cfloop>
+			
+					<cfquery>
+						UPDATE whs_item SET
+							<cfloop list="Description,VPN,Reference,UnitPrice,MinimumInStore,MaximumInStore,Maker,ShelfLocation" index="field">
+								<cfif structKeyExists(form, field)>
+									<cfif field EQ "ShelfLocation">
+										<!--- ShelfLocation requires lookup --->
+										<cfquery name="qSL">
+												SELECT ShelfLocationId FROM shelf_location 
+												WHERE Code = <cfqueryparam value="#form.ShelfLocation#" cfsqltype="cf_sql_varchar"> LIMIT 0,1
+										</cfquery>
+										ShelfLocationId = <cfqueryparam value="#qSL.ShelfLocationId#" cfsqltype="cf_sql_integer">,
+									<cfelse>
+										<!---- TODO: fix for unit price ---->
+										<cfset val = form[field]>
+										#field# = <cfqueryparam  value="#val#" cfsqltype="#(isNumeric(val) ? 'cf_sql_integer' : 'cf_sql_varchar')#">,
+									</cfif>
+								</cfif>
+							</cfloop>
+			
+							<!--- Loop through sum fields --->
+							<cfloop list="QOH,QOO,QOR" index="qfield">
+								<cfset totalQty = 0>
+								<cfif structKeyExists(form, qfield & "_item1")>
+										<cfset totalQty += val(form[qfield & "_item1"])>
+								</cfif>
+								<cfif structKeyExists(form, qfield & "_item2")>
+										<cfset totalQty += val(form[qfield & "_item2"])>
+								</cfif>
+								<cfif totalQty GT 0>
+										#qfield# = <cfqueryparam value="#totalQty#" cfsqltype="cf_sql_integer">,
+								</cfif>
+							</cfloop>
+						Code = <cfqueryparam value="#form.Code#" cfsqltype="cf_sql_varchar">
+						WHERE itemId = <cfqueryparam value="#keepId#" cfsqltype="cf_sql_integer">
+					</cfquery> 
+			
+ 					<cfquery >
+						DELETE FROM whs_item
+						WHERE itemId = <cfqueryparam value="#obsoleteId#" cfsqltype="cf_sql_integer">
+					</cfquery> 
+				</cftransaction>
+			
+				<!--- Success --->
+				<cfset response = {
+					"success": true,
+					"message": "Items merged successfully.",
+					"keepId": keepId
+				}>
+				#serializeJSON(response)#
+			
+			<cfcatch type="any">
+				<cfset response = {
+					"success": false,
+					"message": cfcatch.message
+				}>
+				#serializeJSON(response)#
+			</cfcatch>
+			</cftry>
+		</cfcase>
 
 	</cfswitch>
 
