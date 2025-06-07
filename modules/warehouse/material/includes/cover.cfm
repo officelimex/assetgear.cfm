@@ -77,7 +77,7 @@
     WHERE Currency = 'USD'
 </cfquery>
     <td class="noline" align="left">&nbsp;</td>
-    <td class="noline"  height="37" align="left">STOCK RECIVED FROM OLD M.R.</td>
+    <td class="noline" height="37" align="left">STOCK RECEIVED FROM OLD M.R.</td>
     <td  align="right" nowrap="nowrap">N#NumberFormat(qR2.T,'9,999.99')#</td>
     <td  align="right" nowrap="nowrap">
 

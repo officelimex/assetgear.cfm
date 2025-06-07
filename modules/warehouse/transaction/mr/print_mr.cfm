@@ -106,11 +106,17 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
   <td>
     <cfset service = false/>
     <cfset qMRI = application.com.Transaction.GetMRItems(url.id)/>
+    <cfset i = 0/>
     <cfloop query="qMRI">
+      <cfset i++/>
       <cfif qMRI.ItemId EQ 44143> 
         <cfset service = true/>
       </cfif>
     </cfloop>
+
+    <cfif i EQ 0>
+      <cfset service = true/>
+    </cfif>
 
     <cfif service>
       <p><b>SCOPE OF WORK</b></p>

@@ -27,8 +27,8 @@
   <tr>
     <td width="50%" valign="top"> 
 			<f:Label name="MR ##" value="#qPO.MRId#"/>
-			<f:Label name="Reference" value="#qPO.Ref#"/>
-			<f:Label name="Delivery Info" value="#qPO.DeliveryInfo#"/>
+			<f:Label name="PO Number" value="#qPO.Ref#"/>
+			<f:Label name="Old MR" value="#qPO.DeliveryInfo#"/>
     </td>
     <td class="horz-div" valign="top"> 
 			<f:Label name="Created by" value="#qPO.CreatedBy# on #dateFormat(qPO.Date,'yyyy/mm/dd')#"/>

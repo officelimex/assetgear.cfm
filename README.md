@@ -189,3 +189,18 @@ emmanuel.ofoh@pesoenergy.com-8849
 oghale.adiude@pesoenergy.com-6678
 
 automatically use the wo descrioption, department, and unit while createing an mr
+
+
+- [ ] JHA should be approved before the PTW can be generated
+- [ ] HSE JHA be able to review [make adjustments to JHA] before approval
+
+- [ ] don't allow ptw to be printable until its approved 
+
+- while recivcing the item through po .... add QOO,QOR,QOH
+
+
+
+
+
+
+

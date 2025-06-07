@@ -42,9 +42,9 @@
 			<n:NavItem title="Purchase Orders" url="modules/warehouse/transaction/po/list.cfm" id="all_po"/>
 
 			<!--- <n:navItem type="divider"> --->
-			<n:NavItem type="header" title="Delivery"/>
+			<!--- <n:NavItem type="header" title="Delivery"/>
 			<n:NavItem title="M.R. Delivery Note" url="modules/warehouse/transaction/delivery/all_delivery_note.cfm"  id="all_delivery_note"/>
-			<n:NavItem title="Material Delivery Note" url="modules/warehouse/transaction/delivery/all_mdelivery_note.cfm"  id="all_mdelivery_note"/>
+			<n:NavItem title="Material Delivery Note" url="modules/warehouse/transaction/delivery/all_mdelivery_note.cfm"  id="all_mdelivery_note"/> --->
 			<n:NavItem type="header" title="Reports"/>
 			<n:NavItem title="Recommended Order list" url="modules/warehouse/transaction/rec_order_list.cfm" id="rec_order_list"/>
 			<!---<n:NavItem title="Physical Inventory Worksheet" url="modules/settings/warehouse/shelf_location.cfm" id="shelf_location"/>--->

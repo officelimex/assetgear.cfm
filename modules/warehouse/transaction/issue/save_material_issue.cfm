@@ -85,7 +85,7 @@
 	<cfparam name="url.newpage" default="false">
 	<cfif url.newpage == "true">
 		<f:ButtonGroup>
-			<f:Button value="Issue Item" class="btn-primary" IsSave subpageId="save_material_issue" ReloadURL="modules/warehouse/transaction/issue/save_material_issue.cfm"/>
+			<f:Button value="Issue Item" class="btn-primary" IsSave subpageId="save_material_issue" ReloadURL="modules/warehouse/transaction/issue/save_material_issue.cfm?newpage=true"/>
 		</f:ButtonGroup>
 	</cfif>
 </f:Form>

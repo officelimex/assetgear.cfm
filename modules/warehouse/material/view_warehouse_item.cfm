@@ -76,7 +76,7 @@
 		SELECT 
 			poih.POItemHistoryId AS TransId,
 			rb.OtherNames AS ReceivedBy,
-			mr.Note,
+			CONCAT(mr.Note,'/',poih.Ref) Note,
 			po.POId AS DocId,
 			po.Ref AS Ref, 
 			po.MRId, 
@@ -184,7 +184,7 @@
 			<table class="table table-striped table-condensed table-hover">
 				<thead>
 					<tr>
-					<th nowrap="nowrap">Tran. ##</th>
+					<th nowrap="nowrap">TRN. ##</th>
 					<th nowrap="nowrap">W.O. ##</th>
 					<th>Note</th>
 					<th>Issued to</th>
@@ -212,9 +212,9 @@
 			<table class="table table-striped table-condensed table-hover">
 				<thead>
 					<tr>
-					<th nowrap="nowrap">Tran. ##</th>
+					<th nowrap="nowrap">TRN. ##</th>
 					<th>MR. ##</th>
-					<!--- <th>PO. ##</th> --->
+					<th>Ref. Info</th>
 					<th>Note</th>
 					<th nowrap="nowrap">Received By</th>
 					<th>Date</th>
@@ -233,6 +233,7 @@
 								</cfif>
 							</cfif>
 						</td>
+						<td>#qRvs.Ref#</td>
 						<td>#qRvs.Note#</td>
 						<td>#qRvs.ReceivedBy#</td>
 						<td nowrap="nowrap">#dateformat(qRvs.DateReceived,'dd-mmm-yyyy')#</td>

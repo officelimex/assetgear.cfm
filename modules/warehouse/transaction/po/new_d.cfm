@@ -14,12 +14,12 @@
 <table width="100%" border="0">
   <tr>
     <td width="50%" valign="top"> 
-			<f:TextBox name="Ref" label="Ref info" class="span7" required/>
+			<f:TextBox name="Ref" label="PO Number" class="span7" required/>
 			<f:RadioBox name="Currency" inline showLabel label="Currency" required ListValue="NGN,USD" ListDisplay="Naira,US Dollar" />
     </td>
     <td width="50%" valign="top"> 
       <f:DatePicker name="Date" label="Date Received" required class="span5" type="date" />								
-			<f:TextBox name="DeliveryInfo" label="Delivery Info" class="span5"/>
+			<f:TextBox name="DeliveryInfo" label="MR Ref number" class="span5"/> 
     </td>
   </tr>
   <tr>
