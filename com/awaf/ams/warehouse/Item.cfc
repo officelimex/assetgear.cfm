@@ -97,6 +97,10 @@
 			<cfset assetIds_ = valuelist(assetIds_.Int0)/>
 			<cfparam name="form.Obsolete" default="No"/>
 
+			<!---- remove ` from code and description --->
+			<cfset form.Description = replace(form.Description,'`','"','all')/>
+			<cfset form.Code = replace(form.Code,'`','"','all')/>
+
 			<cftransaction action="begin">
 				<cfquery result="rt">
 						<cfif form.id eq 0>

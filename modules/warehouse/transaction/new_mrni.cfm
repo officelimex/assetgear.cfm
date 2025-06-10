@@ -59,40 +59,49 @@
     </td>
   </tr> 
   <tr>
-  	<td colspan="2"> 
-      <et:Table allowInput height="330px" id="ItemFromWO" bind="WorkOrderId" Event="keyup" 
-        data="modules/ajax/warehouse.cfm?cmd=getWorkOrderNI">
-        <et:Headers>
-          <et:Header title="Materials from Work Order" size="5" type="text"/>
-          <et:Header title="Qty" size="1" type="int"/>
-          <et:Header title="UOM" size="1" type="text">
-            <et:Select listvalue="#ValueList(qUM.Title,'`')#" delimiters="`"/>
-          </et:Header>
-          <et:Header title="OEM" size="2" type="text" required="false"/>
-          <et:Header title="Part/Serial/Model No" size="2" type="text" required="false"/>
-          <et:Header title="" size="1"/>
-        </et:Headers>
-      </et:Table>    
+  	<td colspan="2" > 
+      <div style="border:1px solid ##ddd; padding:10px; border-radius:10px;">
+        <!--- <span class="red">*</span> Materials captured here will eventually be added into the warehouse inventory. --->
+        <et:Table allowInput id="ItemFromWO" bind="WorkOrderId" Event="keyup" 
+          data="modules/ajax/warehouse.cfm?cmd=getWorkOrderNI">
+          <et:Headers>
+            <et:Header title="Non Stocked Materials/Services" size="5" type="text"/>
+            <et:Header title="Qty" size="1" type="int"/>
+            <et:Header title="UOM" size="1" type="text">
+              <et:Select listvalue="#ValueList(qUM.Title,'`')#" delimiters="`"/>
+            </et:Header>
+            <et:Header title="OEM" size="1" type="text" required="false"/>
+            <et:Header title="VPN" size="2" type="text" required="false"/>
+            <et:Header title="Create ICN" size="1" type="text" required>
+              <et:Select listvalue="Yes,No"/>
+            </et:Header>
+            <et:Header title="" size="1"/>
+          </et:Headers>
+        </et:Table> 
+      </div>   
     </td>
   </tr>
   <tr>
-  	<td colspan="2"><hr/></td>
+  	<td colspan="2">&nbsp;</td>
   </tr>
   <tr>
   	<td colspan="2"> 
-      <et:Table allowInput height="222px" id="DirectItems" bind="WorkOrderId" Event="keyup" 
-        data="modules/ajax/warehouse.cfm?cmd=getWorkOrder">
-        <et:Headers>
-          <et:Header title="Materials from Warehouse" size="7" type="int">
-            <et:Select ListValue="#Valuelist(qItem.ItemId,'`')#" ListDisplay="#Valuelist(qItem.ItemDescription,'`')#" delimiters="`"/>
-          </et:Header>
-          <et:Header title="Qty" size="2" type="int" />
-          <et:Header title="Unit Price" size="2" type="float" required="false"/>
-          <et:Header title="" size="1"/>
-        </et:Headers>
-      </et:Table> 
+      <div style="border:1px solid ##ddd; padding:10px; border-radius:10px;">
+        <et:Table allowInput id="DirectItems" bind="WorkOrderId" Event="keyup" 
+          data="modules/ajax/warehouse.cfm?cmd=getWorkOrder">
+          <et:Headers>
+            <et:Header title="Warehouse Materials" size="7" type="int">
+              <et:Select ListValue="#Valuelist(qItem.ItemId,'`')#" ListDisplay="#Valuelist(qItem.ItemDescription,'`')#" delimiters="`"/>
+            </et:Header>
+            <et:Header title="Qty" size="2" type="int" />
+            <et:Header title="Unit Price" size="2" type="float" required="false"/>
+            <et:Header title="" size="1"/>
+          </et:Headers>
+        </et:Table> 
+      </div>
     </td>
   </tr>
+  
 </table>
 
 </div>
@@ -123,18 +132,18 @@ function lookupWorkOrder() {
         },
         onSuccess: response => {
             if (response?.success) {
-                const fields = {
-                    'Note': response.data.note || '',
-                    'DepartmentId': response.data.unit_id || '',
-                    'UnitId': response.data.unit_id || ''
-                };
+              const fields = {
+                'Note': response.data.note || '',
+                'DepartmentId': response.data.unit_id || '',
+                'UnitId': response.data.unit_id || ''
+              };
 
-                Object.entries(fields).forEach(([field, value]) => {
-                    const element = document.getElementById(`__transaction_c_all_mrni0frm${field}`);
-                    if (element) element.value = value;
-                });
+              Object.entries(fields).forEach(([field, value]) => {
+                const element = document.getElementById(`__transaction_c_all_mrni0frm${field}`);
+                if (element) element.value = value;
+              });
             } else {
-                alert('Work Order not found.');
+              alert('Work Order not found.');
             }
         },
         onFailure: () => alert('Failed to lookup Work Order.')

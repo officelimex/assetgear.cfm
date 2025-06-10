@@ -101,9 +101,9 @@
                     #qOI.Description#
                   </cfif>
                 </td>
-                <td>#qOI.Quantity# #qOI.UM#</td>
-                <td>#qOI.Maker# </td>
-                <td>#qOI.VPN# </td>
+                <td>#qOI.Quantity# #qOI.UOM##qOI.UM#</td>
+                <td>#qOI.Maker##qOI.OEM#</td>
+                <td>#qOI.VPN##qOI.WOItemVPN#</td>
               </tr>
             </cfloop>
           </table>

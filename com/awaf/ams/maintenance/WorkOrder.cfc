@@ -82,6 +82,7 @@
  		<cfset this.WORK_ORDER_ITEM_SQL = '
 		    SELECT
 					woi.*,
+					woi.Others as WOItemVPN,
 					i.Status,i.Obsolete,i.Status as ItemStatus,i.Code,
 					CONVERT(CONCAT("[",i.Code,"] ",i.Description, " [",i.VPN,"] " ,"~",i.ItemId) USING utf8) ItemDescription, 
 					i.Description Item, i.VPN, i.Maker,
@@ -253,7 +254,6 @@
 			<cfset wo.AssetId = listFirst(wo.AssetId)/>
 		</cfif>
 		
-
 		<cfparam name="wo.Status" default="Open"/>
     	<cfif wo.Status eq "">
 			<cfset wo.Status = "Open"/>
@@ -401,22 +401,34 @@
 				<!--- update Work Order Item from temp data --->
 				<cfparam name="wo.WorkOrderItem" default=""/>
 				<cfparam name="wo.WorkOrderItem2" default=""/>
+				<cfparam name="wo.WorkOrderItem3" default=""/>
 				<cfparam name="wo.Contract" default=""/>
 				<cfparam name="wo.Labour" default=""/>
 				<!---  int1 - Description, int0 - Quantity ---->
 				<cfset h.SaveFromTempTable(wo.WorkOrderItem,
-						"work_order_item",
-						"ItemId,Purpose,Quantity",
-						"int0,text0,int1",
-						"WorkOrderItemId","WorkOrderId",WOId)/>
+					"work_order_item",
+					"ItemId,Purpose,Quantity",
+					"int0,text0,int1",
+					"WorkOrderItemId","WorkOrderId",WOId)/>
 
 				<cfset h.SaveFromTempTable(wo.WorkOrderItem2,
-						"work_order_item",
-						"Description,Quantity,UOM,OEM,Others",
-						"text0,int0,text1,text2,text3",
-						"WorkOrderItemId","WorkOrderId",WOId)/>
+					"work_order_item",
+					"Description,Quantity,UOM,OEM,Others",
+					"text0,int0,text1,text2,text3",
+					"WorkOrderItemId","WorkOrderId",WOId)/>
+				<!--- auto load others field for WorkOrderItem3 in temp table --->
+<!--- 				<cfquery>
+					UPDATE temp_data SET 
+						`text1` = "JB"
+					WHERE `Session` = "#wo.WorkOrderItem3#"
+				</cfquery>
+				<cfset h.SaveFromTempTable(wo.WorkOrderItem3,
+					"work_order_item",
+					"Description,Quantity,Others",
+					"text0,int0,text1",
+					"WorkOrderItemId","WorkOrderId", WOId)/> --->
 	
-				<!--- check unitprice of spares and make sure there is value --->
+				<!--- check unit price of spares and make sure there is value --->
 				<!--- <cfif IsDate(wo.DateClosed)> --->
 					<cfquery name="qsp">
 						SELECT UnitPrice FROM work_order_item WHERE ItemId IS NULL AND WorkOrderId = #WOId#

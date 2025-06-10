@@ -9,6 +9,7 @@
 <cfset Id5 = "#woId#_5"/>
 <cfset Id6 = "#woId#_6"/>
 <cfset Id7 = "#woId#_7"/>
+<cfset Id8 = "#woId#_8"/>
 
 <cfoutput>
 
@@ -188,10 +189,10 @@
 				</et:Table>
 			</div>
 			<div id="#Id3#">
-				<div class="alert alert-info">Use this area to add materials not stocked in the warehouse</div>
+				<div class="alert alert-info">Use this area to add materials not stocked in the warehouse or service related activities</div>
 				<et:Table allowInput height="222px" id="WorkOrderItem2">
 					<et:Headers>
-						<et:Header title="Material Description" size="5" type="text"/>
+						<et:Header title="Material/Service Description" size="5" type="text"/>
 						<et:Header title="Qty" size="1" type="int"/>
 						<et:Header title="UOM" size="1" type="text">
           		<et:Select listvalue="#ValueList(qUM.Title,'`')#" delimiters="`"/>
@@ -202,7 +203,19 @@
 					</et:Headers>
 				</et:Table>
 			</div>
-			<div id="#Id4#"><!--- Labour --->
+<!--- 			<div id="#Id4#">
+				<div class="alert alert-info">Use this area to add service-related items such as repairs, maintenance, or external work. These items are typically not physical inventory but are essential to the request.
+				</div>
+				<et:Table allowInput height="222px" id="WorkOrderItem3">
+					<et:Headers>
+						<et:Header title="Service Description" size="10" type="text"/>
+						<et:Header title="Qty" size="1" type="int"/>
+						<et:Header title="" size="1"/>
+					</et:Headers>
+				</et:Table>
+			</div> --->
+						
+			<div id="#Id5#"><!--- Labour --->
 				<et:Table allowInput height="190px" id="Labour">
 					<et:Headers>
 						<et:Header title="Employee" size="4" type="int">
@@ -214,7 +227,7 @@
 					</et:Headers>
 				</et:Table>
 			</div>
-			<div id="#Id7#"><!--- Labour --->
+			<div id="#Id6#"><!--- Labour --->
 				<table width="100%" border="0">
 					<tr>
 						<td valign="top">
@@ -223,7 +236,7 @@
 					</tr>
 				</table>
 			</div>
-			<div id="#Id5#"><!--- Contractor --->
+			<div id="#Id7#"><!--- Contractor --->
 				<et:Table allowInput height="222px" id="Contract">
 					<et:Headers>
 						<et:Header title="Contractor" size="5" type="text"/>
@@ -236,32 +249,33 @@
 					</et:Headers>
 					</et:Table>
 			</div>
-			<div id="#Id6#">
+			<div id="#Id8#">
 				<div class="alert alert-info">Use this area to add third party documents for easy access such as invoice, receipt, or any other type of document.</div>
 				<u:UploadFile id="Attachments" table="work_order" pk="#url.id#" />
 			</div>
-
-
-				<nt:NavTab renderTo="#woId#">
-					<nt:Tab>
-						<nt:Item title="Open Section" isactive/>
-						<nt:Item title="Warehouse Inventory"/>
-						<nt:Item title="Non-Stocked Materials"/>
-						<nt:Item title="Labour Section"/>
-						<nt:Item title="Supervision"/>
-						<nt:Item title="Contractors"/>
-						<nt:Item title="Documents"/>
-					</nt:Tab>
-					<nt:Content>
-						<nt:Item id="#Id1#" isactive/>
-						<nt:Item id="#Id2#"/>
-						<nt:Item id="#Id3#"/>
-						<nt:Item id="#Id4#"/>
-						<nt:Item id="#Id7#"/>
-						<nt:Item id="#Id5#"/>
-						<nt:Item id="#Id6#"/>
-					</nt:Content>
-				</nt:NavTab>
+				
+			<nt:NavTab renderTo="#woId#">
+				<nt:Tab>
+					<nt:Item title="Open Section" isactive/>
+					<nt:Item title="Warehouse Inventory"/>
+					<nt:Item title="Non-Stocked Materials/Services"/>
+					<!--- <nt:Item title="Service Related Items"/> --->
+					<nt:Item title="Labour Section"/>
+					<nt:Item title="Supervision"/>
+					<nt:Item title="Contractors"/>
+					<nt:Item title="Documents"/>
+				</nt:Tab>
+				<nt:Content>
+					<nt:Item id="#Id1#" isactive/>
+					<nt:Item id="#Id2#"/>
+					<nt:Item id="#Id3#"/>
+					<!--- <nt:Item id="#Id4#"/> --->
+					<nt:Item id="#Id5#"/>
+					<nt:Item id="#Id6#"/>
+					<nt:Item id="#Id7#"/>
+					<nt:Item id="#Id8#"/>
+				</nt:Content>
+			</nt:NavTab>
 
 				<cfif url.id eq 0>
 					<f:ButtonGroup>
@@ -304,7 +318,6 @@
 					$('_assetLocId').set('value', assetInfo.aid);
 					$('_assetId').set('value', assetInfo.id);
 				}
-
 			}
 		});
 	</script>

@@ -72,6 +72,19 @@
 			INNER JOIN um ON um.UMId = wi.UMId
 		'/>
 
+		<cfset this.MR_ITEM_SQL_EXTENDED = '
+			SELECT
+				mri.*,
+				mri.Description MRIItemDescription,
+				CONCAT(wi.Description,"~",wi.ItemId) ItemDescription, 
+				wi.Description, wi.Description MainItemDescription,	wi.Obsolete, wi.Status,
+				wi.Currency, wi.Code, wi.VPN ItemVPN, wi.Maker,
+				um.Code UM
+			FROM whs_mr_item mri
+			LEFT JOIN whs_item wi ON wi.ItemId = mri.ItemId
+			LEFT JOIN um ON um.UMId = wi.UMId
+		'/>
+
 		<cfset this.MR_NI_ITEM_SQL = '
 			SELECT
 				mri.*, mri.VPN Item
@@ -259,6 +272,40 @@
 		<cfreturn qMRI/>
 	</cffunction>
 
+	<cffunction name="GetMRItemsStocked" return="query" access="public">
+		<cfargument name="mrid" hint="material requisition id" required="true" type="numeric"/>
+
+		<cfquery name="qMRI">
+			#this.MR_ITEM_SQL_EXTENDED#
+			WHERE mri.MRId = <cfqueryparam value="#arguments.mrid#" cfsqltype="cf_sql_integer"/> 
+				AND mri.ItemId IS NOT NULL
+		</cfquery>
+
+		<cfreturn qMRI/>
+	</cffunction>
+
+	<cffunction name="GetMRItemsNonStocked" return="query" access="public">
+		<cfargument name="mrid" hint="material requisition id" required="true" type="numeric"/>
+
+		<cfquery name="qMRI">
+			#this.MR_ITEM_SQL_EXTENDED#
+			WHERE mri.MRId = <cfqueryparam value="#arguments.mrid#" cfsqltype="cf_sql_integer"/> 
+				AND mri.ItemId IS NULL
+		</cfquery>
+
+		<cfreturn qMRI/>
+	</cffunction>
+
+	<cffunction name="GetMRItemsAll" return="query" access="public">
+		<cfargument name="mrid" hint="material requisition id" required="true" type="numeric"/>
+
+		<cfquery name="qMRI">
+			#this.MR_ITEM_SQL_EXTENDED#
+			WHERE mri.MRId = <cfqueryparam value="#arguments.mrid#" cfsqltype="cf_sql_integer"/> 
+		</cfquery>
+
+		<cfreturn qMRI/>
+	</cffunction>
 	
 	<cffunction name="GetPOItems" return="query" access="public">
 		<cfargument name="poid" hint="po id" required="true" type="numeric"/>
@@ -383,26 +430,50 @@
 					</cfquery>
 					<cfset qmri = h.GetTempDataToUpdate(mr.ItemFromWO)/>
 					<cfloop query="qmri">
-						<cfquery result="rt">
-							INSERT INTO whs_item SET
-								Description = <cfqueryparam cfsqltype="cf_sql_varchar" value="#qmri.text0#"/>,
-								UMId 				= <cfqueryparam cfsqltype="cf_sql_varchar" value="#itemObj.GetUMByCode(qmri.text1).UMId#"/>,
-								VPN 				= <cfqueryparam cfsqltype="cf_sql_varchar" value="#qmri.text3#"/>,
-								Maker 			= <cfqueryparam cfsqltype="cf_sql_varchar" value="#qmri.text2#"/>,
-								QOR 				= <cfqueryparam cfsqltype="cf_sql_integer" value="#qmri.int0#"/>
-						</cfquery>
-						<cfset item_id = setCode(rt.GENERATED_KEY)/>
+						<cfset item_id = 0/>
+						<cfset _vpn = qmri.text3/>
+						<cfset _maker = qmri.text2/>
+						<cfset _vpn = replace(_vpn, 'text4','')/>
+						<cfset _maker = replace(_maker, 'text3','')/>
+						<!--- replace ` in item description --->
+						<cfset _desc = replace(qmri.text0, '`','','all')/>
+
+						<cfif qmri.text4 eq "Yes">
+							<cfquery result="rt">
+								INSERT INTO whs_item SET
+									Description = <cfqueryparam cfsqltype="cf_sql_varchar" value="#_desc#"/>,
+									UMId 				= <cfqueryparam cfsqltype="cf_sql_varchar" value="#itemObj.GetUMByCode(qmri.text1).UMId#"/>,
+									VPN 				= <cfqueryparam cfsqltype="cf_sql_varchar" value="#_vpn#"/>,
+									Maker 			= <cfqueryparam cfsqltype="cf_sql_varchar" value="#_maker#"/>,
+									QOR 				= <cfqueryparam cfsqltype="cf_sql_integer" value="#qmri.int0#"/>
+							</cfquery>
+							<cfset item_id = setCode(rt.GENERATED_KEY)/>
+						</cfif>
+
 						<cfquery>
 							INSERT INTO whs_mr_item SET 
-								ItemId 		= <cfqueryparam cfsqltype="cf_sql_integer" value="#item_id#"/>,
+								<cfif item_id neq 0>
+									ItemId 	= <cfqueryparam cfsqltype="cf_sql_integer" value="#item_id#"/>,
+								<cfelse>
+									Description = <cfqueryparam cfsqltype="cf_sql_varchar" value="#_desc#"/>,
+									VPN 		= <cfqueryparam cfsqltype="cf_sql_varchar" value="#_vpn#"/>,
+									Maker 	= <cfqueryparam cfsqltype="cf_sql_varchar" value="#_maker#"/>,
+									UOM = <cfqueryparam cfsqltype="cf_sql_varchar" value="#qmri.text1#"/>,
+								</cfif>
 								Quantity 	= <cfqueryparam cfsqltype="cf_sql_integer" value="#qmri.int0#"/>,
-								MRId 			= <cfqueryparam cfsqltype="cf_sql_integer" value="#mrid#"/>,
-								UnitPrice = <cfqueryparam cfsqltype="cf_sql_float" value="#qmri.float0#"/>
+								MRId 			= <cfqueryparam cfsqltype="cf_sql_integer" value="#mrid#"/>
 						</cfquery> 
 						<cfif val(form.WorkOrderId)>
 							<cfquery>
 								INSERT INTO work_order_item SET 
-									ItemId = #item_id#,
+									<cfif item_id neq 0>
+										ItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#item_id#"/>,
+									<cfelse>
+										Description = <cfqueryparam cfsqltype="cf_sql_varchar" value="#_desc#"/>,
+										Others = <cfqueryparam cfsqltype="cf_sql_varchar" value="#_vpn#"/>,
+										OEM = <cfqueryparam cfsqltype="cf_sql_varchar" value="#qmri.text2#"/>,
+										UOM = <cfqueryparam cfsqltype="cf_sql_varchar" value="#qmri.text1#"/>,
+									</cfif>
 									WorkOrderId = #val(form.WorkOrderId)#,
 									Quantity = #val(qmri.int0)#,
 									Status = "Close"
@@ -440,6 +511,7 @@
 							</cfquery>
 						</cfif>
 					</cfloop>
+
 				</cfif>
 				<!--- update totalvalue in MR --->
 				<cfquery>
@@ -483,20 +555,22 @@
 						WHERE wo.WorkOrderId = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.WorkOrderId#"/>
 					</cfquery>
 					
-					<cfmail 
+					<cfif application.mode EQ application.LIVE>
+						<cfmail 
 							from="AssetGear <do-not-reply@assetgear.net>"
 							bcc="adexfe@live.com" 
 							to="#to_email#" cc="#wh_admin#,#qWOC.Email#" subject="Material Requisition for WO ###form.WorkOrderId#" type="html">
-						Hello,
-						<p>
-								The following work order requires your attention & approval :
-								<br/> Work Order ###form.WorkOrderId# : #qWOC.Description#
-						</p>
-						<p>
-							Kindly login to <a href="#application.site.url#">AssetGear</a>
-						</p>
-						<p>Thank you<br/>
-					</cfmail>
+							Hello,
+							<p>
+									The following work order requires your attention & approval :
+									<br/> Work Order ###form.WorkOrderId# : #qWOC.Description#
+							</p>
+							<p>
+								Kindly login to <a href="#application.site.url#">AssetGear</a>
+							</p>
+							<p>Thank you<br/>
+						</cfmail>
+					</cfif>
 
 				</cfif>
 

@@ -802,10 +802,11 @@
 									`text1` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#qE.UOM#"/>,
 									`text2` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#qE.OEM#"/>,
 									`text3` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#qE.Others#"/>,
+									`text4` = "No",
 									`Flag` = "n",
 									`TimeCreated` = <cfqueryparam cfsqltype="cf_sql_date" value="#now()#"/>
 							</cfquery>
-							[#SerializeJSON(qE.Description)#,#qE.Quantity#,#SerializeJSON(qE.UOM)#,#SerializeJSON(qE.OEM)#,#SerializeJSON(qE.Others)#,#rt.GENERATED_KEY#]<cfif qE.recordcount neq qE.currentrow>,</cfif>
+							[#SerializeJSON(qE.Description)#,#qE.Quantity#,#SerializeJSON(qE.UOM)#,#SerializeJSON(qE.OEM)#,#SerializeJSON(qE.Others)#,"No",#rt.GENERATED_KEY#]<cfif qE.recordcount neq qE.currentrow>,</cfif>
 						</cfloop>
 					]}
 			</cfcase>

@@ -63,7 +63,7 @@
 
 	<g:Event command="editA">
     <g:Window 
-      title="'Work order ##' +d[0]" width="990px" height="500px" 
+      title="'Work order ##' +d[0]"  
       url="'modules/maintenance/workorder/get_page.cfm?cid=#url.cid#&filter=#url.filter#'" 
       id="save_wo_window">
       
@@ -84,7 +84,7 @@
     </g:Window>
   </g:Event>
 	<g:Event command="viewWH">
-    <g:Window title="'Work order ##' +d[0]" width="990px" height="500px" url="'modules/maintenance/workorder/get_page.cfm?cid=#url.cid#&filter=#url.filter#&other=true'" id="">
+    <g:Window title="'Work order ##' +d[0]"  url="'modules/maintenance/workorder/get_page.cfm?cid=#url.cid#&filter=#url.filter#&other=true'" id="">
       <!--- <g:Button value="Approve & Send to FS" executeURL="'modules/ajax/maintenance.cfm?cmd=WHApprove'" class="btn-success"/> --->
       
       <!--- if its a warehouse item use this process --->

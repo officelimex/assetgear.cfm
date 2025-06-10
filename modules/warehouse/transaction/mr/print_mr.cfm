@@ -105,11 +105,13 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
 <tr>
   <td>
     <cfset service = false/>
-    <cfset qMRI = application.com.Transaction.GetMRItems(url.id)/>
+    <cfset qMRI1 = application.com.Transaction.GetMRItemsStocked(url.id)/>
+    <cfset qMRI2 = application.com.Transaction.GetMRItemsNonStocked(url.id)/>
+    
     <cfset i = 0/>
-    <cfloop query="qMRI">
+    <cfloop query="qMRI1">
       <cfset i++/>
-      <cfif qMRI.ItemId EQ 44143> 
+      <cfif qMRI1.ItemId EQ 44143> 
         <cfset service = true/>
       </cfif>
     </cfloop>
@@ -117,6 +119,7 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
     <cfif i EQ 0>
       <cfset service = true/>
     </cfif>
+    <cfset gs = 0/>
 
     <cfif service>
       <p><b>SCOPE OF WORK</b></p>
@@ -124,49 +127,85 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
       <br/>
     </cfif>
 
-    <table width="100%" border="0" cellpadding="0" cellspacing="0" class="tbl">
-      <tr>
-        <th class="left" width="1px">S/N</th>
-        <th class="center" width="1px">QTY</th>
-        <th class="center" width="1px">UOM</th>
-        <th class="center" width="99%">DESCRIPTION (ICN, VPN)</th>
-        <th class="center" width="1px">QOH</th>
-        <th class="center" width="1px">QOO</th>
-        <th class="center" width="1px">QOR</th>
-        <th class="a-right" width="1px">Unit Cost</th>
-        <th class="a-right" width="1px">Total<br/> <cfif qMR.Currency eq "NGN">(NGN)<cfelse>(USD)</cfif> </th>
-        </tr>
-        <cfset gs = 0/>
-      <cfloop query="qMRI">
-        <tr <cfif qMRI.Currentrow eq qMRI.Recordcount> class="bottom" </cfif>>
-          <td valign="top" class="left">#qMRI.Currentrow#</td>
-          <td valign="top" align="right">#qMRI.Quantity#</td>
-          <td valign="top" >#qMRI.UM#</td>
-          <td valign="top">
-            <cfif qMRI.ItemVPN neq "">VPN: <b>#qMRI.ItemVPN#</b><br/></cfif>
-            [#qMRI.Code#] #replace(qMRI.Description,chr(13),'<br/>','all')#
-            <!--- <cfif qMRI.Remark neq "">
-              <br/>#qMRI.Remark#
-            </cfif> --->
-          </td>
-          <td align="center" valign="top" >#val(qMRI.QOH)#</td>
-          <td align="center" valign="top" >#val(qMRI.QOO)#</td>
-          <td align="center" valign="top" >
-            <cfif service>0<cfelse>#val(qMRI.QOR)#</cfif>
-          </td>
-          <td align="right" valign="top">#Numberformat(qMRI.UnitPrice,'9,999.99')#</td>
-          <td align="right" valign="top">
-            <cfset qu = val(qMRI.Quantity)*val(qMRI.UnitPrice)/>
-            #NumberFormat(val(qMRI.Quantity)*val(qMRI.UnitPrice),'9,999.99')#</td>
-            <cfset gs = gs + qu/>
+    <cfif qMRI1.recordcount>
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" class="tbl">
+        <tr>
+          <th class="left" width="1px">S/N</th>
+          <th class="center" width="1px">QTY</th>
+          <th class="center" width="1px">UOM</th>
+          <th class="center" width="99%">DESCRIPTION (ICN, VPN)</th>
+          <th class="center" width="1px">QOH</th>
+          <th class="center" width="1px">QOO</th>
+          <th class="center" width="1px">QOR</th>
+          <th class="a-right" width="1px">Unit Cost</th>
+          <th class="a-right" width="1px">Total<br/> <cfif qMR.Currency eq "NGN">(NGN)<cfelse>(USD)</cfif> </th>
           </tr>
-        </cfloop>
-      <tr  class="bottom">
-        <td colspan="8" valign="top" class="no-bottom">&nbsp;</td>
-        <td align="right" class="cbg" valign="top">#numberformat(gs,'9,999.99')#</td>
-        </tr>
+          <cfset gs = 0/>
+          <cfloop query="qMRI1">
+          <tr <cfif qMRI1.Currentrow eq qMRI1.Recordcount> class="bottom" </cfif>>
+            <td valign="top" class="left">#qMRI1.Currentrow#</td>
+            <td valign="top" align="right">#qMRI1.Quantity#</td>
+            <td valign="top" >#qMRI1.UM#</td>
+            <td valign="top">
+              <cfif qMRI1.ItemVPN neq "">
+                VPN: <b>#qMRI1.ItemVPN#</b><br/><br/>
+              </cfif>
+              <cfset desc = replace(qMRI1.MainItemDescription,chr(13),'<br/>','all')/>
+              <cfset desc = replace(desc,chr(10),'<br/>','all')/>
+              [#qMRI1.Code#] #desc#
+              <!--- <cfif qMRI1.Remark neq "">
+                <br/>#qMRI1.Remark#
+              </cfif> --->
+            </td>
+            <td align="center" valign="top" >#val(qMRI1.QOH)#</td>
+            <td align="center" valign="top" >#val(qMRI1.QOO)#</td>
+            <td align="center" valign="top" >
+              <cfif service>0<cfelse>#val(qMRI1.QOR)#</cfif>
+            </td>
+            <td align="right" valign="top">#Numberformat(qMRI1.UnitPrice,'9,999.99')#</td>
+            <td align="right" valign="top">
+              <cfset qu = val(qMRI1.Quantity)*val(qMRI1.UnitPrice)/>
+              #NumberFormat(val(qMRI1.Quantity)*val(qMRI1.UnitPrice),'9,999.99')#</td>
+              <cfset gs = gs + qu/>
+            </tr>
+          </cfloop>
+        <tr  class="bottom">
+          <td colspan="8" valign="top" class="no-bottom">&nbsp;</td>
+          <td align="right" class="cbg" valign="top">#numberformat(gs,'9,999.99')#</td>
+          </tr>
 
-    </table></td>
+      </table>
+    </cfif>
+
+
+    <cfif qMRI2.recordcount>
+      <br/>
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" class="tbl">
+        <tr>
+          <th class="left" width="1px">S/N</th>
+          <th class="center" width="1px">QTY</th>
+          <th class="center" width="1px">UOM</th>
+          <th class="center" width="99%">MATERIAL/SERVICE DESCRIPTION</th>
+          <th class="a-right" width="1px">VPN</th>
+          <th class="a-right" width="1px">OEM</th>
+          </tr>
+          <cfset gs = 0/>
+          <cfloop query="qMRI2">
+          <tr <cfif qMRI2.Currentrow eq qMRI2.Recordcount> class="bottom" </cfif>>
+            <td valign="top" class="left">#qMRI2.Currentrow#</td>
+            <td valign="top" align="right">#qMRI2.Quantity#</td>
+            <td valign="top" >#qMRI2.UOM#</td>
+            <td valign="top">
+              #replace(qMRI2.Description,chr(13),'<br/>','all')#
+            </td>
+            <td valign="top">#qMRI2.VPN#&nbsp;</td>
+            <td valign="top">#qMRI2.Maker#&nbsp;</td>
+      
+          </cfloop>
+      </table>
+    </cfif>
+    
+  </td>
 </tr>
 <tr>
   <td>
@@ -207,20 +246,21 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
           <td align="right">Title: </td>
           <td nowrap="nowrap">#qMR.WOCreatorPosition#</td>
         </tr>
-        <tr>
-          <td valign="bottom" align="right">Signature: </td>
-          <td height="27px">
-            <div style="top:62px;position: absolute; z-index: 300; ">...................................</div>
-            <cfset fl = util.GetSignaturePath(qMR.WOCreatedByUserId)/>
-            <cfif len(fl)>
-              <cfhttp url="#fl#" method="get" result="imageData" />
-              <cfset base64Image = ToBase64(imageData.Filecontent) />
-              <div style="position: relative;">
-                <img style="left:5px;bottom:-20px;position: absolute;z-index: 1;" src="data:image/png;base64,#base64Image#" height="30"/> 
-              </div>
-            </cfif>
-          </td>
-        </tr>
+        <cfset fl = util.GetSignaturePath(qMR.WOCreatedByUserId)/>
+        <cfif len(fl)>
+          <tr>
+            <td valign="bottom" align="right">Signature: </td>
+            <td height="27px">
+                <div style="top:62px;position: absolute; z-index: 300; ">...................................</div>
+                <cfhttp url="#fl#" method="get" result="imageData" />
+                <cfset base64Image = ToBase64(imageData.Filecontent) />
+                <div style="position: relative;">
+                  <img style="left:5px;bottom:-20px;position: absolute;z-index: 1;" src="data:image/png;base64,#base64Image#" height="30"/> 
+                </div>
+            </td>
+          </tr>
+        </cfif>
+
         <tr>
           <td align="right">Date: </td>
           <td>

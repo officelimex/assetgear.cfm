@@ -10,10 +10,10 @@
 <cfset Id1 = "#woId#_1"/>
 <cfset Id2 = "#woId#_2"/>
 <cfset Id3 = "#woId#_3"/>
-<cfset Id4 = "#woId#_4"/>
 <cfset Id5 = "#woId#_5"/>
 <cfset Id6 = "#woId#_6"/>
 <cfset Id7 = "#woId#_7"/>
+<cfset Id8 = "#woId#_8"/>
 
 <cfoutput>
 <cfimport taglib="../../../assets/awaf/tags/xNavTab_1000/" prefix="nt" />
@@ -63,7 +63,7 @@
 <f:Form id="#woId#frm" action="modules/ajax/maintenance.cfm?cmd=SaveWorkOrder" EditId="#url.id#">
     <input type="hidden" value="#qWO.PMTaskId#" name="PMTaskId"/>
 	<input type="hidden" value="#qWO.ServiceRequestId#" name="ServiceRequestId"/>
-	<div id="#Id1#" style="height:420px;">
+	<div id="#Id1#" >
         <table width="100%" border="0">
           <tr>
             <td colspan="2" valign="top">
@@ -113,26 +113,24 @@
             <td colspan="2" ><f:CheckBox name="AssetLocationIds" ListValue="#ValueList(qAL.AssetLocationId,'`')#" ListDisplay="#ValueList(qAL.Location,'`')#" showlabel label="Asset Location" delimiters="`" bind="AssetId" Event="change" data="modules/ajax/maintenance.cfm?cmd=LoadAssetLocations" selected="#qWO.AssetLocationIds#" inline/></td>
           </tr>          <tr>
             <td colspan="2">
-                <table width="99%">
-                    <tr>
-                    	<td width="160px" he valign="top" nowrap="nowrap" align="center">Work Details:</td>
-                    	<td valign="top">
-
-<script>
-	<cfset dd= "_#CreateUUID()#"/>
-	CKEDITOR.replaceAll('#dd#');
-	var editor = CKEDITOR.instances['WorkDetails'], _txteditor = $$('.#dd#')[0];
-	editor.on( 'key', function( e ) {
-		_txteditor.set('text',e.editor.getData());
-	});
-	editor.on( 'blur', function( e ) {
-		_txteditor.set('text',e.editor.getData());
-	});
-</script>
-                        <textarea id="WorkDetails" name="WorkDetails" style="width:85%; height:110px;" class="#dd#">#qWO.WorkDetails#</textarea></td>
-                    </tr>
-
-                </table>
+							<table width="99%">
+								<tr>
+									<td width="160px" he valign="top" nowrap="nowrap" align="center">Work Details:</td>
+									<td valign="top">
+										<script>
+											<cfset dd= "_#CreateUUID()#"/>
+											CKEDITOR.replaceAll('#dd#');
+											var editor = CKEDITOR.instances['WorkDetails'], _txteditor = $$('.#dd#')[0];
+											editor.on( 'key', function( e ) {
+												_txteditor.set('text',e.editor.getData());
+											});
+											editor.on( 'blur', function( e ) {
+												_txteditor.set('text',e.editor.getData());
+											});
+										</script>
+										<textarea id="WorkDetails" name="WorkDetails" style="width:85%; height:110px;" class="#dd#">#qWO.WorkDetails#</textarea></td>
+								</tr>
+							</table>
             </td>
           </tr>
         </table>
@@ -164,14 +162,14 @@
     </div>
 
 		<div id="#Id3#">
-    	<div class="alert alert-info">Use this area to add materials not stocked in the warehouse</div>
+    	<div class="alert alert-info">Use this area to add materials not stocked in the warehouse or service related activities</div>
 			<cfquery name="qOI_2" dbtype="query">
 				SELECT * FROM qOI
 				WHERE ItemId = ''
 			</cfquery>
 			<et:Table allowInput="#aInput#" height="200px" id="WorkOrderItem2">
 				<et:Headers>
-					<et:Header title="Material Description" size="5" type="text"/>
+					<et:Header title="Material/Service Description" size="5" type="text"/>
 					<et:Header title="Qty" size="1" type="int"/>
 					<et:Header title="UOM" size="1" type="text">
 						<et:Select listValue="#ValueList(qUM.Title,'`')#" delimiters="`"/>
@@ -184,7 +182,7 @@
 			</et:Table>
     </div>
 
-    <div id="#Id4#"><!--- Labour --->
+    <div id="#Id5#"><!--- Labour --->
     	<et:Table allowInput height="210px" id="Labour">
 				<et:Headers>
 					<et:Header title="Employee" size="4" type="int">
@@ -199,7 +197,7 @@
     </div>
 
 		<!--- Contractor --->
-    <div id="#Id5#">
+    <div id="#Id6#">
 			<et:Table allowInput height="210px" id="Contract">
 				<et:Headers>
 					<et:Header title="Contractor" size="4" type="text"/>
@@ -214,46 +212,46 @@
 			</et:Table>
     </div>
 
-    <div id="#Id6#" align="center">
-        <table width="100%" border="0">
-          <tr>
-            <td width="50%" valign="top">
-            	<f:DatePicker name="DateClosed" label="Date Closed" value="#qWO.DateClosed#" type="datetime"/>
-            </td>
-            <td class="horz-div" valign="top">
-            	<f:Select name="SupervisedByUserId" autoselect label="Supervised By" delimiters="`" ListValue="#Valuelist(qCU.UserId,'`')#" ListDisplay="#Valuelist(qCU.Names,'`')#" Selected="#qWO.SupervisedByUserId#" class="span9" required/>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="2">&nbsp;</td>
-          </tr>
-          <tr>
-          	<td colspan="2">
-            	<f:TextArea name="WorkDone" label="Work Done" value="#qWO.WorkDone#" class="span11" rows="8"/>
-            </td>
-          </tr>
-          <tr>
-          	<td>
-							<cfif (qWO.DepartmentId eq request.userinfo.departmentid)>
-								<cfif request.IsSV || request.IsPS || request.IsMGR>
-									<f:Select name="Status" required ListValue="Open,Close,Suspended,Part on hold,Declined" Selected="#qWO.Status#" class="span6"/>
-								<cfelse>
-									<f:Select name="Status" ListValue="Open,Close,Suspended" Selected="#qWO.Status#" class="span6"/>
-								</cfif>
+    <div id="#Id7#" align="center">
+			<table width="100%" border="0">
+				<tr>
+					<td width="50%" valign="top">
+						<f:DatePicker name="DateClosed" label="Date Closed" value="#qWO.DateClosed#" type="datetime"/>
+					</td>
+					<td class="horz-div" valign="top">
+						<f:Select name="SupervisedByUserId" autoselect label="Supervised By" delimiters="`" ListValue="#Valuelist(qCU.UserId,'`')#" ListDisplay="#Valuelist(qCU.Names,'`')#" Selected="#qWO.SupervisedByUserId#" class="span9" required/>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">&nbsp;</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<f:TextArea name="WorkDone" label="Work Done" value="#qWO.WorkDone#" class="span11" rows="8"/>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<cfif (qWO.DepartmentId eq request.userinfo.departmentid)>
+							<cfif request.IsSV || request.IsPS || request.IsMGR>
+								<f:Select name="Status" required ListValue="Open,Close,Suspended,Part on hold,Declined" Selected="#qWO.Status#" class="span6"/>
 							<cfelse>
-								<cfif request.IsMGR>
-									<f:Select name="Status" required ListValue="Open,Close,Suspended,Part on hold,Declined" Selected="#qWO.Status#" class="span6"/>
-								<cfelse>
-									<f:Select name="Status" Disabled ListValue="Open,Close,Suspended,Part on hold,Declined" Selected="#qWO.Status#" class="span6"/>
-								</cfif>
+								<f:Select name="Status" ListValue="Open,Close,Suspended" Selected="#qWO.Status#" class="span6"/>
 							</cfif>
-            </td>
-            <td></td>
-          </tr>
-        </table>
+						<cfelse>
+							<cfif request.IsMGR>
+								<f:Select name="Status" required ListValue="Open,Close,Suspended,Part on hold,Declined" Selected="#qWO.Status#" class="span6"/>
+							<cfelse>
+								<f:Select name="Status" Disabled ListValue="Open,Close,Suspended,Part on hold,Declined" Selected="#qWO.Status#" class="span6"/>
+							</cfif>
+						</cfif>
+					</td>
+					<td></td>
+				</tr>
+			</table>
     </div>
 
-    <div id="#Id7#">
+    <div id="#Id8#">
         <cfquery name="qMr" result="rt1">
         	SELECT * FROM whs_mr WHERE WorkOrderId  = #url.Id#
         </cfquery>
@@ -291,6 +289,7 @@
 				<nt:Item title="Open Section" isactive/>
 				<nt:Item title="Warehouse Inventory"/>
 				<nt:Item title="Non-Stocked Materials"/>
+				<!--- <nt:Item title="Service Related Items"/> --->
 				<nt:Item title="Labour Section"/>
 				<nt:Item title="Contractors"/>
 				<nt:Item title="Close Section"/>
@@ -300,10 +299,11 @@
 				<nt:Item id="#Id1#" isactive/>
 				<nt:Item id="#Id2#"/>
 				<nt:Item id="#Id3#"/>
-				<nt:Item id="#Id4#"/>
+				<!--- <nt:Item id="#Id4#"/> --->
 				<nt:Item id="#Id5#"/>
 				<nt:Item id="#Id6#"/>
 				<nt:Item id="#Id7#"/>
+				<nt:Item id="#Id8#"/>
 			</nt:Content>
     </nt:NavTab>
 		<cfset nobutton = true/>
@@ -351,6 +351,11 @@
 </f:Form>
 
 <script>
+	window.addEvent('domready', function() {
+		var targetHeight = $$('.dbx-inner-frame')[0].getSize().y - 80;
+		$('#Id1#').setStyle('height', targetHeight + 'px');
+	});
+
 	function #woId#changePT(d)	{
 		if(d.value == 'm')	{
 		 	$('#Id1#_a').addClass('hide');
