@@ -425,6 +425,7 @@
 	<cfcase value="test">
 		<cfdump var="#getUser(0,0,"WH_SUP,WH")#"/>
 	</cfcase>
+
   <cfcase value="SupApproveWO-WH">
     <cfscript>
 			qW = getWO(url.id)
@@ -1588,6 +1589,31 @@
 	<cfreturn newId/>
 </cffunction>
 
+<cfscript>
+
+	switch (url.cmd) {
+		case "removeFromCriticalList":
+			queryExecute("
+				UPDATE whs_item SET Critical = 'No'
+				WHERE ItemId = #val(form.Id)#
+			")
+
+			application.com.Helper.LogActivity(tbl: 'whs_item', key : form.Id, event: "Removed item from Critical list");
+			writeOutput("Item has been removed from Critical list")
+		break;
+		case "addToCriticalList":
+			queryExecute("
+				UPDATE whs_item SET Critical = 'Yes'
+				WHERE ItemId = #val(form.Id)#
+			")
+
+			application.com.Helper.LogActivity(tbl: 'whs_item', key : form.Id, event: "Added item to Critical list");
+			writeOutput("Item has been added to Critical list")
+		break;
+		default:
+	}
+
+</cfscript>
 
 
 <cfobjectcache action="clear"/>

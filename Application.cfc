@@ -97,12 +97,17 @@ component {
 				break;
 				case "PLR":
 					request.IsPlanner = true;
+					request.IsIT = true;
+					request.IsSup = true;
+					request.IsSV = true;
 				break;
 				case "SUP":
 					request.IsSup = true;
 				break;
 				case "IT":
 					request.IsIT = true;
+					request.IsSup = true;
+					request.IsSV = true;
 				break;
 				case "SV":
 					request.IsSV = true;

@@ -9,6 +9,7 @@
 <cfset Id6 = "#whsId#_6"/>
 <cfset Id7 = "#whsId#_7"/>
 <cfset Id8 = "#whsId#_8"/>
+<cfset Id10 = "#whsId#_10"/>
 
 <cfoutput>
 <cfimport taglib="../../../assets/awaf/tags/xNavTab_1000/" prefix="nt" />
@@ -19,7 +20,7 @@
 <!--- Getting Data From Whs_item--->
 <cfquery name="qWI">
 	SELECT * FROM whs_item
-    WHERE ItemId = #val(url.id)# AND 
+  WHERE ItemId = #val(url.id)# AND 
 	Obsolete = "No" AND Status <> "Deleted"
 </cfquery>
 
@@ -266,15 +267,19 @@
 				</cfloop>
 			</table>
     </div>
-     <nt:NavTab renderTo="#whsId#">
+		<div id="#Id10#">
+			<util:ViewAuditTrail table="whs_item" pk="#url.id#"/>
+		</div>
+    <nt:NavTab renderTo="#whsId#">
 			<nt:Tab>
-					<nt:Item title="General" isactive/>
-					<nt:Item title="Use with"/>
-					<nt:Item title="Attachments"/>
-					<nt:Item title="Custom Field"/>
-					<nt:Item title="Issues"/>
-					<nt:Item title="Receipts"/>
-					<nt:Item title="M.R."/>
+				<nt:Item title="General" isactive/>
+				<nt:Item title="Use with"/>
+				<nt:Item title="Attachments"/>
+				<nt:Item title="Custom Field"/>
+				<nt:Item title="Issues"/>
+				<nt:Item title="Receipts"/>
+				<nt:Item title="M.R."/>
+				<nt:Item title="Audit trail"/>
 			</nt:Tab>
 			<nt:Content>
 				<nt:Item id="#Id1#" isactive/>
@@ -284,13 +289,14 @@
 				<nt:Item id="#Id5#"/>
 				<nt:Item id="#Id6#"/>
 				<nt:Item id="#Id7#"/>
+				<nt:Item id="#Id10#"/>
 			</nt:Content>
-     </nt:NavTab>
+    </nt:NavTab>
 		<cfif url.id eq 0>
 			<f:ButtonGroup>
 				<f:Button value="Create new Item" class="btn-primary" IsSave/>
 			</f:ButtonGroup>
-     </cfif>
+		</cfif>
  </f:Form>
 
 </cfoutput>

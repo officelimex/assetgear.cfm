@@ -95,19 +95,23 @@
 			<cfcase value="getWarehouseItem">
 					<cfset start = (url.page * url.perpage) - (url.perpage)/>
 					<cfparam name="url.ob" default=""/>
+					<cfparam name="url.critical" default=""/>
 
 					<cfquery name="q">
 						#application.com.Item.WAREHOUSE_ITEM_SQL#
 						WHERE
 						<cfif url.ob eq "">
-						Obsolete = "No" AND Status <> "Deleted"
+							Obsolete = "No" AND Status <> "Deleted" AND
 						<cfelse>
-						Obsolete = "Yes" AND Status <> "Deleted"
+							Obsolete = "Yes" AND Status <> "Deleted" AND
 						</cfif>
-
-						<cfif structKeyExists(url,'keyword')>
-							AND (#url.Field# LIKE "%#url.keyword#%")
+						<cfif url.critical eq "Yes">
+							Critical = "Yes" AND Status <> "Deleted" AND
 						</cfif>
+						<cfif structKeyExists(url,'keyword')> 
+							(#url.Field# LIKE "%#url.keyword#%") AND
+						</cfif>
+						1 = 1
 						ORDER BY #url.sort# #url.sortOrder#
 						LIMIT #start#,#url.perpage#
 					</cfquery>
@@ -116,13 +120,17 @@
 							#application.com.Item.WAREHOUSE_ITEM_COUNT_SQL#
 							WHERE
 							<cfif url.ob eq "">
-								Obsolete = "No" AND Status <> "Deleted"
+								Obsolete = "No" AND Status <> "Deleted" AND
 							<cfelse>
-								Obsolete = "Yes" AND Status <> "Deleted"
+								Obsolete = "Yes" AND Status <> "Deleted" AND 
+							</cfif>
+							<cfif url.critical eq "Yes">
+								Critical = "Yes" AND Status <> "Deleted" AND
 							</cfif>
 							<cfif structkeyexists(url,'keyword')>
-				AND (#url.Field# LIKE "%#url.keyword#%")
-			</cfif>
+							 (#url.Field# LIKE "%#url.keyword#%") AND
+							</cfif>
+							1 = 1
 					</cfquery>
 					<cfoutput>
 					{"total": #qT.c#,

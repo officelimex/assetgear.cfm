@@ -2,6 +2,12 @@
 
 	<cffunction name="Init" access="public" returntype="Item">
 
+			<cfset this.WAREHOUSE_ITEM_BASIC_SQL = '
+				SELECT 
+					whi.* 
+				FROM whs_item AS whi
+			'/>
+
 			<cfset this.WAREHOUSE_ITEM_SQL = '
 				SELECT 
 					whi.*, 
@@ -30,6 +36,17 @@
 
 			<cfquery name="qI_">
 				#this.WAREHOUSE_ITEM_SQL#
+				WHERE ItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.wi#">
+			</cfquery>
+
+			<cfreturn qI_/>
+    </cffunction>
+
+    <cffunction name="GetBasicItem" access="public" returntype="query" hint="get al item in the warehouse">
+			<cfargument name="wi" type="numeric" required="yes" hint="get Warehouse Item"/>
+
+			<cfquery name="qI_">
+				#this.WAREHOUSE_ITEM_BASIC_SQL#
 				WHERE ItemId = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.wi#">
 			</cfquery>
 
@@ -87,8 +104,8 @@
 			<cfset _id = form.id/>
 			<cfparam name="form.departmentids" default=""/>
 			<cfparam name="form.Currency" default=""/>
-
-			<cfset h = createobject('component','assetgear.com.awaf.util.helper').init()/>
+			
+			<cfset h = application.com.Helper/>
 
 			<!--- get associate asset (Int0 = AssetIds)--->
 			<cfset assetIds_ = h.GetTempDataToUpdate(form.AssetIds)/>
@@ -101,11 +118,16 @@
 			<cfset form.Description = replace(form.Description,'`','"','all')/>
 			<cfset form.Code = replace(form.Code,'`','"','all')/>
 
+			<cfset logInv = {}/>
+			<cfset event = "New"/>
+
 			<cftransaction action="begin">
 				<cfquery result="rt">
 						<cfif form.id eq 0>
 								INSERT INTO
 						<cfelse>
+								<cfset logInv = GetBasicItem(form.id)/>
+								<cfset event = "Update"/>
 								UPDATE
 						</cfif>
 								whs_item SET
@@ -122,6 +144,7 @@
 								UnitPrice = <cfqueryparam cfsqltype="cf_sql_float" value="#form.unitprice#">,
 								Currency = <cfqueryparam cfsqltype="cf_sql_char" maxlength="3" value="#form.Currency#">,
 								`Obsolete` = <cfqueryparam cfsqltype="cf_sql_char" maxlength="3" value="#form.Obsolete#">,
+								`Critical` = <cfqueryparam cfsqltype="cf_sql_char" maxlength="3" value="#form.Critical#">,
 								MaximumInStore = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.MaximumInStore#">,
 								AssetIds = <cfqueryparam cfsqltype="cf_sql_varchar" value="#assetIds_#"/>
 						<cfif form.id neq 0>
@@ -146,12 +169,15 @@
 				<cfset s_path = form.PhotosSource & "/" & form.Photos />
 				<cfset d_path = form.PhotosDestination & "/whs_item/" & form.id & "/" />
 				<cfset f.Move('whs_item',form.id,'p',s_path,d_path)/>
+				<cfif form.Code == "" && val(form.id)>
+					<cfquery>	
+						UPDATE whs_item SET Code = #form.id# WHERE ItemId = #val(form.id)#
+					</cfquery>
+				</cfif>
 
-			<cfif form.Code == "" && val(form.id)>
-				<cfquery>	
-					UPDATE whs_item SET Code = #form.id# WHERE ItemId = #val(form.id)#
-				</cfquery>
-			</cfif>
+				<!--- log item update --->
+				<cfset h.LogActivity(tbl:'whs_item', key:form.id, event:'#event# Item', info: serializeJSON(logInv))/>
+
 			</cftransaction>
 						
 

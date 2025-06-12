@@ -19,14 +19,15 @@
   <div class="row-fluid">
   
     <div class="span2" style="position:fixed;">
-        <n:Nav renderTo="#spId#">
-            <n:NavItem title="Spare Part Items" isactive url="modules/maintenance/spare_part/spare_part_item.cfm" id="spare_part_item"/>
-        </n:Nav>  
+			<n:Nav renderTo="#spId#">
+				<n:NavItem title="All Items" isactive url="modules/maintenance/spare_part/spare_part_item.cfm" id="spare_part_item"/>
+				<n:NavItem title="Critical Items" url="modules/maintenance/spare_part/critical_item.cfm" id="critical_item"/>
+			</n:Nav>  
     </div>
     <div class="span10" style="float:right">
     	<div id="#spId#_grid">
-        	<div class="sub_page spare_part_item" id="#spId#_spare_part_item"></div>
-        </div>
+				<div class="sub_page spare_part_item" id="#spId#_spare_part_item"></div>
+			</div>
     </div>
 
   </div>

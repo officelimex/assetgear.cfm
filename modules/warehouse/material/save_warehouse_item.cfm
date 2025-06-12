@@ -37,7 +37,8 @@
 					</cfif>
           <f:TextBox name="Code" label="Code" value="#qWI.Code#" help="#help#" />
           <f:TextArea name="Description" label="Description" required value="#qWI.Description#"/>
-          <f:RadioBox name="Obsolete" inline showlabel label="Is Obsolete" required selected="#qWI.Obsolete#" ListValue="Yes,No"/>
+          <f:RadioBox name="Critical" inline showlabel label="Is a Critical item" required selected="#qWI.Critical#" ListValue="Yes,No"/>
+          <f:RadioBox name="Obsolete" inline showlabel label="Item is Obsolete" required selected="#qWI.Obsolete#" ListValue="Yes,No"/>
           <f:RadioBox name="Currency" inline showlabel label="Currency" required selected="#qWI.Currency#" ListValue="NGN,USD" ListDisplay="Naira,US Dollar" />
           <cfset up=trim(NumberFormat(qWI.Unitprice,'9,999.99'))/>
           <f:TextBox name="UnitPrice" label="Unit price" required value="#up#"/>

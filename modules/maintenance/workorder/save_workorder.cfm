@@ -308,7 +308,7 @@
     </nt:NavTab>
 		<cfset nobutton = true/>
     <f:ButtonGroup>
-			<cfif qWO.WorkClassId == 12 && request.IsSUP>
+			<cfif qWO.WorkClassId == 12 && (request.IsSUP)>
       	<f:Button IsSave 
 					value="Save as Draft" class="btn-info" onSuccess="win_save_wo_window.close()"
 					actionURL="modules/ajax/maintenance.cfm?cmd=saveWorkOrder&draft=true" 
