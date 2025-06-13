@@ -12,6 +12,8 @@ body {
 }
 
 .cke_editable {
+	padding: 11px !important;
+	margin: 0 !important;
 	font-size: 13px;
 	line-height: 1.6em;
 	height: 100vh !important;
