@@ -33,206 +33,242 @@
 			LEFT JOIN reading_type rt ON pm.ReadingTypeId = rt.ReadingTypeId
 		'/>
 
-        <cfreturn this/>
+		<cfset this.PM_TASK_ITEM_SQL = '
+			SELECT
+				pmi.*,
+				CONVERT(CONCAT("[",i.Code,"] ",i.Description, " [",i.VPN,"] " ,"~",i.ItemId) USING utf8) ItemDescription,
+				i.Code ItemCode, i.Description ItemDescription2, i.VPN ItemVPN,
+				um.Code UOM
+			FROM
+				pm_task_item pmi
+			INNER JOIN whs_item i ON i.ItemId = pmi.ItemId
+			INNER JOIN um 				ON um.UMId 	= i.UMId
+		'/>
+
+		<cfreturn this/>
 	</cffunction>
 
-    <cffunction name="GetPMTask" access="public" returntype="query">
-    	<cfargument name="id" type="numeric" required="yes"/>
+	<cfscript>
 
-        <cfquery name="qP">
-        	#this.PM_TASK_SQL#
-            WHERE pm.PMTaskId = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.id#"/>
-        </cfquery>
+		public query function GetPMTaskItems(required numeric id) {
+			var qP = queryExecute(
+				this.PM_TASK_ITEM_SQL & " WHERE pmi.PMTaskId = :id",
+				{id: {value: arguments.id, cfsqltype: "cf_sql_integer"}}
+			)
 
-        <cfreturn qP/>
-    </cffunction>
+			return qP
+		}
 
-    <cffunction name="GetAllActivePMTask" returntype="query" access="public">
+	</cfscript>
 
-    	<cfquery name="qP" cachedwithin="#createTime(1,0,0)#">
-    		#this.PM_TASK_SQL#
-    		WHERE pm.IsActive = "yes" -- AND pm.StartTime IS NOT NULL
-    	</cfquery>
+	<cffunction name="GetPMTask" access="public" returntype="query">
+		<cfargument name="id" type="numeric" required="yes"/>
 
-    	<cfreturn qP/>
-    </cffunction>
+			<cfquery name="qP">
+				#this.PM_TASK_SQL#
+					WHERE pm.PMTaskId = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.id#"/>
+			</cfquery>
 
-    <cffunction name="GenerateWorkOrder" returntype="void" output="false" access="public" hint="run the pm task and generate work order">
+			<cfreturn qP/>
+	</cffunction>
 
-			<cfset oW = createObject("component","assetgear.com.awaf.ams.maintenance.WorkOrder").init()/>
-			<cfset qry = createObject("component", "assetgear.com.awaf.util.aQuery").Init()/>
+	<cffunction name="GetAllActivePMTask" returntype="query" access="public">
 
-    	<!--- get all active pm task --->
-    	<cfset qPMTask = GetAllActivePMTask()/>
+		<cfquery name="qP" cachedwithin="#createTime(1,0,0)#">
+			#this.PM_TASK_SQL#
+			WHERE pm.IsActive = "yes" -- AND pm.StartTime IS NOT NULL
+		</cfquery>
 
-    	<cfloop query="qPMTask">
+		<cfreturn qP/>
+	</cffunction>
 
-				<!--- get the last work order for this task --->
-				<cfset qLastOpened = oW.GetLastOpenWorkOrder(qPMTask.PMTaskId)/>
-				<cfset qWO  = oW.GetLastWorkOrder(qPMTask.PMTaskId)/>
-				<cfset qLastClosed  = oW.GetLastClosedWorkOrder(qPMTask.PMTaskId)/>
+	<cffunction name="GenerateWorkOrder" returntype="void" output="false" access="public" hint="run the pm task and generate work order">
+
+		<cfset oW = createObject("component","assetgear.com.awaf.ams.maintenance.WorkOrder").init()/>
+		<cfset qry = createObject("component", "assetgear.com.awaf.util.aQuery").Init()/>
+
+		<!--- get all active pm task --->
+		<cfset qPMTask = GetAllActivePMTask()/>
+
+		<cfloop query="qPMTask">
+
+			<!--- get the last work order for this task --->
+			<cfset qLastOpened = oW.GetLastOpenWorkOrder(qPMTask.PMTaskId)/>
+			<cfset qWO  = oW.GetLastWorkOrder(qPMTask.PMTaskId)/>
+			<cfset qLastClosed  = oW.GetLastClosedWorkOrder(qPMTask.PMTaskId)/>
 
 
-				<cfset sWO = qry.QueryToStruct(qLastOpened)/>
-				<cfset sWO.Id = 0/>
-				<cfset sWO.DateClosed = ""/>
-				<cfset sWO.AssetLocationIds = qPMTask.AssetLocationId/>
-				<cfset sWO.AssetId = qPMTask.AssetId/>
-				<cfset sWO.WorkClassId = 10/>
-				<cfset sWO.DepartmentId = qPMTask.DepartmentId/>
-				<cfset sWO.UnitId = qPMTask.UnitId/>
-				<cfset sWO.Description = qPMTask.Description/>
-				<cfset sWO.WorkDetails = qPMTask.TaskDetails/>
-				<cfset sWO.PMTaskId = qPMTask.PMTaskId/>
-				<cfset sWO.Status = "Open"/>
- 
-				<cfswitch expression="#qPMTask.Type#">
-					<!--- for days based task --->
-					<cfcase  value="d">
-							<cfif !qLastOpened.recordcount>
-								<cfif isdate(qLastClosed.DateClosed)>
-									<cfset dateclosed = DateFormat(qLastClosed.DateClosed, "yyyy-mm-dd")/>
-								<cfelse>
-									<cfset dateclosed = DateFormat(qPMTask.StartTime, "yyyy-mm-dd")/>
-								</cfif>
-								<cfif isDate(dateclosed)>
-									<cfset sWO.DateOpened = AddDateByFrequency(dateclosed, qPMTask.FrequencyId)/>
-									<!--- create work order --->
-									<cfset oW.SaveWorkOrder(sWO)/>
-								</cfif>
+			<cfset sWO = qry.QueryToStruct(qLastOpened)/>
+			<cfset sWO.Id = 0/>
+			<cfset sWO.DateClosed = ""/>
+			<cfset sWO.AssetLocationIds = qPMTask.AssetLocationId/>
+			<cfset sWO.AssetId = qPMTask.AssetId/>
+			<cfset sWO.WorkClassId = 10/>
+			<cfset sWO.DepartmentId = qPMTask.DepartmentId/>
+			<cfset sWO.UnitId = qPMTask.UnitId/>
+			<cfset sWO.Description = qPMTask.Description/>
+			<cfset sWO.WorkDetails = qPMTask.TaskDetails/>
+			<cfset sWO.PMTaskId = qPMTask.PMTaskId/>
+			<cfset sWO.Status = "Open"/>
+
+			<cfswitch expression="#qPMTask.Type#">
+				<!--- for days based task --->
+				<cfcase  value="d">
+						<cfif !qLastOpened.recordcount>
+							<cfif isdate(qLastClosed.DateClosed)>
+								<cfset dateclosed = DateFormat(qLastClosed.DateClosed, "yyyy-mm-dd")/>
+							<cfelse>
+								<cfset dateclosed = DateFormat(qPMTask.StartTime, "yyyy-mm-dd")/>
 							</cfif>
-					</cfcase>
-					<!--- for milestone reading --->
-					<cfcase value="m">
-							<!--- check if the milestone table is upto what the pmtask stated --->
-							<cfquery name="qMT">
-								SELECT * FROM pm_milestone
-								WHERE PMTaskId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qPMTask.PMtaskId#"/>
-							</cfquery>
-							
-							<cfif qMT.Reading GTE qPMTask.Milestone>
-									<cfset sWO.DateOpened = now()/>
-									<cfif qWO.Status EQ "Close">
-											<!--- create wo ---->
-											<cfset oW.SaveWorkOrder(sWO)/>
-									<cfelseif !qWO.RecordCount><!--- if the wo is empty create new one using the start time on the pm --->
-											<cfset oW.SaveWorkOrder(sWO)/>
-									</cfif>
-									<cfquery>
-										UPDATE pm_milestone SET
-											Reading = #val(qMT.Reading-qPMTask.Milestone)#
-										WHERE MilestoneId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qMT.MilestoneId#"/>
-									</cfquery>
+							<cfif isDate(dateclosed)>
+								<cfset sWO.DateOpened = AddDateByFrequency(dateclosed, qPMTask.FrequencyId)/>
+								<!--- create work order --->
+								<cfset oW.SaveWorkOrder(sWO)/>
 							</cfif>
-					</cfcase>
-				</cfswitch>
-    	</cfloop>
+						</cfif>
+				</cfcase>
+				<!--- for milestone reading --->
+				<cfcase value="m">
+						<!--- check if the milestone table is upto what the pmtask stated --->
+						<cfquery name="qMT">
+							SELECT * FROM pm_milestone
+							WHERE PMTaskId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qPMTask.PMtaskId#"/>
+						</cfquery>
+						
+						<cfif qMT.Reading GTE qPMTask.Milestone>
+								<cfset sWO.DateOpened = now()/>
+								<cfif qWO.Status EQ "Close">
+										<!--- create wo ---->
+										<cfset oW.SaveWorkOrder(sWO)/>
+								<cfelseif !qWO.RecordCount><!--- if the wo is empty create new one using the start time on the pm --->
+										<cfset oW.SaveWorkOrder(sWO)/>
+								</cfif>
+								<cfquery>
+									UPDATE pm_milestone SET
+										Reading = #val(qMT.Reading-qPMTask.Milestone)#
+									WHERE MilestoneId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qMT.MilestoneId#"/>
+								</cfquery>
+						</cfif>
+				</cfcase>
+			</cfswitch>
+		</cfloop>
 
-      <cfobjectcache action="clear"/>
-    </cffunction>
+		<cfobjectcache action="clear"/>
+	</cffunction>
 
-    <cffunction name="AddDate" returntype="date" access="public" hint="add two dates together with a dynamic frequency">
-        <cfargument name="d1" required="yes" type="date" hint="date to add">
-        <cfargument name="fy" required="yes" type="numeric" hint="year">
-        <cfargument name="fq" required="yes" type="numeric" hint="Quarters">
-        <cfargument name="fm" required="yes" type="numeric" hint="months">
-        <cfargument name="fw" required="yes" type="numeric" hint="weeks">
-        <cfargument name="fd" required="yes" type="numeric" hint="days">
-        <cfargument name="fh" required="yes" type="numeric" hint="hours">
-        <cfargument name="fn" required="yes" type="numeric" hint="mminutes">
+	<cffunction name="AddDate" returntype="date" access="public" hint="add two dates together with a dynamic frequency">
+			<cfargument name="d1" required="yes" type="date" hint="date to add">
+			<cfargument name="fy" required="yes" type="numeric" hint="year">
+			<cfargument name="fq" required="yes" type="numeric" hint="Quarters">
+			<cfargument name="fm" required="yes" type="numeric" hint="months">
+			<cfargument name="fw" required="yes" type="numeric" hint="weeks">
+			<cfargument name="fd" required="yes" type="numeric" hint="days">
+			<cfargument name="fh" required="yes" type="numeric" hint="hours">
+			<cfargument name="fn" required="yes" type="numeric" hint="mminutes">
 
-        <cfset stemp = arguments.d1>
+			<cfset stemp = arguments.d1>
 
-        <cfset stemp = dateAdd('n',arguments.fn,stemp) />
-        <cfset stemp = dateAdd('h',arguments.fh,stemp) />
-        <cfset stemp = dateAdd('d',arguments.fd,stemp) />
-        <cfset stemp = dateAdd('ww',arguments.fw,stemp) />
-        <cfset stemp = dateAdd('m',arguments.fm,stemp) />
-        <cfset stemp = dateAdd('q',arguments.fq,stemp) />
-        <cfset stemp = dateAdd('yyyy',arguments.fy,stemp) />
+			<cfset stemp = dateAdd('n',arguments.fn,stemp) />
+			<cfset stemp = dateAdd('h',arguments.fh,stemp) />
+			<cfset stemp = dateAdd('d',arguments.fd,stemp) />
+			<cfset stemp = dateAdd('ww',arguments.fw,stemp) />
+			<cfset stemp = dateAdd('m',arguments.fm,stemp) />
+			<cfset stemp = dateAdd('q',arguments.fq,stemp) />
+			<cfset stemp = dateAdd('yyyy',arguments.fy,stemp) />
 
-        <cfset stemp  = dateformat(stemp,'yyyy/mm/dd') & " " & timeformat(stemp,'hh:mm:ss tt')/>
-        <cfreturn stemp/>
-    </cffunction>
+			<cfset stemp  = dateformat(stemp,'yyyy/mm/dd') & " " & timeformat(stemp,'hh:mm:ss tt')/>
+			<cfreturn stemp/>
+	</cffunction>
 
-    <cffunction name="AddDateByFrequency" returntype="any" access="public" hint="add two dates together with a dynamic frequency">
-        <cfargument name="d1" required="yes" type="date" hint="date to add">
-        <cfargument name="fid" required="yes" type="numeric" hint="frequency id">
+	<cffunction name="AddDateByFrequency" returntype="any" access="public" hint="add two dates together with a dynamic frequency">
+			<cfargument name="d1" required="yes" type="date" hint="date to add">
+			<cfargument name="fid" required="yes" type="numeric" hint="frequency id">
 
-        <cfquery name="qF">
-            SELECT * FROM `frequency`
-            WHERE `FrequencyId` = <cfqueryparam value="#arguments.fid#" cfsqltype="cf_sql_integer">
-        </cfquery>
+			<cfquery name="qF">
+					SELECT * FROM `frequency`
+					WHERE `FrequencyId` = <cfqueryparam value="#arguments.fid#" cfsqltype="cf_sql_integer">
+			</cfquery>
 
-        <cfset ndate = AddDate(arguments.d1,qF.Years,qF.Quarters,qF.Months,qF.Weeks,qF.Days,qF.Hours,qF.Minutes)/>
-        <cfif qF.WorkingDaysOnly eq "yes">
-        	<cfset day_ = DayOfWeekAsString(DayOfWeek(ndate))/>
-            <cfswitch expression="#day_#">
-            	<cfcase value="Sunday">
-                	<cfset ndate = dateadd('d',ndate,1)/>
-                </cfcase>
-                <cfcase value="Saturday">
-                	<cfset ndate = dateadd('d',ndate,-1)/>
-                </cfcase>
-            </cfswitch>
-        </cfif>
+			<cfset ndate = AddDate(arguments.d1,qF.Years,qF.Quarters,qF.Months,qF.Weeks,qF.Days,qF.Hours,qF.Minutes)/>
+			<cfif qF.WorkingDaysOnly eq "yes">
+				<cfset day_ = DayOfWeekAsString(DayOfWeek(ndate))/>
+					<cfswitch expression="#day_#">
+						<cfcase value="Sunday">
+								<cfset ndate = dateadd('d',ndate,1)/>
+							</cfcase>
+							<cfcase value="Saturday">
+								<cfset ndate = dateadd('d',ndate,-1)/>
+							</cfcase>
+					</cfswitch>
+			</cfif>
 
-        <cfreturn ndate/>
-    </cffunction>
+			<cfreturn ndate/>
+	</cffunction>
 
-    <cffunction name="SavePMTask" access="public" returntype="numeric">
-        <cfargument name="pm_" required="true" hint="pm task struct data" type="struct"/>
+	<cffunction name="SavePMTask" access="public" returntype="numeric">
+		<cfargument name="pm_" required="true" hint="pm task struct data" type="struct"/>
 
-        <cfset pm = arguments.pm_/>
+		<cfset pm = arguments.pm_/>
 
-        <cfif pm.Type eq "d">
-            <cfset pm.ReadingTypeId = 0/>
-            <cfif val(pm.FrequencyId) eq 0>
-                <cfthrow  message="Please select a Frequency"/>
-            </cfif>
-        <cfelse>
-            <cfset pm.FrequencyId = 0/>
-            <cfif val(pm.ReadingTypeId) eq 0>
-                <cfthrow detail="Please select a Reading type"/>
-            </cfif>
-        </cfif>
+		<cfif pm.Type eq "d">
+			<cfset pm.ReadingTypeId = 0/>
+			<cfif val(pm.FrequencyId) eq 0>
+				<cfthrow  message="Please select a Frequency"/>
+			</cfif>
+		<cfelse>
+			<cfset pm.FrequencyId = 0/>
+			<cfif val(pm.ReadingTypeId) eq 0>
+				<cfthrow detail="Please select a Reading type"/>
+			</cfif>
+		</cfif>
 
-        <cfquery result="rt">
-            <cfif pm.id eq 0>
-                INSERT INTO
-            <cfelse>
-                UPDATE
-            </cfif>
-                `pm_task` SET
-                `AssetLocationId` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#pm.AssetLocationId#"/>,
-                `RequireShortdown` = <cfqueryparam cfsqltype="cf_sql_char" maxlength="3" value="#pm.RequireShortdown#"/>,
-                `DepartmentId` = <cfqueryparam cfsqltype="cf_sql_idstamp" value="#pm.DepartmentId#"/>,
-					<cfif val(pm.UnitId)>
-						`UnitId` = <cfqueryparam cfsqltype="cf_sql_idstamp" value="#val(pm.UnitId)#"/>,
-					</cfif>
-                `Description` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#pm.Description#"/>,
-                `TaskDetails` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#pm.TaskDetails#"/>,
-					<cfif pm.FrequencyId>
-               	`FrequencyId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#pm.FrequencyId#"/>,
-					</cfif>
-					 `StartTime` = <cfqueryparam cfsqltype="cf_sql_date" value="#pm.StartTime#"/>,
-                `IsActive` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#pm.IsActive#"/>,
-					<cfif pm.ReadingTypeId>
-               	`ReadingTypeId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#pm.ReadingTypeId#"/>,
-					</cfif>
-                `Milestone` = <cfqueryparam cfsqltype="cf_sql_float" value="#pm.Milestone#"/>,
-                `NotifyBefore` = <cfqueryparam cfsqltype="cf_sql_float" value="#val(pm.NotifyBefore)#"/>,
-                `Type` = <cfqueryparam cfsqltype="cf_sql_varchar" maxlength="1" value="#pm.Type#"/>,
-                `Note` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#pm.Note#"/>
-            <cfif pm.id neq 0>
-                WHERE `PMTaskId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#pm.id#">
-            </cfif>
-        </cfquery>
+		<cfquery result="rt">
+			<cfif pm.id eq 0>
+				INSERT INTO
+			<cfelse>
+				UPDATE
+			</cfif>
+			`pm_task` SET
+			`AssetLocationId` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#pm.AssetLocationId#"/>,
+			`RequireShutdown` = <cfqueryparam cfsqltype="cf_sql_char" maxlength="3" value="#pm.RequireShutdown#"/>,
+			`DepartmentId` = <cfqueryparam cfsqltype="cf_sql_idstamp" value="#pm.DepartmentId#"/>,
+			<cfif val(pm.UnitId)>
+				`UnitId` = <cfqueryparam cfsqltype="cf_sql_idstamp" value="#val(pm.UnitId)#"/>,
+			</cfif>
+				`Description` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#pm.Description#"/>,
+				`TaskDetails` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#pm.TaskDetails#"/>,
+			<cfif pm.FrequencyId>
+				`FrequencyId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#pm.FrequencyId#"/>,
+			</cfif>
+				`StartTime` = <cfqueryparam cfsqltype="cf_sql_date" value="#pm.StartTime#"/>,
+				`IsActive` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#pm.IsActive#"/>,
+			<cfif pm.ReadingTypeId>
+				`ReadingTypeId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#pm.ReadingTypeId#"/>,
+			</cfif>
+			`Milestone` = <cfqueryparam cfsqltype="cf_sql_float" value="#pm.Milestone#"/>,
+			`NotifyBefore` = <cfqueryparam cfsqltype="cf_sql_float" value="#val(pm.NotifyBefore)#"/>,
+			`Type` = <cfqueryparam cfsqltype="cf_sql_varchar" maxlength="1" value="#pm.Type#"/>,
+			`Note` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#pm.Note#"/>
+			<cfif pm.id neq 0>
+				WHERE `PMTaskId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#pm.id#">
+			</cfif>
+		</cfquery>
 
-        <cfset pmid = pm.id/>
-        <cfif pm.id eq 0>
-            <cfset pmid = rt.GENERATED_KEY/>
-        </cfif>
-        <cfreturn pmid/>
-    </cffunction>
+		<cfset pmid = pm.id/>
+		<cfif pm.id eq 0>
+			<cfset pmid = rt.GENERATED_KEY/>
+		</cfif>
+
+		<cfset h = application.com.Helper/>
+		<!--- update Work Order Item from temp data --->
+		<cfparam name="pm.ItemsNeeded" default=""/>
+		<!---  int1 - Description, int0 - Quantity ---->
+		<cfset h.SaveFromTempTable(pm.ItemsNeeded,
+			"pm_task_item",
+			"ItemId,Purpose,Quantity",
+			"int0,text0,int1",
+			"PMTaskItemId","PMTaskId",pmid)/>
+
+		<cfreturn pmid/>
+	</cffunction>
 </cfcomponent>

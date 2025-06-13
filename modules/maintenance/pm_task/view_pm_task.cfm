@@ -38,27 +38,27 @@
   <tr> 
     <td width="50%" valign="top"> 
 			<f:Label name="Description" value="#qPM.Description#"/>
-			<cfset qA = application.com.Asset.GetAssetByAssetLocatonIds(qPM.AssetLocationId)/>
+			<cfset qA = application.com.Asset.GetAssetByAssetLocationIds(qPM.AssetLocationId)/>
 			<f:Label name="Assets" value="#valuelist(qA.Asset)#"/>
 			<f:Label name="Department" Value="#qD.Name#"/>
 			<f:Label name="Is Active" value="#qPM.IsActive#"/>
     </td>
     <td class="horz-div" valign="top"> 
-        <cfif qPM.Type eq 'd'>
-        	<cfset getType = "Date"/>
-        <cfelse>
-            <cfset getType = "Milestone"/>
-        </cfif>
-        <f:Label name="Type" value="#getType#"/> 
-        <cfif qPM.Type eq "d">
-            <f:Label name="Frequency" Value="	#qF.Description#"/>
-            <f:Label name="Notify" value="#qPM.NotifyBefore#"/>
-            <f:Label name="Start Time" value="	#dateformat(qPM.StartTime,'yyyy/mm/dd')#"/>
-        <cfelse>
-            <f:Label name="Reading Type" Value="	#qRT.Type#"/>
-            <f:Label name="Milestone" label="Recurring: Every" required value="#qPM.Milestone#" class="span4"/>
-            <f:Label name="Notify Before" value="#qPM.NotifyBefore#" />
-        </cfif>
+			<cfif qPM.Type eq 'd'>
+				<cfset getType = "Date"/>
+			<cfelse>
+				<cfset getType = "Milestone"/>
+			</cfif>
+			<f:Label name="Type" value="#getType#"/> 
+			<cfif qPM.Type eq "d">
+				<f:Label name="Frequency" Value="	#qF.Description#"/>
+				<f:Label name="Notify" value="#qPM.NotifyBefore#"/>
+				<f:Label name="Start Time" value="	#dateformat(qPM.StartTime,'yyyy/mm/dd')#"/>
+			<cfelse>
+				<f:Label name="Reading Type" Value="	#qRT.Type#"/>
+				<f:Label name="Milestone" label="Recurring: Every" required value="#qPM.Milestone#" class="span4"/>
+				<f:Label name="Notify Before" value="#qPM.NotifyBefore#" />
+			</cfif>
     </td>
   </tr> 
   <tr>
@@ -66,8 +66,47 @@
  		<br/><f:Label name="Task Details" value="#qPM.TaskDetails#"  class="12"/>    
     </td>
   </tr>
-  <tr>
+	<cfset qOI = application.com.PMTask.GetPMTaskItems(url.id)/>
+	<cfif qOI.recordcount>
+		<tr>
+			<td colspan="2">
+				<HR/>
+				<h5>Materials Needed</h5>
+				<table width="100%" border="0">
+					<tr>
+						<td valign="top" style="padding-left:10px;">
+							<table class="table"><thead>
+								<tr>
+									<th>##</th>
+									<th>ICN</th>
+									<th>Item Description</th>
+									<th>VPN</th>
+									<th>Purpose</th>
+									<th>Quantity</th>
+								</tr>
+								</thead>
+								<cfloop query="qOI">
+									<tr>
+										<td>#qOI.Currentrow#</td>
+										<td>#qOI.ItemCode#</td>
+										<td>
+											#qOI.ItemDescription2#
+										</td>
+										<td>#qOI.ItemVPN#</td>
+										<td>#qOI.Purpose#</td>
+										<td>#qOI.Quantity# #qOI.UOM#</td>
+									</tr>
+								</cfloop>
+							</table>
+						</td>
+					</tr> 
+				</table> 
+			</td>
+		</tr>
+	</cfif>
+	<tr>
   	<td colspan="2">
+			<HR/>
     	<f:Label name="Note" value="#qPM.Note#"  class="12"/> 
     </td>
   </tr>
