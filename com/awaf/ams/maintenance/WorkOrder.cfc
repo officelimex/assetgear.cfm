@@ -282,6 +282,10 @@
 			</cfif>
 		</cfif> 
 
+		<cfif wo.WorkClassId NEQ 12 AND val(wo.ExpectedWorkDuration) EQ 0>
+			<cfthrow message="Please provide estimated work duration in the open section of the Work Order"/>
+		</cfif>
+
 		<cftransaction action="begin">
 			<!--- update the status of the Service request --->
 			<cfif wo.ServiceRequestId neq "">
@@ -307,7 +311,12 @@
 				<cfif val(wo.AssetFailureReportId)>
 					AssetFailureReportId = <cfqueryparam cfsqltype="cf_sql_integer" value="#wo.AssetFailureReportId#"/>,
 				</cfif>
-			
+				<cfif val(wo.ExpectedWorkDuration)>
+					ExpectedWorkDuration = <cfqueryparam cfsqltype="cf_sql_integer" value="#wo.ExpectedWorkDuration#"/>,
+				<cfelse>
+					ExpectedWorkDuration = NULL,
+				</cfif>
+				`Priority` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#wo.Priority#"/>,
 				`DateOpened`  = <cfqueryparam cfsqltype="cf_sql_date" value="#wo.DateOpened#"/>,
 				`Status` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#wo.Status#"/>,
 				`Description` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#wo.Description#"/>,

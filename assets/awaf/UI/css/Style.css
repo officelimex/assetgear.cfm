@@ -2,6 +2,9 @@ body {
 	background: #EEEFF0;
 }
 
+.text-bold {
+	font-weight: bold;
+}
 
 a {
 	cursor: pointer;

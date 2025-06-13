@@ -126,11 +126,27 @@
 							<tr>
 								<td width="50%" valign="top" >
 									<div style="width:90%">
+									</div>
+								</td>
+								<td class="horz-div" valign="top">
+								</td>
+							</tr>
+							<tr>
+								<cfset dept_ctrl = unit_ctrl = true/>
+								<cfif request.IsPlanner || request.IsWarehouseMan>
+									<cfset dept_ctrl= false/>
+								</cfif>
+								<cfif request.IsSUP>
+									<cfset unit_ctrl = false/>
+								</cfif>
+
+								<td width="50%" valign="top" >
+									<div style="width:90%">
 										<input type="hidden" name="AssetFailureReportId" label="Failure Report ##" value=""/>
 										<f:Select name="WorkClassId" label="Work Class" required ListValue="#Valuelist(qJC.JobClassId)#" ListDisplay="#Valuelist(qJC.Class)#"/>
-										<f:Select name="DepartmentId" label="Department" required ListValue="#Valuelist(qCD.DepartmentId)#" ListDisplay="#Valuelist(qCD.Name)#"  Selected="#request.UserInfo.DepartmentId#"/>
+										<f:Select selected="Normal" name="Priority" label="Work Priority" required ListValue="Low,Normal,High,Critical"/>
+										<f:Select name="DepartmentId" disabled="#dept_ctrl#" label="Department" required ListValue="#Valuelist(qCD.DepartmentId)#" ListDisplay="#Valuelist(qCD.Name)#"  Selected="#request.UserInfo.DepartmentId#"/>
 										<cfset require_unit = false/>
-										
 										<input type="hidden" name="Status" value="Open"/>		
 									</div>
 								</td>
@@ -142,9 +158,11 @@
 									<cfif val(request.userInfo.DepartmentId) == 16>
 										<cfset require_unit = true/>
 									</cfif>
-									<f:Select name="UnitId" label="Unit" required="#require_unit#" ListValue="#Valuelist(qCun.UnitId)#" ListDisplay="#Valuelist(qCun.Name)#" Selected="#request.UserInfo.UnitId#"/>
+									<f:TextBox name="ExpectedWorkDuration" class="span4" type="number" validate="integer" label="Est. Work Duration (hrs)" value="48" />
+									<f:Select name="UnitId" label="Unit" disabled required="#unit_ctrl#" ListValue="#Valuelist(qCun.UnitId)#" ListDisplay="#Valuelist(qCun.Name)#" Selected="#request.UserInfo.UnitId#"/>
 								</td>
 							</tr>
+
 							<tr>
 								<td colspan="2">
 									<table width="99%">

@@ -57,12 +57,24 @@
           <f:Label name="Asset" value="#qAS.Description#"/>
         </td>
         <td class="horz-div" valign="top"> 
-          <cfif len(qWO.ServiceRequestId)>
-            <f:Label name="Service Request ##" label="Service Request ##" value="#qWO.ServiceRequestId#" />
-          </cfif>
+          <f:Label name="Service Request ##" hideOnBlank label="Service Request ##" value="#qWO.ServiceRequestId#" />
+          <f:Label name="Department" value="#qWO.Department# &mdash;  #qWO.Unit#" />
           <f:Label name="Work Class" value="#qWO.JobClass#" />
           <f:Label name="Date Opened" value="#dateformat(qWO.DateOpened,'dd/mmm/yyyy')#"/>
           <f:Label name="Asset Location" value="#AssetLocation# "/> 
+          <cfset _pclass = "info"/>
+          <cfswitch expression="#qWO.Priority#">
+            <cfcase value="Critical">
+              <cfset _pclass = "error"/>
+            </cfcase>
+            <cfcase value="High">
+              <cfset _pclass = "warning"/>
+            </cfcase>
+            <cfcase value="Low">
+              <cfset _pclass = "info"/>
+            </cfcase>
+          </cfswitch>
+          <f:Label name="Priority" label="Priority" class="text-#_pclass# text-bold" value="#qWO.Priority#"/>
         </td>
       </tr> 
       <tr>

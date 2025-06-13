@@ -91,24 +91,28 @@
 	</td>
 				</tr>
 				<tr>
-            <td width="50%" valign="top">
-              <f:TextArea name="Description" label="Work Description" required value="#qWO.Description#" rows="4"/>
-            </td>
-            <td class="horz-div" valign="top">
-            <cfif qWO.WorkClassId eq 10>
-            	<f:Select name="WorkClassId" label="Work Class" required ListValue="#Valuelist(qJC.JobClassId)#" ListDisplay="#Valuelist(qJC.Class)#" Selected="#qWO.WorkClassId#" />
-            <cfelse>
-            	<f:Select name="WorkClassId" label="Work Class" required ListValue="#Valuelist(qJC.JobClassId)#" ListDisplay="#Valuelist(qJC.Class)#" Selected="#qWO.WorkClassId#" />
-            </cfif>
-
-            <f:DatePicker name="DateOpened" label="Date Opened" required value="#dateformat(qWO.DateOpened,'dd/mmm/yyyy')#"/>
-            <f:Select name="DepartmentId" label="Department" required ListValue="#Valuelist(qCD.DepartmentId)#" ListDisplay="#Valuelist(qCD.Name)#"  Selected="#qWO.DepartmentId#"/>
-						<f:Select name="UnitId" label="Unit" ListValue="#Valuelist(qCun.UnitId)#" ListDisplay="#Valuelist(qCun.Name)#" Selected="#qWO.UnitId#"/>
+					<td width="50%" valign="top">
+						<f:Select name="WorkClassId" class="span10" label="Work Class" required ListValue="#Valuelist(qJC.JobClassId)#" ListDisplay="#Valuelist(qJC.Class)#" Selected="#qWO.WorkClassId#" />
+						<f:TextArea name="Description" class="span10" label="Work Description" required value="#qWO.Description#" rows="4"/>
+					</td>
+					<td class="horz-div" valign="top">
+						<cfset dept_ctrl = unit_ctrl = true/>
+						<cfif request.IsPlanner || request.IsWarehouseMan>
+							<cfset dept_ctrl= false/>
+						</cfif>
+						<cfif request.IsSUP>
+							<cfset unit_ctrl = false/>
+						</cfif>
+						<f:Select selected="#qWO.Priority#" name="Priority" label="Work Priority" required ListValue="Low,Normal,High,Critical"/>
+						<f:TextBox name="ExpectedWorkDuration" class="span4" type="number" validate="integer" label="Est. Work Duration (hrs)" value="#qWO.ExpectedWorkDuration#" />
+						<f:DatePicker name="DateOpened" label="Date Opened" required value="#dateformat(qWO.DateOpened,'dd/mmm/yyyy')#"/>
+						<f:Select name="DepartmentId" disabled="#dept_ctrl#" label="Department" required ListValue="#Valuelist(qCD.DepartmentId)#" ListDisplay="#Valuelist(qCD.Name)#"  Selected="#qWO.DepartmentId#"/>
+						<f:Select name="UnitId" label="Unit" required="#unit_ctrl#" ListValue="#Valuelist(qCun.UnitId)#" ListDisplay="#Valuelist(qCun.Name)#" Selected="#qWO.UnitId#"/>
 						<input type="hidden" name="AssetFailureReportId" label="Failure Report ##" value="#qWO.AssetFailureReportId#"/>
-									<!---<f:DatePicker name="DateDue" label="Date Due" required value="#dateformat(qWO.DateDue,'dd/mmm/yyyy')#"/>--->
+						<!---<f:DatePicker name="DateDue" label="Date Due" required value="#dateformat(qWO.DateDue,'dd/mmm/yyyy')#"/>--->
 
-            </td>
-          </tr>
+					</td>
+				</tr>
           <tr>
             <td colspan="2" ><f:CheckBox name="AssetLocationIds" ListValue="#ValueList(qAL.AssetLocationId,'`')#" ListDisplay="#ValueList(qAL.Location,'`')#" showlabel label="Asset Location" delimiters="`" bind="AssetId" Event="change" data="modules/ajax/maintenance.cfm?cmd=LoadAssetLocations" selected="#qWO.AssetLocationIds#" inline/></td>
           </tr>          <tr>

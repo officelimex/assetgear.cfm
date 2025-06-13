@@ -1,243 +1,275 @@
-component {
+<cfcomponent>
+	
+    <cffunction name="Init" access="public" returntype="helper">
+    	
+        <cfreturn this/>
+    </cffunction>
+	
+	<cffunction name="UpdateCustomFields" access="public" returntype="void">
+		<cfargument name="tbl" type="string" required="true" hint="the table that owns the custom field" />
+		<cfargument name="cf_count" hint="Number of Custom fields available to update" required="false" default="8"  type="numeric" />
+		<cfargument name="cf_prefix" hint="Custom Field prefix name" type="string" required="false" default="CustomField"/>		
 
-	public helper function Init() {
-		return this;
-	}
+	    <cfloop from="1" to="#arguments.cf_count#" index="i">
 
-	public void function UpdateCustomFields(required string tbl, numeric cf_count=8, string cf_prefix="CustomField") {
-		for (var i = 1; i <= cf_count; i++) {
-			var cfvlu = form["#cf_prefix##i#"];
-			var cfid = form["#cf_prefix##i#_id"];
-			var cffld = form["#cf_prefix##i#_label"];
+	    	<cfset cfvlu = form["#arguments.cf_prefix##i#"]/> 
+ 
+            <cfset cfid = form["#arguments.cf_prefix##i#_id"]/>
+            <cfset cffld = form["#arguments.cf_prefix##i#_label"]/>     
 
-			switch (cffld) {
-				case "{Custom field}":
-					break;
-				default:
-					cfid = form["CustomField#i#_id"];
-					cffld = form["CustomField#i#_label"];
+        	<cfswitch expression="#cffld#">
+        		<cfcase value="{Custom field}">
+        			<!--- do nothing --->
+        		</cfcase>
+        		<cfdefaultcase>
+	                <cfquery>
+	                    <cfset cfid = form["CustomField#i#_id"]/>
+	                    <cfset cffld = form["CustomField#i#_label"]/>                        
+	                    
+	                    <cfif cfid eq 0>
+	                        INSERT INTO custom_field SET
+	                            `Table` = <cfqueryparam value="#arguments.tbl#" cfsqltype="cf_sql_varchar"/>,
+	                            `PK` = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.id#"/>,
+	                            `Field` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#cffld#"/>,
+	                            `Value` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#cfvlu#"/>
+		                <cfelseif cffld eq "">
+		                	<!--- delete the custom field from the table --->
+		                	DELETE FROM `custom_field`
+		                	WHERE `CustomFieldId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#cfid#"/>
+	                    <cfelseif cffld neq "">
+	                        UPDATE custom_field SET
+	                            `Field` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#cffld#"/>,
+	                            `Value` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#cfvlu#"/>
+	                        WHERE `CustomFieldId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#cfid#"/>
+	                    </cfif>	                    
+	                </cfquery>
+        		</cfdefaultcase>
+        	</cfswitch> 
 
-					if (cfid == 0) {
-						queryExecute("
-							INSERT INTO custom_field (Table, PK, Field, Value)
-							VALUES (:tbl, :pk, :field, :value)
-						", {
-							tbl: { value: tbl, cfsqltype: "cf_sql_varchar" },
-							pk: { value: form.id, cfsqltype: "cf_sql_integer" },
-							field: { value: cffld, cfsqltype: "cf_sql_varchar" },
-							value: { value: cfvlu, cfsqltype: "cf_sql_varchar" }
-						});
-					} else if (cffld == "") {
-						queryExecute("
-							DELETE FROM custom_field
-							WHERE CustomFieldId = :cfid
-						", {
-							cfid: { value: cfid, cfsqltype: "cf_sql_integer" }
-						});
-					} else {
-						queryExecute("
-							UPDATE custom_field SET
-								Field = :field,
-								Value = :value
-							WHERE CustomFieldId = :cfid
-						", {
-							field: { value: cffld, cfsqltype: "cf_sql_varchar" },
-							value: { value: cfvlu, cfsqltype: "cf_sql_varchar" },
-							cfid: { value: cfid, cfsqltype: "cf_sql_integer" }
-						});
-					}
+	    </cfloop>
+
+	</cffunction>
+
+	<cffunction name="SaveFromTempTable" access="public" returntype="void" hint="save data into the proper table from temp_data" output="true">
+		<cfargument name="sid" hint="session id" required="true" type="string"/>
+		<cfargument name="tbl" hint="table to insert to" required="true" type="string"/>
+		<cfargument name="fld_des" hint="field to insert into (destination)" required="true" type="string"/>
+		<cfargument name="fld_src" hint="field to insert from (source)" required="true" type="string"/>
+		<cfargument name="pk_field" hint="primary key field" required="true" type="string"/>
+		<cfargument name="fk_field" hint="foreign key field" required="true" type="string"/>
+		<cfargument name="fk_value" hint="foreign key value" required="true" type="numeric" />
+		
+
+		<cfset llen = listlen(arguments.fld_des)/>
+		
+		<cftransaction action="begin">
+		
+		<cfquery name="qTemp">
+			SELECT * FROM temp_data
+		    WHERE `Session` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.sid#"/>
+				<!---AND `Flag` <> "" --->
+		</cfquery>
+		<!--- insert ---> 
+		<cfloop query="qTemp"> 
+			<cfquery>
+		        <cfswitch expression="#qTemp.Flag#">
+							<cfcase value="d">
+								DELETE FROM `#arguments.tbl#` 
+								WHERE `#arguments.pk_field#` = <cfqueryparam cfsqltype="cf_sql_integer" value="#qTemp.PK#"/>
+							</cfcase>
+							<cfcase value="u"> 
+								<cfif qTemp.PK eq "">
+									INSERT INTO `#arguments.tbl#` SET
+									<cfif arguments.fk_field neq "">
+										`#arguments.fk_field#` = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.fk_value#"/>,
+									</cfif>
+								<cfelse>
+									UPDATE `#arguments.tbl#` SET	
+								</cfif>	
+						
+							<cfset i=0/>
+							<cfloop list="#fld_des#" delimiters="," index="fld_d">
+								<cfset i++/>
+								<cfset fld_s = listgetat(arguments.fld_src,i)/>
+								<cfset ttype = left(fld_s,len(fld_s)-1)/>
+		                    	`#fld_d#` = 
+									<cfswitch expression="#ttype#">
+										<cfcase value="int"><cfqueryparam cfsqltype="cf_sql_integer" value="#val(evaluate(fld_s))#"/></cfcase>
+                    <cfcase value="float"><cfqueryparam cfsqltype="cf_sql_decimal" value="#val(evaluate(fld_s))#"/></cfcase>
+										<cfcase value="date"><cfqueryparam cfsqltype="cf_sql_date" value="#evaluate(fld_s)#"/></cfcase>
+										<cfdefaultcase>
+											<cfset rst = evaluate(fld_s)>
+											<cfif listFindNoCase("text1,text2,text3,text4,text5,text6", rst) && len(rst) == 5>
+												<cfset rst = ""/>
+											</cfif>
+											<cfqueryparam cfsqltype="cf_sql_varchar" value="#rst#"/>
+										</cfdefaultcase>
+									</cfswitch>
+									<cfif llen neq i>,</cfif>
+							</cfloop>
+		                <cfif qTemp.PK neq "">
+							WHERE `#arguments.pk_field#` = <cfqueryparam cfsqltype="cf_sql_integer" value="#qTemp.PK#"/>
+						</cfif>
+		            </cfcase>
+		            <cfdefaultcase>
+                    	<!--- insert if the flag is new and the primary key value is 0 ---->
+                        
+                    	<cfif (qTemp.Flag eq "n") or (val(qTemp.PK) eq 0)>           	 
+                            INSERT INTO `#arguments.tbl#` SET
+                                <cfif arguments.fk_field neq "">
+                                    `#arguments.fk_field#` = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.fk_value#"/>,
+                                </cfif> 
+                                <cfset i=0/>
+                                <cfloop list="#fld_des#" delimiters="," index="fld_d">
+                                    <cfset i++/>
+                                    <cfset fld_s = listgetat(arguments.fld_src,i)/>
+                                    <cfset ttype = left(fld_s,len(fld_s)-1)/>
+                                    `#fld_d#` = 
+																			<cfswitch expression="#ttype#">
+																				<cfcase value="int"><cfqueryparam cfsqltype="cf_sql_integer" value="#val(evaluate(fld_s))#"/></cfcase>
+																				<cfcase value="date"><cfqueryparam cfsqltype="cf_sql_date" value="#evaluate(fld_s)#"/></cfcase>
+																				<cfcase value="float"><cfqueryparam cfsqltype="cf_sql_decimal" value="#val(evaluate(fld_s))#"/></cfcase>
+																				<cfdefaultcase>
+																					<cfset rst = evaluate(fld_s)>
+																					<cfif listFindNoCase("text1,text2,text3,text4,text5,text6", rst) && len(rst) == 5>
+																						<cfset rst = ""/>
+																					</cfif>
+																					<cfqueryparam cfsqltype="cf_sql_varchar" value="#rst#"/>
+																				</cfdefaultcase>
+																			</cfswitch>
+																			<cfif llen neq i>,</cfif>
+                                </cfloop>
+                        <cfelse>
+                        	<!--- make query not emplty --->
+                            SELECT 1
+                    	</cfif>
+		            </cfdefaultcase>
+		        </cfswitch> 
+		    </cfquery>    
+		</cfloop>
+		<!--- clear temp table --->
+		<cfquery>
+            DELETE FROM `temp_data` 
+            WHERE `Session` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.sid#"/>
+		</cfquery>
+		
+		</cftransaction>
+		
+		<cfobjectcache action="clear"/>
+	</cffunction>
+	
+    <cffunction name="GetTempDate" access="public" returntype="query" hint="get the temp data using session field">
+    	<cfargument name="sid" required="yes" type="string"/>
+        
+        <cfset var qT = ""/>
+        <cfquery name="qT">
+        	SELECT * FROM temp_data
+            WHERE `Session` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.sid#"/>
+        </cfquery>
+        
+        <cfreturn qT/>
+    </cffunction>
+    
+    <cffunction name="GetTempDataToUpdate" access="public" returntype="query" hint="">
+    	<cfargument name="sid" required="yes" type="string"/>
+        
+        <cfset var qT = ""/>
+        <cfquery name="qT">
+        	SELECT * FROM temp_data
+            WHERE `Session` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.sid#"/>
+            	AND Flag <> "d"
+        </cfquery>
+        
+        <cfreturn qT/>
+    </cffunction>
+
+    <cffunction name="GetTempDataToDelete" access="public" returntype="query" hint="">
+    	<cfargument name="sid" required="yes" type="string"/>
+        
+        <cfset var qT = ""/>
+        <cfquery name="qT">
+        	SELECT * FROM temp_data
+            WHERE `Session` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.sid#"/>
+            	AND Flag = "d"
+        </cfquery>
+        
+        <cfreturn qT/>
+    </cffunction>  
+    
+    <cffunction name="FlagTempDataToDelete" access="public" returntype="void" hint="clear temp data via session">
+    	<cfargument name="sid" required="yes" type="string"/>
+         
+        <cfquery>
+            UPDATE temp_data SET `Flag` = "d"
+            WHERE `Session` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#url.sid#"/>
+        </cfquery>
+         
+    </cffunction>
+
+    <cffunction name="UpdateStatus" access="public" hint="update the status of a table" returntype="void">
+    	<cfargument name="key" hint="the field name of the item to update" required="yes" type="string"/>
+        <cfargument name="value" hint="the value of the item to update : id" required="yes" type="numeric"/>
+        <cfargument name="status" hint="the new status you want to change to" required="yes" type="string"/>
+        <cfargument name="table" hint="the database table you want to update" required="yes" type="string"/> 
+        
+        <cfquery>
+        	UPDATE #arguments.table# SET
+            	`Status` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.status#"/>
+            WHERE `#arguments.key#` = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.value#"/>
+        </cfquery>
+    	
+    </cffunction>
+
+		<cffunction name="LogComment">
+			<cfargument name="key" required="yes" type="numeric">
+			<cfargument name="comment" required="yes" type="string">
+			<cfargument name="model" required="yes" type="string" default="wo">
+			
+			<cfquery>
+				INSERT INTO core_comment SET 
+					`PK` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.key#"/>,
+					CommentByUserId = <cfqueryparam cfsqltype="cf_sql_integer" value="#request.userInfo.userId#"/>,
+					Comments = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.comment#"/>,
+					`Table` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#arguments.model#"/>
+			</cfquery>
+			
+			<cfreturn true />
+		</cffunction>
+
+		<cfscript>
+			/**
+			 * Log Activity
+			 *
+			 * @param tbl (required)
+			 * @param key (required)
+			 * @param event (required)
+			 * @param url (optional)
+			 * @param info (optional)
+			 * @param type (optional)
+			 */
+			public void function LogActivity(required string tbl, required string key, required string event, string url="", string info="", string type="I") {
+				var browserInfo = cgi.http_user_agent;
+				var ipAddress = cgi.remote_addr;
+				var currentURL = cgi.script_name & cgi.path_info & cgi.query_string;
+		
+				queryExecute("
+					INSERT INTO core_log (
+						UserId, URL, Type, `Key`, Title, IP, Browser, Description, `Table`
+					) VALUES (
+						:userId, :url, :type, :key, :event, :ip, :browser, :info, :table
+					)
+				", {
+					userId:   { value: request.userInfo.userId, cfsqltype: "cf_sql_integer" },
+					url:      { value: currentURL, cfsqltype: "cf_sql_varchar" },
+					type:     { value: arguments.type, cfsqltype: "cf_sql_varchar" },
+					key:      { value: arguments.key, cfsqltype: "cf_sql_varchar" },
+					event:    { value: arguments.event, cfsqltype: "cf_sql_varchar" },
+					ip:       { value: ipAddress, cfsqltype: "cf_sql_varchar" },
+					browser:  { value: browserInfo, cfsqltype: "cf_sql_varchar" },
+					info:     { value: arguments.info, cfsqltype: "cf_sql_longvarchar" },
+					table:    { value: arguments.tbl, cfsqltype: "cf_sql_varchar" }
+				});
 			}
-		}
-	}
 
-	public void function SaveFromTempTable(
-		required string sid,
-		required string tbl,
-		required string fld_des,
-		required string fld_src,
-		required string pk_field,
-		required string fk_field,
-		required numeric fk_value
-	) {
-		var llen = listLen(fld_des);
-		transaction {
-			var qTemp = queryExecute("
-				SELECT * FROM temp_data WHERE Session = :sid
-			", { sid: { value: sid, cfsqltype: "cf_sql_varchar" } });
-
-			for (var row in qTemp) {
-				switch (row.Flag) {
-					case "d":
-						queryExecute("
-							DELETE FROM #tbl# WHERE #pk_field# = :pk
-						", { pk: { value: row.PK, cfsqltype: "cf_sql_integer" } });
-						break;
-
-					case "u":
-						var isInsert = (row.PK == "");
-						var sql = isInsert ? "INSERT INTO #tbl# SET " : "UPDATE #tbl# SET ";
-						if (fk_field != "") {
-							sql &= "`#fk_field#` = :fk, ";
-						}
-
-						var params = {};
-						if (fk_field != "") {
-							params["fk"] = { value: fk_value, cfsqltype: "cf_sql_integer" };
-						}
-
-						var i = 0;
-						for (var fld_d in listToArray(fld_des)) {
-							i++;
-							var fld_s = listGetAt(fld_src, i);
-							var ttype = left(fld_s, len(fld_s) - 1);
-							var val = evaluate(fld_s);
-							var key = "f" & i;
-
-							sql &= "`#fld_d#` = :#key#";
-							if (i < llen) sql &= ", ";
-
-							switch (ttype) {
-								case "int":
-									params[key] = { value: val(val), cfsqltype: "cf_sql_integer" };
-									break;
-								case "float":
-									params[key] = { value: val(val), cfsqltype: "cf_sql_decimal" };
-									break;
-								case "date":
-									params[key] = { value: val, cfsqltype: "cf_sql_date" };
-									break;
-								default:
-									if (listFindNoCase("text1,text2,text3,text4,text5,text6", val) && len(val) == 5) {
-										val = "";
-									}
-									params[key] = { value: val, cfsqltype: "cf_sql_varchar" };
-							}
-						}
-
-						if (!isInsert) {
-							sql &= " WHERE #pk_field# = :pk";
-							params["pk"] = { value: row.PK, cfsqltype: "cf_sql_integer" };
-						}
-
-						queryExecute(sql, params);
-						break;
-
-					default:
-						if (row.Flag == "n" || val(row.PK) == 0) {
-							var sql = "INSERT INTO #tbl# SET ";
-							var params = {};
-							if (fk_field != "") {
-								sql &= "`#fk_field#` = :fk, ";
-								params["fk"] = { value: fk_value, cfsqltype: "cf_sql_integer" };
-							}
-
-							var i = 0;
-							for (var fld_d in listToArray(fld_des)) {
-								i++;
-								var fld_s = listGetAt(fld_src, i);
-								var ttype = left(fld_s, len(fld_s) - 1);
-								var val = evaluate(fld_s);
-								var key = "f" & i;
-
-								sql &= "`#fld_d#` = :#key#";
-								if (i < llen) sql &= ", ";
-
-								switch (ttype) {
-									case "int":
-										params[key] = { value: val(val), cfsqltype: "cf_sql_integer" };
-										break;
-									case "float":
-										params[key] = { value: val(val), cfsqltype: "cf_sql_decimal" };
-										break;
-									case "date":
-										params[key] = { value: val, cfsqltype: "cf_sql_date" };
-										break;
-									default:
-										if (listFindNoCase("text1,text2,text3,text4,text5,text6", val) && len(val) == 5) {
-											val = "";
-										}
-										params[key] = { value: val, cfsqltype: "cf_sql_varchar" };
-								}
-							}
-							queryExecute(sql, params);
-						}
-				}
-			}
-
-			queryExecute("
-				DELETE FROM temp_data WHERE Session = :sid
-			", { sid: { value: sid, cfsqltype: "cf_sql_varchar" } });
-		}
-		objectCacheClear();
-	}
-
-	public query function GetTempDate(required string sid) {
-		return queryExecute("
-			SELECT * FROM temp_data WHERE Session = :sid
-		", { sid: { value: sid, cfsqltype: "cf_sql_varchar" } });
-	}
-
-	public query function GetTempDataToUpdate(required string sid) {
-		return queryExecute("
-			SELECT * FROM temp_data WHERE Session = :sid AND Flag <> 'd'
-		", { sid: { value: sid, cfsqltype: "cf_sql_varchar" } });
-	}
-
-	public query function GetTempDataToDelete(required string sid) {
-		return queryExecute("
-			SELECT * FROM temp_data WHERE Session = :sid AND Flag = 'd'
-		", { sid: { value: sid, cfsqltype: "cf_sql_varchar" } });
-	}
-
-	public void function FlagTempDataToDelete(required string sid) {
-		queryExecute("
-			UPDATE temp_data SET Flag = 'd' WHERE Session = :sid
-		", { sid: { value: sid, cfsqltype: "cf_sql_varchar" } });
-	}
-
-	public void function UpdateStatus(required string key, required numeric value, required string status, required string table) {
-		queryExecute("
-			UPDATE #table# SET Status = :status WHERE #key# = :val
-		", {
-			status: { value: status, cfsqltype: "cf_sql_varchar" },
-			val: { value: value, cfsqltype: "cf_sql_integer" }
-		});
-	}
-
-	public boolean function LogComment(required numeric key, required string comment, required string model="wo") {
-		queryExecute("
-			INSERT INTO core_comment (PK, CommentByUserId, Comments, Table)
-			VALUES (:pk, :uid, :comment, :model)
-		", {
-			pk: { value: key, cfsqltype: "cf_sql_varchar" },
-			uid: { value: request.userInfo.userId, cfsqltype: "cf_sql_integer" },
-			comment: { value: comment, cfsqltype: "cf_sql_varchar" },
-			model: { value: model, cfsqltype: "cf_sql_varchar" }
-		});
-		return true;
-	}
-
-	public void function LogActivity(required string tbl, required string key, required string event, string url="", string info="", string type="I") {
-		var browserInfo = cgi.http_user_agent;
-		var ipAddress = cgi.remote_addr;
-		var currentURL = cgi.script_name & cgi.path_info & cgi.query_string;
-
-		queryExecute("
-			INSERT INTO core_log (
-				UserId, URL, Type, `Key`, Title, IP, Browser, Description, `Table`
-			) VALUES (
-				:userId, :url, :type, :key, :event, :ip, :browser, :info, :table
-			)
-		", {
-			userId:   { value: request.userInfo.userId, cfsqltype: "cf_sql_integer" },
-			url:      { value: currentURL, cfsqltype: "cf_sql_varchar" },
-			type:     { value: arguments.type, cfsqltype: "cf_sql_varchar" },
-			key:      { value: arguments.key, cfsqltype: "cf_sql_varchar" },
-			event:    { value: arguments.event, cfsqltype: "cf_sql_varchar" },
-			ip:       { value: ipAddress, cfsqltype: "cf_sql_varchar" },
-			browser:  { value: browserInfo, cfsqltype: "cf_sql_varchar" },
-			info:     { value: arguments.info, cfsqltype: "cf_sql_longvarchar" },
-			table:    { value: arguments.tbl, cfsqltype: "cf_sql_varchar" }
-		});
-	}
-}
+		</cfscript>
+</cfcomponent>

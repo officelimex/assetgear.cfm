@@ -91,6 +91,10 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
         <td valign="top" class="left bottom">W.O. Type</td>
         <td valign="top" class="right bottom">#qWO.JobClass#</td>
       </tr>
+      <tr>
+        <td valign="top" class="left bottom">Priority</td>
+        <td valign="top" class="right bottom">#qWO.Priority#</td>
+      </tr>
       <cfif val(qWO.MRId)>
           <tr>
             <td valign="top" class="left bottom">M. R ##</td>

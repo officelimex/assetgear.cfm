@@ -23,8 +23,8 @@
  
 <cfquery name="qAS">
 	SELECT *
-    FROM asset
-    WHERE AssetId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qWO.AssetId#"/>
+  FROM asset
+  WHERE AssetId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qWO.AssetId#"/>
 </cfquery>
 
 <cfquery name="qAl">
@@ -61,9 +61,24 @@
               <f:Label name="Asset Location" value="#AssetLocation# "/> 
             </td>
             <td class="horz-div" valign="top"> 
-              <f:Label name="Service Request ##" label="Service Request ##" value="#qWO.ServiceRequestId#" />
+              <f:Label name="Service Request ##" hideOnBlank label="Service Request ##" value="#qWO.ServiceRequestId#"/>
+              <f:Label name="Department" value="#qWO.Department# &mdash;  #qWO.Unit#" />
               <f:Label name="Work Class" value="#qWO.JobClass#" />
               <f:Label name="Date Opened" value="#dateformat(qWO.DateOpened,'dd/mmm/yyyy')#"/>
+              <cfset _pclass = "info"/>
+              <cfswitch expression="#qWO.Priority#">
+                <cfcase value="Critical">
+                  <cfset _pclass = "error"/>
+                </cfcase>
+                <cfcase value="High">
+                  <cfset _pclass = "warning"/>
+                </cfcase>
+                <cfcase value="Low">
+                  <cfset _pclass = "info"/>
+                </cfcase>
+              </cfswitch>
+              <f:Label name="Priority" label="Priority" class="text-#_pclass# text-bold" value="#qWO.Priority#"/>
+
             </td>
           </tr> 
           <tr>

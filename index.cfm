@@ -30,7 +30,7 @@
 <link href="assets/awaf/UI/css/aGrid.css?v=0.2" rel="stylesheet" type="text/css" media="screen" />
 <link href="assets/awaf/UI/css/aWindow.css" rel="stylesheet" type="text/css" media="screen" />
 <link href="assets/awaf/UI/css/bootstrap.min.2.2.1.css" rel="stylesheet" type="text/css" media="screen" />
-<link href="assets/awaf/UI/css/Style.css?v=0.2.3.21" rel="stylesheet" type="text/css" media="screen" />
+<link href="assets/awaf/UI/css/Style.css?v=0.2.3.22" rel="stylesheet" type="text/css" media="screen" />
 <link href="assets/awaf/UI/tab/aCustomTab.css?v=0.1" rel="stylesheet" type="text/css" media="screen" /> 
 
 <cfimport taglib="assets/awaf/tags/xWindow_1000/" prefix="w" />
