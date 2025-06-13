@@ -362,7 +362,7 @@
                         <et:Table allowInput height="100%" id="CorrectiveId">
                             <et:Headers>
                                 <et:Header title="Action Item Description" size="4" type="text" />
-                                <et:Header title="Person Reponsible" size="3" type="int">
+                                <et:Header title="Person Responsible" size="3" type="int">
                                     <et:Select ListValue="#Valuelist(qU.UserId,'`')#" ListDisplay="#Valuelist(qU.Names,'`')#" delimiters="`"/>
                                 </et:Header>
                                 <et:Header title="Completion Date" size="2" type="date" hint="D/M/YYYY"/>

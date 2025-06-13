@@ -169,7 +169,7 @@ For any inquiries or support, please contact [support@officelime.com](mailto:sup
   - [*] requestor
   - [*] department/unit 
   - [*] priority 
-  - [ ] estimated hours of completion - ExpectedWorkDuration, 
+  - [*] estimated hours of completion - ExpectedWorkDuration, 
   - [ ] and time spent hours columns to the work order dashboard.
 - [ ] Adjust the schedule maintenance trigger to generate based on the set date of the PM task (19th of the month), disregarding the closure date, and ensure the trigger time is consistently midnight.
 - [ ] Add a button to generate scheduled maintenance or instantly generate work orders.
@@ -193,11 +193,6 @@ For any inquiries or support, please contact [support@officelime.com](mailto:sup
 - [ ] Prepare the scheduled maintenance feature tonight for Solomon Unu to test tomorrow morning.
 - [ ] Add the functionality for handling over a permit to work to the development list.
 
-
-- Pully hub - remove qor
-- Brush:Electric Motor
-- Rag: Mini
-
 ## New Feature
 
 - [ ] when lpg and operations approves it should also copy their sup
@@ -205,7 +200,7 @@ For any inquiries or support, please contact [support@officelime.com](mailto:sup
 ## Update
 
 - [ ] Separate the Name from the Date and Signature
-- [ ] Change all colors on borders to company brand
+- [*] Change all colors on borders to company brand
 
 ## Wish List
 

@@ -77,7 +77,7 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
         <td valign="top" class="right bottom">
 <!---        <cfset qAL = application.com.Asset.GetAssetLocationInWorkOrder(qWO.AssetLocationIds)/>
         #replace(ValueList(qAL.Location),',',', ','all')#--->
-		<cfset qAL = application.com.Asset.GetAssetByAssetLocatonIds(qWO.AssetLocationIds)/>
+		<cfset qAL = application.com.Asset.GetAssetByAssetLocationIds(qWO.AssetLocationIds)/>
         #qAL.Location#<cfif qAL.ParentLocation neq ""> @ #qAL.ParentLocation# </cfif>  #qAL.LocDescription#
         </td>
       </tr>

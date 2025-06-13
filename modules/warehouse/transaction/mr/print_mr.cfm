@@ -255,7 +255,7 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
                 <cfhttp url="#fl#" method="get" result="imageData" />
                 <cfset base64Image = ToBase64(imageData.Filecontent) />
                 <div style="position: relative;">
-                  <img style="left:5px;bottom:-20px;position: absolute;z-index: 1;" src="data:image/png;base64,#base64Image#" height="30"/> 
+                  <img style="left:0px;bottom:-18px;position: absolute;z-index: 1;" src="data:image/png;base64,#base64Image#" height="30"/> 
                 </div>
             </td>
           </tr>

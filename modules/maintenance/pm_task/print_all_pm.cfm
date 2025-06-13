@@ -102,7 +102,7 @@ border-bottom:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
   <tr>
     <td class="left">#c#</td>
     <td>#qP.PMTaskId#</td>
-    <td><cfset qA = application.com.Asset.GetAssetByAssetLocatonIds(qP.AssetLocationId)/><cfset ast = valueList(qA.Asset,'`')/>
+    <td><cfset qA = application.com.Asset.GetAssetByAssetLocationIds(qP.AssetLocationId)/><cfset ast = valueList(qA.Asset,'`')/>
     #replace(ast,'`','<br/>','all')#
     </td>
     <td>#qP.Description#</td>

@@ -1172,7 +1172,7 @@ CREATE TABLE `pm_task` (
   `NotifyBefore` decimal(18,2) DEFAULT '0.00',
   `Type` char(1) NOT NULL DEFAULT 'd' COMMENT 'd for days, m for milestone',
   `Note` text,
-  `RequireShortdown` char(3) NOT NULL DEFAULT 'No' COMMENT 'yes or no',
+  `RequireShutdown` char(3) NOT NULL DEFAULT 'No' COMMENT 'yes or no',
   PRIMARY KEY (`PMTaskId`),
   KEY `DepartmentId` (`DepartmentId`),
   KEY `UnitId` (`UnitId`),
@@ -1185,7 +1185,7 @@ CREATE TABLE `pm_task` (
 LOCK TABLES `pm_task` WRITE;
 /*!40000 ALTER TABLE `pm_task` DISABLE KEYS */;
 
-INSERT INTO `pm_task` (`PMTaskId`, `AssetLocationId`, `DepartmentId`, `UnitId`, `ManHours`, `Description`, `TaskDetails`, `Resources`, `TaskFlag`, `FrequencyId`, `StartTime`, `IsActive`, `ReadingTypeId`, `Milestone`, `NotifyBefore`, `Type`, `Note`, `RequireShortdown`)
+INSERT INTO `pm_task` (`PMTaskId`, `AssetLocationId`, `DepartmentId`, `UnitId`, `ManHours`, `Description`, `TaskDetails`, `Resources`, `TaskFlag`, `FrequencyId`, `StartTime`, `IsActive`, `ReadingTypeId`, `Milestone`, `NotifyBefore`, `Type`, `Note`, `RequireShutdown`)
 VALUES
 	(3444,'1581',16,2,NULL,'yfgdf','dfg fgdfsd',NULL,NULL,17,'2024-11-13 00:00:00','Yes',NULL,NULL,0.00,'d','','No');
 

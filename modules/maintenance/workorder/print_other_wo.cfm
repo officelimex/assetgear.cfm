@@ -115,7 +115,7 @@ border-bottom:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
         <td nowrap>#qW.WorkOrderId#</td>
         <td>#qW.Asset#</td>
         <td>
-		<cfset qA = application.com.Asset.GetAssetByAssetLocatonIds(qW.AssetLocationIds)/>
+		<cfset qA = application.com.Asset.GetAssetByAssetLocationIds(qW.AssetLocationIds)/>
 		<!---<cfset ast = valueList(qA.Location,'`')/>
         #replace(ast,'`','<br/>','all')#--->
         <cfif qA.ParentLocation neq "">

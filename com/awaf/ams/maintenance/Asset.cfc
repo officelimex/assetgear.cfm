@@ -180,7 +180,7 @@
         <cfreturn qP/>
     </cffunction>
 
-    <cffunction name="GetAssetByAssetLocatonIds" access="public" returntype="query">
+    <cffunction name="GetAssetByAssetLocationIds" access="public" returntype="query">
     	<cfargument name="ids" type="string" required="yes"/>
 
         <cfquery name="qP" cachedwithin="#createTime(1,0,0)#">
