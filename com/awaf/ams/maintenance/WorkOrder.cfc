@@ -41,6 +41,7 @@
  				jc.Class JobClass,
  				d.Name Department,
 				ut.Name Unit,
+				mr.MRId,
  				CONCAT(cu.Surname," ",cu.OtherNames) ClosedBy,
  				CONCAT(su.Surname," ",su.OtherNames) SupervisedBy,
  				CONCAT(sup.Surname," ",sup.OtherNames) SupName,
@@ -65,6 +66,8 @@
 			LEFT JOIN core_user mgr ON mgr.UserId = wo.FSUserId 
       LEFT JOIN core_user wh ON wh.UserId = wo.WHUserId 
       LEFT JOIN core_user sup ON sup.UserId = wo.SupUserId 
+
+			LEFT JOIN whs_mr mr 		ON mr.WorkOrderId = wo.WorkOrderId
  		'/>
     <cfset this.WORK_ORDER_COUNT_SQL = '
  			SELECT

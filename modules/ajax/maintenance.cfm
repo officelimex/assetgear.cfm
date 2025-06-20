@@ -128,10 +128,39 @@
 
 		</cfscript>
 		</cftransaction>
-
-
 	</cfcase>
 
+	<cfcase value="RecallRequest">
+
+		<cftransaction>
+			<cfset qW = getWO(form.id)/>
+			<cfquery>
+				UPDATE work_order SET 
+					`Status2` = '',
+					`Status` = 'Open'
+				WHERE WorkOrderId = #form.id#
+			</cfquery>
+			<cfscript>
+				if(application.MODE == application.LIVE)	{
+					ws_email = userObj.GetEmailsInRole("WH_SUP")
+					application.com.Notice.SendEmail(
+						to  		: ws_email,
+						cc 			: qW.cb_Email,
+						subject	: "Work Order ###qW.WorkOrderId# Has been Recalled",
+						msg 		: "
+							Hello,
+							<p>  
+								This is to inform you that Work Order <strong>###qW.WorkOrderId#</strong> has been Recalled.  
+							</p>
+							Please discontinue any further action or processing related to this Work Order until I have had the opportunity to review it in full. 
+							<p>Thank You</p> 
+						"
+					)	
+				}
+			</cfscript>
+		</cftransaction>
+
+	</cfcase>
 
 	<cfcase value="WHApproveOnly">
 		<cfscript>
@@ -152,9 +181,9 @@
 
 			qW = queryExecute("
 				UPDATE work_order SET 
-					Status2 = 'Sent to WM',
-					WHApprovedDate = :_date, 
-					WHUserId = :_uid
+					Status2 				= 'Sent to WM',
+					WHApprovedDate 	= :_date, 
+					WHUserId 				= :_uid
 				WHERE WorkOrderId = :_wid
 			", {
 				_wid : url.id,

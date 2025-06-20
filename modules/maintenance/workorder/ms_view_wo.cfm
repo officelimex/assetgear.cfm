@@ -54,6 +54,13 @@
             <f:Label name="Created by" value="#qWO.createdBy#"/>
           </cfif>
           <f:Label name="Work Description" value="#qWO.Description#"/>
+          <cfif qWO.Status2 EQ "Approved">
+            <a href="modules/warehouse/transaction/mr/print_mr.cfm?id=#qWO.MRId#" target="_blank">
+              <f:Label name="MR ##" hideOnBlank value="#qWO.MRId#"/>
+            </a>
+          <cfelse>
+            <f:Label name="MR ##" hideOnBlank value="#qWO.MRId#"/>
+          </cfif>
           <f:Label name="Asset" value="#qAS.Description#"/>
         </td>
         <td class="horz-div" valign="top"> 
@@ -167,7 +174,7 @@
   </nt:NavTab>
   
   <f:ButtonGroup>
-    <cfif qWO.WorkClassId EQ 12 AND qWO.Status NEQ "Approved" AND (request.IsMGR OR (request.IsWarehouseAdmin AND qWO.DepartmentId EQ 8))>
+    <cfif qWO.WorkClassId EQ 12 AND qWO.Status2 NEQ "Approved" AND (request.IsMGR OR (request.IsWarehouseAdmin AND qWO.DepartmentId EQ 8))>
       <cfset _show = true>
       <cfif qWO.DepartmentId NEQ request.userInfo.DepartmentId>
         <cfset _show = false>
@@ -177,13 +184,16 @@
       </cfif>
       
       <cfif _show>
-        <f:Button IsSave 
-          value="Reject Request" 
-          class="btn-danger" 
-          actionURL="modules/ajax/maintenance.cfm?cmd=RejectReq"
-          onSuccess="win_save_wo_window.close()"
-          icon="icon-thumbs-down icon-white"
-        />
+        <!--- add recall button --->
+        <cfif qWO.CreatedByUserId EQ request.userInfo.UserId && qWO.Status2 EQ "Sent to Warehouse">
+          <f:Button IsSave 
+            value="Recall Request" 
+            class="btn-warning" 
+            actionURL="modules/ajax/maintenance.cfm?cmd=RecallRequest"
+            onSuccess="win_save_wo_window.close()"
+            icon="icon-thumbs-down icon-white"
+          />
+        </cfif>
         <f:Button IsSave 
           value="Request Review" 
           class="btn-info" 
