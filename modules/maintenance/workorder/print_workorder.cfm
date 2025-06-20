@@ -150,7 +150,7 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
         <td valign="top" class="left">#qMN.Currentrow#</td>
         <td valign="top" class="left">#qMN.Code#</td>
         <td valign="top">
-          #qMN.Item#
+          #replace(qMN.Item,chr(10),'<br/>','all')#
           <cfif qMN.Purpose NEQ "">
             <div class="small">For: #qMN.Purpose#</div>
           </cfif>
@@ -193,7 +193,7 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
       <tr <cfif qOO.Currentrow eq qOO.Recordcount> class="bottom" </cfif>>
         <td valign="top" class="left">#qOO.Currentrow#</td>
         <td valign="top">
-          #replace(qOO.Description,chr(13),'<br/>','all')#
+          #replace(qOO.Description,chr(10),'<br/>','all')#
         </td>
         <td valign="top" align="right">#qOO.Quantity#</td>
         <td valign="top">#qOO.UOM#&nbsp;</td>

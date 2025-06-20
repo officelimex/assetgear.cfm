@@ -48,7 +48,8 @@
 					<td width="58%" valign="top">
 						<f:Select name="AssetLocationId" label="Asset" required ListValue="#valuelist(qA.AssetLocationId,'`')#" autoselect delimiters="`" ListDisplay="#valuelist(qA.Asset,'`')#" Selected="#qPM.AssetLocationId#" class="span11"/>
 						<f:TextArea name="Description" required value="#qPM.Description#" class="span11"/>
-						<cfif !request.IsPlanner>
+						<f:TextBox name="ExpectedWorkDuration" help="How long in hours will it take to complete the job" required class="span4" type="number" validate="integer" label="Est. Work Duration (hrs)" value="#qPM.ExpectedWorkDuration#" />
+						<cfif request.IsPlanner>
 							<f:Select name="DepartmentId" label="Department" required ListValue="#Valuelist(qD.DepartmentId)#" ListDisplay="#Valuelist(qD.Name)#" Selected="#qPM.DepartmentId#"/>
 							<f:Select name="UnitId" label="Unit" ListValue="#Valuelist(qUt.UnitId)#" ListDisplay="#Valuelist(qUt.Name)#" Selected="#qPM.UnitId#"/>
 						</cfif>

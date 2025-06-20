@@ -2275,6 +2275,26 @@ var aEditTable = new Class({
 					}
 					});
 					break*/
+				case "textarea":
+					if (hd["required"] == true) {
+						ctlInput = new Element("textarea", {
+							id: unid + _index1,
+							placeholder: hd["hint"],
+							required: "required",
+							styles: {
+								width: "100%",
+							},
+						});
+					} else {
+						ctlInput = new Element("textarea", {
+							id: unid + _index1,
+							placeholder: hd["hint"],
+							styles: {
+								width: "100%",
+							},
+						});
+					}
+					break;
 				default: // text, date, float
 					if (typeOf(hd["data"]) == "array") {
 						ctlInput = new Element("select", {
@@ -2292,27 +2312,22 @@ var aEditTable = new Class({
 							);
 						});
 					} else {
-						//console.log(hd['required']);
-						if (hd["required"] == true) {
-							ctlInput = new Element("input", {
-								id: unid + _index1,
-								type: "text",
-								placeholder: hd["hint"],
-								required: "required",
-								styles: {
-									width: "100%",
-								},
-							});
-						} else {
-							ctlInput = new Element("input", {
-								id: unid + _index1,
-								type: "text",
-								placeholder: hd["hint"],
-								styles: {
-									width: "100%",
-								},
-							});
+						var inputType = "input";
+						var _totalRows = hd["rows"];
+						if (_totalRows > 1) {
+							inputType = "textarea";
 						}
+
+						ctlInput = new Element(inputType, {
+							id: unid + _index1,
+							type: "text",
+							rows: _totalRows - 1,
+							placeholder: hd["hint"],
+							required: hd["required"] ? undefined : hd["required"],
+							styles: {
+								width: "100%",
+							},
+						});
 					}
 					break;
 			}

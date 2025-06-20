@@ -210,7 +210,7 @@
 				<div class="alert alert-info">Use this area to add materials not stocked in the warehouse or service related activities</div>
 				<et:Table allowInput height="222px" id="WorkOrderItem2">
 					<et:Headers>
-						<et:Header title="Material/Service Description" size="5" type="text"/>
+						<et:Header title="Material/Service Description" size="5" type="text" rows="4" required="true"/>
 						<et:Header title="Qty" size="1" type="int"/>
 						<et:Header title="UOM" size="1" type="text">
           		<et:Select listvalue="#ValueList(qUM.Title,'`')#" delimiters="`"/>

@@ -16,7 +16,7 @@
 	<cfparam name="Attributes.condition" default="1"/> 
 	<cfparam name="Attributes.warning" default="" type="string"/> 
 	<!--- end ----> 
-	<cfparam name="Attributes.executeURL" type="string" default=""/> <!--- execuite command on a url --->
+	<cfparam name="Attributes.executeURL" type="string" default=""/> <!--- execute command on a url --->
 	<cfassociate basetag="cf_Window" />  
 	<cfset windowTagData = getBaseTagData("cf_Window") /> 
 	<!--- <cfdump  var="#windowTagData.Attributes#"/> --->
@@ -52,27 +52,28 @@
 					</cfif>
 					<cfif Attributes.IsSave> 
 							<cfif Attributes.IsNewForm>
-							var frm = '#request.grid.renderTo#0frm'; 
+								var frm = '#request.grid.renderTo#0frm'; 
 							<cfelse>
-							var frm = '#request.grid.renderTo#'+d[0]+'frm'; 
+								var frm = '#request.grid.renderTo#'+d[0]+'frm'; 
 							</cfif> 
+							
 							new Form.Validator.Inline($(frm), { 								   
-									onFormValidate: function(passed, form, event) {
-											if (passed) {
-													$(frm).set('send', {
-															onRequest: function(){e.target.disabled=true },
-															onFailure: function(r){showError(r);},
-															onSuccess: function(r){
-																	if(r.trim()==''){r='Your data was saved sucessfuly. Please refresh to see change.'}
-																	var an = new aNotify();
-																	an.alert('Successful!',r);  
-																	// _w.close();
-																	win_#windowTagData.Attributes.id#.close()
-																	tr.highlight('##FF0'); 
-															},
-															onComplete: function(){e.target.disabled=false;}
-													}).send();
-											}
+								onFormValidate: function(passed, form, event) {
+									if (passed) {
+										$(frm).set('send', {
+											onRequest: function(){e.target.disabled=true },
+											onFailure: function(r){showError(r);},
+											onSuccess: function(r){
+													if(r.trim()==''){r='Your data was saved successfully. Please refresh to see change.'}
+													var an = new aNotify();
+													an.alert('Successful!',r);  
+													// _w.close();
+													win_#windowTagData.Attributes.id#.close()
+													tr.highlight('##FF0'); 
+											},
+											onComplete: function(){e.target.disabled=false;}
+										}).send();
+									}
 							}}).validate();
 					</cfif> 
 					<cfif len(Attributes.onClick)>
@@ -90,26 +91,29 @@
 					<cfif Attributes.executeURL neq ""> 
 						new Request({
 						<cfif find('?',Attributes.executeURL)>
-								url: #Attributes.executeURL#+'&id='+d[0],
+							url: #Attributes.executeURL#+'&id='+d[0],
 						<cfelse>
-								url: #Attributes.executeURL#+'?id='+d[0],
+							url: #Attributes.executeURL#+'?id='+d[0],
 						</cfif> 
-								method: 'post',
-								data: {
-									pmt: pmt,
-            		},
-								onRequest: function()	{e.target.disabled=true;},
-								onSuccess: function(r)	{
-										var an = new aNotify();
-										an.alert('Successful!',r);	
-										// _w.close();
-										win_#windowTagData.Attributes.id#.close()
-										tr.highlight('##FF0'); 					
-								},
-								onFailure:function(e)	{
-										showError(e);
-										e.target.disabled=false;
-								}
+							method: 'post',
+							data: function() {
+								var frm = '#request.grid.renderTo#'+d[0]+'frm'; 
+								var formData = $(frm).toQueryString();  // ✅ Use explicit form reference
+								formData += '&pmt=' + encodeURIComponent(pmt); // ✅ Add dynamic value
+								return formData;
+							}(),
+							onRequest: function()	{e.target.disabled=true;},
+							onSuccess: function(r)	{
+									var an = new aNotify();
+									an.alert('Successful!',r);	
+									// _w.close();
+									win_#windowTagData.Attributes.id#.close()
+									tr.highlight('##FF0'); 					
+							},
+							onFailure:function(e)	{
+									showError(e);
+									e.target.disabled=false;
+							}
 						}).send();
 					</cfif>  
 				}.bind(_g) 

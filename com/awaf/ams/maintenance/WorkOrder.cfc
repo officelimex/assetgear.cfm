@@ -365,99 +365,118 @@
 				</cfif>
 			</cfquery>
 
-				<!--- save the description and details of the WO to PM if available --->
-				<cfif val(wo.PMTaskId) AND len(wo.WorkDetails) GT 10>
-					<cfquery>
-						UPDATE pm_task SET
-							Description = <cfqueryparam cfsqltype="cf_sql_varchar" value="#wo.Description#"/>,
-							TaskDetails = <cfqueryparam cfsqltype="cf_sql_varchar" value="#wo.WorkDetails#"/>
-						WHERE PMTaskId = <cfqueryparam cfsqltype="cf_sql_integer" value="#wo.PMTaskId#"/>
-					</cfquery>
-				</cfif>
+			<cfset WOId = wo.Id/>
+			<cfif wo.Id eq 0>
+				<cfset WOId = rt.GENERATED_KEY/>
+			</cfif>
 
-				<cfset WOId = wo.Id/>
-				<cfif wo.Id eq 0>
-					<cfset WOId = rt.GENERATED_KEY/>
-				</cfif>
-
-				<cfset f = CreateObject("component","assetgear.com.awaf.util.file").init()/>
-				<!--- upload attachments --->
-				<cfparam name="wo.Attachments" default=""/>
-				<cfif wo.Attachments neq "">
-					<cfset s_path = wo.AttachmentsSource & "/" & wo.Attachments />
-					<cfset d_path = wo.AttachmentsDestination & "/work_order/" & WOId & "/" />
-					<cfset f.Move('work_order',WOId,'a',s_path,d_path)/>
-				</cfif>
-
-				<cfset h = createobject('component','assetgear.com.awaf.util.helper').Init()/>
-				<!--- associate spares with asset --->
-				<cfset qItm1 = h.GetTempDate(wo.WorkOrderItem)/>
-				<cfif qItm1.recordcount>
-					<cfquery name="qA">
-						SELECT ItemIds, AssetId FROM asset
-						WHERE AssetId = #val(wo.AssetId)#
-					</cfquery>
-					<cfset l = createObject("component","assetgear.com.awaf.util.List").Init()/>
-					<cfset nlist = listAppend(trim(qA.ItemIds), valueList(qItm1.Int0))/>
-
-					<cfquery>
-						UPDATE asset SET
-							ItemIds = trim("#l.ListDistinct(nlist)#")
-						WHERE AssetId = #qA.AssetId#
-					</cfquery>
-				</cfif>
-
-				<!--- update Work Order Item from temp data --->
-				<cfparam name="wo.WorkOrderItem" default=""/>
-				<cfparam name="wo.WorkOrderItem2" default=""/>
-				<cfparam name="wo.WorkOrderItem3" default=""/>
-				<cfparam name="wo.Contract" default=""/>
-				<cfparam name="wo.Labour" default=""/>
-				<!---  int1 - Description, int0 - Quantity ---->
-				<cfset h.SaveFromTempTable(wo.WorkOrderItem,
-					"work_order_item",
-					"ItemId,Purpose,Quantity",
-					"int0,text0,int1",
-					"WorkOrderItemId","WorkOrderId",WOId)/>
-
-				<cfset h.SaveFromTempTable(wo.WorkOrderItem2,
-					"work_order_item",
-					"Description,Quantity,UOM,OEM,Others",
-					"text0,int0,text1,text2,text3",
-					"WorkOrderItemId","WorkOrderId",WOId)/>
-				<!--- auto load others field for WorkOrderItem3 in temp table --->
-<!--- 				<cfquery>
-					UPDATE temp_data SET 
-						`text1` = "JB"
-					WHERE `Session` = "#wo.WorkOrderItem3#"
+			<!--- if is a new work order and it has pm  task, check for pm task items and insert into work order item --->
+			<cfif wo.id EQ 0 AND val(wo.PMTaskId)>
+				<cfquery name="qPTI">
+					SELECT * FROM pm_task_item
+					WHERE PMTaskId = #val(wo.PMTaskId)#
 				</cfquery>
-				<cfset h.SaveFromTempTable(wo.WorkOrderItem3,
-					"work_order_item",
-					"Description,Quantity,Others",
-					"text0,int0,text1",
-					"WorkOrderItemId","WorkOrderId", WOId)/> --->
-	
-				<!--- check unit price of spares and make sure there is value --->
-				<!--- <cfif IsDate(wo.DateClosed)> --->
-					<cfquery name="qsp">
-						SELECT UnitPrice FROM work_order_item WHERE ItemId IS NULL AND WorkOrderId = #WOId#
+				<cfif qPTI.recordcount>
+					<cfquery>
+						INSERT INTO work_order_item (WorkOrderId, ItemId, Quantity, Purpose)
+						VALUES 
+						<cfloop query="qPTI">
+							(#WOId#, #qPTI.ItemId#, #qPTI.Quantity#, <cfqueryparam cfsqltype="cf_sql_varchar" value="#qPTI.Purpose#"/>)
+							<cfif qPTI.currentRow EQ qPTI.recordcount>;<cfelse>,</cfif>
+						</cfloop>
 					</cfquery>
-					<!--- <cfloop query="qsp">
-						<cfif qsp.UnitPrice eq 0>
-							<cfthrow message="Kindly supply the unit price for spares used in Part Section B "/>
-						</cfif>
-					</cfloop> --->
-				<!--- </cfif> --->
-				<cfset h.SaveFromTempTable(wo.Contract,
-						"contract",
-						"Contractor,Description",
-						"text0,text1",
-						"ContractId","WorkOrderId",WOId)/>
-				<cfset h.SaveFromTempTable(wo.Labour,
-						"labour",
-						"UserId,Function,Hours",
-						"int0,text0,int1",
-						"LabourId","WorkOrderId",WOId)/>
+				</cfif>
+			</cfif>
+			<!--- save the description and details of the WO to PM if available --->
+			<cfif val(wo.PMTaskId) AND len(wo.WorkDetails) GT 10>
+				<cfquery>
+					UPDATE pm_task SET
+						Description = <cfqueryparam cfsqltype="cf_sql_varchar" value="#wo.Description#"/>,
+						TaskDetails = <cfqueryparam cfsqltype="cf_sql_varchar" value="#wo.WorkDetails#"/>
+					WHERE PMTaskId = <cfqueryparam cfsqltype="cf_sql_integer" value="#wo.PMTaskId#"/>
+				</cfquery>
+			</cfif>
+
+
+
+			<cfset f = CreateObject("component","assetgear.com.awaf.util.file").init()/>
+			<!--- upload attachments --->
+			<cfparam name="wo.Attachments" default=""/>
+			<cfif wo.Attachments neq "">
+				<cfset s_path = wo.AttachmentsSource & "/" & wo.Attachments />
+				<cfset d_path = wo.AttachmentsDestination & "/work_order/" & WOId & "/" />
+				<cfset f.Move('work_order',WOId,'a',s_path,d_path)/>
+			</cfif>
+
+			<cfset h = application.com.Helper/>
+			<!--- associate spares with asset --->
+			<cfset qItm1 = h.GetTempDate(wo.WorkOrderItem)/>
+			<cfif qItm1.recordcount>
+				<cfquery name="qA">
+					SELECT ItemIds, AssetId FROM asset
+					WHERE AssetId = #val(wo.AssetId)#
+				</cfquery>
+				<cfset l = createObject("component","assetgear.com.awaf.util.List").Init()/>
+				<cfset nlist = listAppend(trim(qA.ItemIds), valueList(qItm1.Int0))/>
+
+				<cfquery>
+					UPDATE asset SET
+						ItemIds = trim("#l.ListDistinct(nlist)#")
+					WHERE AssetId = #qA.AssetId#
+				</cfquery>
+			</cfif>
+
+			<!--- update Work Order Item from temp data --->
+			<cfparam name="wo.WorkOrderItem" default=""/>
+			<cfparam name="wo.WorkOrderItem2" default=""/>
+			<cfparam name="wo.WorkOrderItem3" default=""/>
+			<cfparam name="wo.Contract" default=""/>
+			<cfparam name="wo.Labour" default=""/>
+			<!---  int1 - Description, int0 - Quantity ---->
+			<cfset h.SaveFromTempTable(wo.WorkOrderItem,
+				"work_order_item",
+				"ItemId,Purpose,Quantity",
+				"int0,text0,int1",
+				"WorkOrderItemId","WorkOrderId",WOId)/>
+
+			<cfset h.SaveFromTempTable(wo.WorkOrderItem2,
+				"work_order_item",
+				"Description,Quantity,UOM,OEM,Others",
+				"text0,int0,text1,text2,text3",
+				"WorkOrderItemId","WorkOrderId",WOId)/>
+			<!--- auto load others field for WorkOrderItem3 in temp table --->
+<!--- 				<cfquery>
+				UPDATE temp_data SET 
+					`text1` = "JB"
+				WHERE `Session` = "#wo.WorkOrderItem3#"
+			</cfquery>
+			<cfset h.SaveFromTempTable(wo.WorkOrderItem3,
+				"work_order_item",
+				"Description,Quantity,Others",
+				"text0,int0,text1",
+				"WorkOrderItemId","WorkOrderId", WOId)/> --->
+
+			<!--- check unit price of spares and make sure there is value --->
+			<!--- <cfif IsDate(wo.DateClosed)> --->
+				<cfquery name="qsp">
+					SELECT UnitPrice FROM work_order_item WHERE ItemId IS NULL AND WorkOrderId = #WOId#
+				</cfquery>
+				<!--- <cfloop query="qsp">
+					<cfif qsp.UnitPrice eq 0>
+						<cfthrow message="Kindly supply the unit price for spares used in Part Section B "/>
+					</cfif>
+				</cfloop> --->
+			<!--- </cfif> --->
+			<cfset h.SaveFromTempTable(wo.Contract,
+					"contract",
+					"Contractor,Description",
+					"text0,text1",
+					"ContractId","WorkOrderId",WOId)/>
+			<cfset h.SaveFromTempTable(wo.Labour,
+					"labour",
+					"UserId,Function,Hours",
+					"int0,text0,int1",
+					"LabourId","WorkOrderId",WOId)/>
 
 			<cfquery name="qpts">
 				SELECT 
@@ -500,9 +519,11 @@
 							<p>Thank you<br/> 
 						</cfmail>
 					</cfif>
-				<cfelse>
-					<!--- send to supritendent to approve --->
-					<cfset SentToSuperintendent(WOId)/>				
+				<cfelse> 
+					<cfif !arguments.draft>
+						<!--- send to superintendent to approve --->
+						<cfset SentToSuperintendent(WOId)/>				
+					</cfif>
 				</cfif>
 
 			</cfif>

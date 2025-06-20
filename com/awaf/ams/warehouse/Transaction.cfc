@@ -78,7 +78,7 @@
 				mri.Description MRIItemDescription,
 				CONCAT(wi.Description,"~",wi.ItemId) ItemDescription, 
 				wi.Description, wi.Description MainItemDescription,	wi.Obsolete, wi.Status,
-				wi.Currency, wi.Code, wi.VPN ItemVPN, wi.Maker,
+				wi.Currency, wi.Code, wi.VPN ItemVPN, wi.Maker ItemMaker,
 				um.Code UM
 			FROM whs_mr_item mri
 			LEFT JOIN whs_item wi ON wi.ItemId = mri.ItemId
@@ -431,8 +431,8 @@
 					<cfset qmri = h.GetTempDataToUpdate(mr.ItemFromWO)/>
 					<cfloop query="qmri">
 						<cfset item_id = 0/>
-						<cfset _vpn = qmri.text3/>
-						<cfset _maker = qmri.text2/>
+						<cfset _vpn = trim(qmri.text3)/>
+						<cfset _maker = trim(qmri.text2)/>
 						<cfset _vpn = replace(_vpn, 'text4','')/>
 						<cfset _maker = replace(_maker, 'text3','')/>
 						<!--- replace ` in item description --->

@@ -18,7 +18,7 @@
 <table width="100%" border="0">
   <tr>
     <td width="50%" valign="top">
-      <f:select name="ServiceType" label="Type of Request" required Listvalue="MR,JR" listDisplay="Material Request,Job Request" onchange="#jrId#changePT(this)"/>
+      <f:select name="ServiceType" label="Type of Request" required Listvalue="JR" listDisplay="Job Request" onchange="#jrId#changePT(this)"/>
 
     </td>
     <td valign="top">

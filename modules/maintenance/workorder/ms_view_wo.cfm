@@ -108,9 +108,9 @@
                 <td>#qOI.Code#</td>
                 <td>
                   <cfif val(qOI.ItemId)>
-                    #qOI.Item#
+                    #replaceNoCase(qOI.Item,chr(10),'<br/>','all')#
                   <cfelse>
-                    #qOI.Description#
+                    #replaceNoCase(qOI.Description,chr(10),'<br/>','all')#
                   </cfif>
                 </td>
                 <td>#qOI.Quantity# #qOI.UOM##qOI.UM#</td>

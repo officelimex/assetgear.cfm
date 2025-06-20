@@ -61,11 +61,10 @@
   <tr>
   	<td colspan="2" > 
       <div style="border:1px solid ##ddd; padding:10px; border-radius:10px;">
-        <!--- <span class="red">*</span> Materials captured here will eventually be added into the warehouse inventory. --->
         <et:Table allowInput id="ItemFromWO" bind="WorkOrderId" Event="keyup" 
           data="modules/ajax/warehouse.cfm?cmd=getWorkOrderNI">
           <et:Headers>
-            <et:Header title="Non Stocked Materials/Services" size="5" type="text"/>
+            <et:Header title="Non Stocked Materials/Services" size="5" type="text" rows="4"/>
             <et:Header title="Qty" size="1" type="int"/>
             <et:Header title="UOM" size="1" type="text">
               <et:Select listvalue="#ValueList(qUM.Title,'`')#" delimiters="`"/>

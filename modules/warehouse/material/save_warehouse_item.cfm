@@ -36,7 +36,7 @@
 						<cfset help="Ignore this section if you want an auto generated code"/>
 					</cfif>
           <f:TextBox name="Code" label="Code" value="#qWI.Code#" help="#help#" />
-          <f:TextArea name="Description" label="Description" required value="#qWI.Description#"/>
+          <f:TextArea name="Description" label="Description" required value="#qWI.Description#" class="span11"/>
           <f:RadioBox name="Critical" inline showlabel label="Is a Critical item" required selected="#qWI.Critical#" ListValue="Yes,No"/>
           <f:RadioBox name="Obsolete" inline showlabel label="Item is Obsolete" required selected="#qWI.Obsolete#" ListValue="Yes,No"/>
           <f:RadioBox name="Currency" inline showlabel label="Currency" required selected="#qWI.Currency#" ListValue="NGN,USD" ListDisplay="Naira,US Dollar" />
@@ -50,6 +50,7 @@
           <f:Select name="ShelfLocationId" required label="Shelf Location" selected="#qWI.ShelfLocationId#" listvalue="#ValueList(qSL.ShelfLocationId)#" ListDisplay="#ValueList(qSL.Code)#" class="span4"/>
           <f:TextBox name="VPN" label="Part Number" value="#qWI.VPN#"/>
           <f:Select name="UMId" required label="Unit of Measurement" selected="#qWI.UMId#" listvalue="#ValueList(qUM.UMId)#" ListDisplay="#ValueList(qUM.Title)#" class="span5"/>
+          <f:TextBox name="Maker" label="OEM" value="#qWI.Maker#" class="span10"/>
           <f:TextBox name="MinimumInStore" label="Order Level" required value="#qWI.MinimumInStore#" class="span3"/>
           <f:TextBox name="MaximumInStore" label="Maximum in stock" required value="#qWI.MaximumInStore#" class="span3"/>
           <f:TextArea name="Reference" label="Reference" value="#qWI.Reference#"/>

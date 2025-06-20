@@ -134,7 +134,7 @@
 								Code = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Code#">,
 								Description = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Description#">,
 								VPN = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.VPN#">,
-								UMid = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.UMid#">,
+								UMId = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.UMId#">,
 								AssetCategoryId = <cfqueryparam cfsqltype="cf_sql_integer" value="#val(form.AssetCategoryId)#">,
 								ShelfLocationId = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.ShelfLocationId#">,
 								Reference = <cfqueryparam cfsqltype="cf_sql_varchar" value="#form.Reference#">,
@@ -145,6 +145,7 @@
 								Currency = <cfqueryparam cfsqltype="cf_sql_char" maxlength="3" value="#form.Currency#">,
 								`Obsolete` = <cfqueryparam cfsqltype="cf_sql_char" maxlength="3" value="#form.Obsolete#">,
 								`Critical` = <cfqueryparam cfsqltype="cf_sql_char" maxlength="3" value="#form.Critical#">,
+								`Maker` = <cfqueryparam cfsqltype="cf_sql_char" maxlength="3" value="#form.Maker#">,
 								MaximumInStore = <cfqueryparam cfsqltype="cf_sql_integer" value="#form.MaximumInStore#">,
 								AssetIds = <cfqueryparam cfsqltype="cf_sql_varchar" value="#assetIds_#"/>
 						<cfif form.id neq 0>

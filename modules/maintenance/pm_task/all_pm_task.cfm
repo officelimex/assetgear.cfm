@@ -26,7 +26,7 @@
 			<g:Column id="IsActive" caption="Active"/>
 		</g:Columns>
 		<g:Commands> 
-			<cfif (request.IsPlanner) or (request.IsSUP)>
+			<cfif (request.IsPlanner) || (request.IsSUP)>
 				<g:Command id="editA" text="edit" help="Edit PM Task" class="btn btn-mini"/>
 			</cfif>
 			<g:Command id="viewA" text="view" help="View PM Task" class="btn btn-mini"/> 
@@ -35,7 +35,8 @@
 		<g:Event command="editA">
 			<g:Window title="'Update ##' + d[0] + ' - ' + d[2]" url="'modules/maintenance/pm_task/save_pm_task.cfm?cid=#url.cid#'" id="">
 				<g:Button value="Delete" class="btn-danger" icon="icon-remove icon-white" executeURL="'controllers/PMTask.cfc?method=delete'"/>             
-				<g:Button IsSave /> 
+				<g:Button value="Save & Generate Work Order" class="btn-info" executeURL="'com/awaf/ams/maintenance/PMTask.cfc?method=saveAndGenerateWorkOrder'"/>             
+				<g:Button IsSave value="Save Only"/> 
 			</g:Window>
 		</g:Event>     
 		<g:Event command="viewA">

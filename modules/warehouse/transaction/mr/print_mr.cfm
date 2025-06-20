@@ -133,12 +133,9 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
           <th class="left" width="1px">S/N</th>
           <th class="center" width="1px">QTY</th>
           <th class="center" width="1px">UOM</th>
-          <th class="center" width="99%">DESCRIPTION (ICN, VPN)</th>
-          <th class="center" width="1px">QOH</th>
-          <th class="center" width="1px">QOO</th>
-          <th class="center" width="1px">QOR</th>
-          <th class="a-right" width="1px">Unit Cost</th>
-          <th class="a-right" width="1px">Total<br/> <cfif qMR.Currency eq "NGN">(NGN)<cfelse>(USD)</cfif> </th>
+          <th class="center" width="99%">DESCRIPTION</th>
+          <th class="center" width="1px">VPN</th>
+          <th class="center" width="1px">OEM</th>
           </tr>
           <cfset gs = 0/>
           <cfloop query="qMRI1">
@@ -147,32 +144,13 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
             <td valign="top" align="right">#qMRI1.Quantity#</td>
             <td valign="top" >#qMRI1.UM#</td>
             <td valign="top">
-              <cfif qMRI1.ItemVPN neq "">
-                VPN: <b>#qMRI1.ItemVPN#</b><br/><br/>
-              </cfif>
               <cfset desc = replace(qMRI1.MainItemDescription,chr(13),'<br/>','all')/>
               <cfset desc = replace(desc,chr(10),'<br/>','all')/>
-              [#qMRI1.Code#] #desc#
-              <!--- <cfif qMRI1.Remark neq "">
-                <br/>#qMRI1.Remark#
-              </cfif> --->
+              [#qMRI1.Code#] #desc#<br/>
             </td>
-            <td align="center" valign="top" >#val(qMRI1.QOH)#</td>
-            <td align="center" valign="top" >#val(qMRI1.QOO)#</td>
-            <td align="center" valign="top" >
-              <cfif service>0<cfelse>#val(qMRI1.QOR)#</cfif>
-            </td>
-            <td align="right" valign="top">#Numberformat(qMRI1.UnitPrice,'9,999.99')#</td>
-            <td align="right" valign="top">
-              <cfset qu = val(qMRI1.Quantity)*val(qMRI1.UnitPrice)/>
-              #NumberFormat(val(qMRI1.Quantity)*val(qMRI1.UnitPrice),'9,999.99')#</td>
-              <cfset gs = gs + qu/>
-            </tr>
+            <td align="center" valign="top" >#qMRI1.ItemVPN#&nbsp;</td>
+            <td align="center" valign="top" >#qMRI1.ItemMaker#&nbsp;</td>
           </cfloop>
-        <tr  class="bottom">
-          <td colspan="8" valign="top" class="no-bottom">&nbsp;</td>
-          <td align="right" class="cbg" valign="top">#numberformat(gs,'9,999.99')#</td>
-          </tr>
 
       </table>
     </cfif>
@@ -200,7 +178,6 @@ border-top:#brd_c# 1px solid;border-right:#brd_c# 1px solid;}
             </td>
             <td valign="top">#qMRI2.VPN#&nbsp;</td>
             <td valign="top">#qMRI2.Maker#&nbsp;</td>
-      
           </cfloop>
       </table>
     </cfif>

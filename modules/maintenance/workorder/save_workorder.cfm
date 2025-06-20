@@ -173,7 +173,7 @@
 			</cfquery>
 			<et:Table allowInput="#aInput#" height="200px" id="WorkOrderItem2">
 				<et:Headers>
-					<et:Header title="Material/Service Description" size="5" type="text"/>
+					<et:Header title="Material/Service Description" size="5" rows="4" required="true" type="text"/>
 					<et:Header title="Qty" size="1" type="int"/>
 					<et:Header title="UOM" size="1" type="text">
 						<et:Select listValue="#ValueList(qUM.Title,'`')#" delimiters="`"/>

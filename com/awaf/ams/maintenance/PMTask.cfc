@@ -1,15 +1,14 @@
 <cfcomponent >
-
-	<cffunction name="init" access="public" returntype="PMTask">
-
-		<cfset this.PM_TASK_SQL = '
+	
+	<cfscript>
+		static.PM_TASK_SQL = '
 			SELECT
 				pm.*,
 				a.Description Asset, a.AssetId, a.Status,
 				f.Description Frequency,
 				rt.Type ReadingType,
 				CONCAT(l.Name, " ", IFNULL(al.LocDescription,"")) Location,
-        u.Name Unit,
+				u.Name Unit,
 				al.AssetLocationId
 			FROM
 				pm_task pm
@@ -17,11 +16,13 @@
 			INNER JOIN location l ON l.LocationId = al.LocationId
 			INNER JOIN asset a ON a.AssetId = al.AssetId
 			LEFT JOIN frequency f ON pm.FrequencyId = f.FrequencyId
-      LEFT JOIN core_unit u ON pm.UnitId = u.UnitId
+			LEFT JOIN core_unit u ON pm.UnitId = u.UnitId
 			LEFT JOIN reading_type rt ON pm.ReadingTypeId = rt.ReadingTypeId
-		'/>
-
-		<cfset this.PM_TASK_COUNT_SQL = '
+			LEFT JOIN pm_task_item pmi ON pmi.PMTaskId = pm.PMTaskId
+			LEFT JOIN whs_item i ON i.ItemId = pmi.ItemId
+			LEFT JOIN um 				ON um.UMId 	= i.UMId
+		';
+		static.PM_TASK_COUNT_SQL = '
 			SELECT
 				COUNT(pm.PMTaskId) c
 			FROM
@@ -30,10 +31,9 @@
 			INNER JOIN location l ON l.LocationId = al.LocationId
 			INNER JOIN asset a ON a.AssetId = al.AssetId
 			LEFT JOIN frequency f ON pm.FrequencyId = f.FrequencyId
-			LEFT JOIN reading_type rt ON pm.ReadingTypeId = rt.ReadingTypeId
-		'/>
-
-		<cfset this.PM_TASK_ITEM_SQL = '
+			LEFT JOIN reading_type rt ON pm.ReadingTypeId = rt.ReadingTypeId			
+		';
+		static.PM_TASK_ITEM_SQL = '
 			SELECT
 				pmi.*,
 				CONVERT(CONCAT("[",i.Code,"] ",i.Description, " [",i.VPN,"] " ,"~",i.ItemId) USING utf8) ItemDescription,
@@ -42,8 +42,11 @@
 			FROM
 				pm_task_item pmi
 			INNER JOIN whs_item i ON i.ItemId = pmi.ItemId
-			INNER JOIN um 				ON um.UMId 	= i.UMId
-		'/>
+			INNER JOIN um 				ON um.UMId 	= i.UMId			
+		';
+	</cfscript>
+
+	<cffunction name="init" access="public" returntype="PMTask">
 
 		<cfreturn this/>
 	</cffunction>
@@ -52,36 +55,39 @@
 
 		public query function GetPMTaskItems(required numeric id) {
 			var qP = queryExecute(
-				this.PM_TASK_ITEM_SQL & " WHERE pmi.PMTaskId = :id",
+				static.PM_TASK_ITEM_SQL & " WHERE pmi.PMTaskId = :id",
 				{id: {value: arguments.id, cfsqltype: "cf_sql_integer"}}
 			)
 
 			return qP
 		}
 
+		public query function GetPMTask(required numeric id) {
+			var qP = queryExecute("
+				#static.PM_TASK_SQL#
+				WHERE pm.PMTaskId = #arguments.id#
+			")
+
+			return qP
+		}
+
+		public query function GetAllActivePMTask() {
+			var qP = queryExecute("
+				#static.PM_TASK_SQL#
+				WHERE pm.IsActive = 'Yes'
+			")
+
+			return qP
+		}
+
+		remote void function saveAndGenerateWorkOrder()	{
+			writeDump(form)
+			SavePMTask(form)
+			GenerateWorkOrder()
+		}
+
 	</cfscript>
-
-	<cffunction name="GetPMTask" access="public" returntype="query">
-		<cfargument name="id" type="numeric" required="yes"/>
-
-			<cfquery name="qP">
-				#this.PM_TASK_SQL#
-					WHERE pm.PMTaskId = <cfqueryparam cfsqltype="cf_sql_integer" value="#arguments.id#"/>
-			</cfquery>
-
-			<cfreturn qP/>
-	</cffunction>
-
-	<cffunction name="GetAllActivePMTask" returntype="query" access="public">
-
-		<cfquery name="qP" cachedwithin="#createTime(1,0,0)#">
-			#this.PM_TASK_SQL#
-			WHERE pm.IsActive = "yes" -- AND pm.StartTime IS NOT NULL
-		</cfquery>
-
-		<cfreturn qP/>
-	</cffunction>
-
+	
 	<cffunction name="GenerateWorkOrder" returntype="void" output="false" access="public" hint="run the pm task and generate work order">
 
 		<cfset oW = createObject("component","assetgear.com.awaf.ams.maintenance.WorkOrder").init()/>
@@ -109,6 +115,7 @@
 			<cfset sWO.Description = qPMTask.Description/>
 			<cfset sWO.WorkDetails = qPMTask.TaskDetails/>
 			<cfset sWO.PMTaskId = qPMTask.PMTaskId/>
+			<cfset sWO.ExpectedWorkDuration = qPMTask.ExpectedWorkDuration/>
 			<cfset sWO.Status = "Open"/>
 
 			<cfswitch expression="#qPMTask.Type#">
@@ -121,15 +128,16 @@
 								<cfset dateclosed = DateFormat(qPMTask.StartTime, "yyyy-mm-dd")/>
 							</cfif>
 							<cfif isDate(dateclosed)>
-								<cfset sWO.DateOpened = AddDateByFrequency(dateclosed, qPMTask.FrequencyId)/>
+								<!--- <cfset sWO.DateOpened = AddDateByFrequency(dateclosed, qPMTask.FrequencyId)/> --->
+								<cfset sWO.DateOpened = dateclosed/>
 								<!--- create work order --->
-								<cfset oW.SaveWorkOrder(sWO)/>
+								<cfset oW.SaveWorkOrder(sWO, true)/>
 							</cfif>
 						</cfif>
 				</cfcase>
 				<!--- for milestone reading --->
 				<cfcase value="m">
-						<!--- check if the milestone table is upto what the pmtask stated --->
+						<!--- check if the milestone table is up to what the pmtask stated --->
 						<cfquery name="qMT">
 							SELECT * FROM pm_milestone
 							WHERE PMTaskId = <cfqueryparam cfsqltype="cf_sql_integer" value="#qPMTask.PMtaskId#"/>
@@ -138,10 +146,10 @@
 						<cfif qMT.Reading GTE qPMTask.Milestone>
 								<cfset sWO.DateOpened = now()/>
 								<cfif qWO.Status EQ "Close">
-										<!--- create wo ---->
-										<cfset oW.SaveWorkOrder(sWO)/>
+									<!--- create wo ---->
+									<cfset oW.SaveWorkOrder(sWO, true)/>
 								<cfelseif !qWO.RecordCount><!--- if the wo is empty create new one using the start time on the pm --->
-										<cfset oW.SaveWorkOrder(sWO)/>
+									<cfset oW.SaveWorkOrder(sWO, true)/>
 								</cfif>
 								<cfquery>
 									UPDATE pm_milestone SET
@@ -231,9 +239,11 @@
 			`pm_task` SET
 			`AssetLocationId` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#pm.AssetLocationId#"/>,
 			`RequireShutdown` = <cfqueryparam cfsqltype="cf_sql_char" maxlength="3" value="#pm.RequireShutdown#"/>,
-			`DepartmentId` = <cfqueryparam cfsqltype="cf_sql_idstamp" value="#pm.DepartmentId#"/>,
-			<cfif val(pm.UnitId)>
-				`UnitId` = <cfqueryparam cfsqltype="cf_sql_idstamp" value="#val(pm.UnitId)#"/>,
+			<cfif isDefined("pm.DepartmentId") AND val(pm.DepartmentId)>
+				`DepartmentId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#pm.DepartmentId#"/>,
+			</cfif>
+			<cfif isDefined("pm.DepartmentId") AND val(pm.UnitId)>
+				`UnitId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#val(pm.UnitId)#"/>,
 			</cfif>
 				`Description` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#pm.Description#"/>,
 				`TaskDetails` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#pm.TaskDetails#"/>,
@@ -248,7 +258,8 @@
 			`Milestone` = <cfqueryparam cfsqltype="cf_sql_float" value="#pm.Milestone#"/>,
 			`NotifyBefore` = <cfqueryparam cfsqltype="cf_sql_float" value="#val(pm.NotifyBefore)#"/>,
 			`Type` = <cfqueryparam cfsqltype="cf_sql_varchar" maxlength="1" value="#pm.Type#"/>,
-			`Note` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#pm.Note#"/>
+			`Note` = <cfqueryparam cfsqltype="cf_sql_varchar" value="#pm.Note#"/>,
+			`ExpectedWorkDuration` = <cfqueryparam cfsqltype="cf_sql_integer" value="#val(pm.ExpectedWorkDuration)#"/>
 			<cfif pm.id neq 0>
 				WHERE `PMTaskId` = <cfqueryparam cfsqltype="cf_sql_integer" value="#pm.id#">
 			</cfif>
